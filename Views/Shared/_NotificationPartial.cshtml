@@ -1,0 +1,16 @@
+﻿@if (TempData["SuccessMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Message", '@TempData["SuccessMessage"]', "info","fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["FailedMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Message", '@TempData["FailedMessage"]', "warning", "fa fa-bell");
+        </script>
+    </text>
+}

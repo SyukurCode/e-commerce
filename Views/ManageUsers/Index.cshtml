@@ -1,0 +1,128 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<E_Commers_Adelia.Models.EUser>
+@inject UserManager<EUser> UserManager
+
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">List of User</h4>
+                    <a class="btn btn-primary btn-round ms-auto"
+                       id="register" asp-area="Identity" asp-page="/Account/Register">
+                        <i class="fa fa-plus"></i>
+                        Add User
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="lsUser"
+                           class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.DisplayName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.Email)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.IsActive)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.EmailConfirmed)
+                                </th>
+                                <th style="width: 10%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var index = 0;
+                            }
+                            @foreach (var item in Model)
+                            {
+                                var userRole = UserManager.GetRolesAsync(item).Result;
+
+                                @if (!userRole.Contains("Admin"))
+                                {
+                                    <tr>
+                                        <td>@(++index)</td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.DisplayName)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.Email)
+                                        </td>
+                                        <td>
+                                            @(item.IsActive ? "Active" : "Inactive")
+                                        </td>
+                                        <td>
+                                            @(item.EmailConfirmed ? "Yes" : "No")
+                                        </td>
+                                        <td>
+
+                                            <div class="form-button-action">
+                                                @if (item.IsActive)
+                                                {
+                                                    <form id="@item.Id" asp-action="ToggleStatusUser" asp-route-id="@item.Id" method="post">
+                                                        <button type="button"
+                                                                data-bs-toggle="tooltip"
+                                                                title="Disable"
+                                                                class="btn btn-link btn-danger"
+                                                                data-original-title="" onclick="submitDisable('@item.Id')">
+                                                            <i class="fa fa-power-off"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <form asp-action="ToggleStatusUser" asp-route-id="@item.Id" method="post">
+                                                        <button type="submit"
+                                                                data-bs-toggle="tooltip"
+                                                                title="Enable"
+                                                                class="btn btn-link btn-danger"
+                                                                data-original-title="">
+                                                            <i class="fa fa-power-off"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                <a type="button"
+                                                   asp-area="Identity" asp-page="/Account/ResendEmailConfirmation"
+                                                   asp-route-email="@item.Email"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Resend Comfirmation"
+                                                   class="btn btn-link btn-primary"
+                                                   data-original-title="">
+                                                    <i class="fa fa-envelope"></i>
+                                                </a>
+                                                <form id="@item.Id" asp-action="DeleteUser"
+                                                      asp-route-Id="@item.Id" method="post">
+                                                    <button type="button"
+                                                            data-bs-toggle="tooltip"
+                                                            title="Delete"
+                                                            class="btn btn-link btn-primary"
+                                                            data-original-title="" onclick="submitDelete('@item.Id')">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_NotificationPartial" />
+    <partial name="_UserDataTableScriptPartial" />
+}

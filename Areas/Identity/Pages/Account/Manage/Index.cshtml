@@ -1,0 +1,79 @@
+﻿@page
+@model IndexModel
+@inject UserManager<EUser> UserManager
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+    ViewData["Avatar"] = Url.Action("GetAvatar", "Profile", new { userId = UserManager.GetUserId(User) });
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-12">
+        <!-- Account -->
+        <form asp-controller="Profile" asp-action="UploadAvatar" enctype="multipart/form-data" method="post" class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-start align-items-sm-center gap-4">
+                <img src="@ViewData["Avatar"]"
+                     alt="user-avatar"
+                     class="d-block rounded"
+                     height="100"
+                     width="100"
+                     id="uploadedAvatar" />
+
+                <!-- Pastikan elemen dalam ni susun secara mendatar -->
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <!-- This makes buttons inline -->
+                    <label for="upload" class="btn btn-primary mb-0" tabindex="0">
+                        <span class="d-none d-sm-block">Upload new photo</span>
+                        <i class="bx bx-upload d-block d-sm-none"></i>
+                    </label>
+
+                    <input type="file"
+                           name="avatarFile"
+                           id="upload"
+                           class="account-file-input"
+                           hidden
+                           accept="image/png, image/jpeg" />
+
+                    <button type="submit" class="btn btn-outline-primary account-image-apply mb-0" disabled>Apply</button>
+
+                    <button type="button" class="btn btn-outline-secondary account-image-reset mb-0" disabled>
+                        <i class="bx bx-reset d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-muted mb-0 ms-2">Allowed JPG, GIF or PNG. Max size of 800K</p>
+        </form>
+
+    </div>
+    <hr class="mt-0 mb-4" />
+    <div class="mb-4">
+        <form id="profile-form" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="form-floating mb-3">
+                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
+                <label asp-for="Username" class="form-label"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.DisplayName" class="form-control" placeholder="Please enter your displayname." />
+                <label asp-for="Input.DisplayName" class="form-label"></label>
+                <span asp-validation-for="Input.DisplayName" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
+                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ProfileScriptsPartial" />
+    }

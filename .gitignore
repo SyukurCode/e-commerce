@@ -1,0 +1,17 @@
+﻿.env
+Upload
+# Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+
+# Others
+*.log
+*.tmp
+*.cache
+*.db
+*.lock

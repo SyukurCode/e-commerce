@@ -1,0 +1,38 @@
+﻿@model E_Commers_Adelia.Models.ProductOption
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+
+    <div class="col-md-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Product Option</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateOption">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductId" value='@ViewData["Id"]'/>
+            <div class="form-group">
+                <label asp-for="OptionName" class="control-label"></label>
+                <input asp-for="OptionName" class="form-control" />
+                <span asp-validation-for="OptionName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AdditionalPrice" class="control-label"></label>
+                <input asp-for="AdditionalPrice" class="form-control" />
+                <span asp-validation-for="AdditionalPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group text-center">
+                <input type="submit" value="Create" class="btn btn-primary" />
+                <a class="btn btn-secondary" asp-action="Index">Back</a>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+

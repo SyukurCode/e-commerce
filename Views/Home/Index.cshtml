@@ -1,0 +1,68 @@
+﻿@model IEnumerable<E_Commers_Adelia.Models.Product>
+@{
+    ViewData["Title"] = "Menu";
+    ViewData["ProductCount"] = Model.Count();
+}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">Total @ViewData["ProductCount"] menu available</h6>
+    </div>
+</div>
+
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        @if (item.isEnable)
+        {
+            <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                <a asp-action="Index" asp-controller="Order" asp-route-id="@item.Id" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0 me-3">
+                                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
+                                         alt="Product Image"
+                                         class="rounded"
+                                         style="width: 80px; height: 80px; object-fit: cover;" />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-wrap">@item.Name</h6>
+                                    <small class="text-muted text-wrap d-block">@item.Description</small>
+                                    <h5 class="text-primary mt-1">RM @item.Price</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="col-sm-6 col-md-4 col-lg-3 mb-4 opacity-50">
+                <div class="card h-100 shadow-sm border border-secondary">
+                    <div class="card-body d-flex flex-column p-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
+                                     alt="Product Image"
+                                     class="rounded"
+                                     style="width: 80px; height: 80px; object-fit: cover;" />
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1 text-wrap">@item.Name</h6>
+                                <small class="text-muted text-wrap d-block">@item.Description</small>
+                                <h5 class="text-danger mt-1">Not available</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+@section Scripts
+{
+    <partial name="_NotificationPartial" />
+}
