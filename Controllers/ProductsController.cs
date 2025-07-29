@@ -131,7 +131,7 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate,isEnable")] Product product)
         {
             if (id != product.Id)
             {

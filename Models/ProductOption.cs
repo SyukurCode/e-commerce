@@ -9,7 +9,7 @@ namespace E_Commers_Adelia.Models
         public int ProductId { get; set; }
         [Display(Name ="Name")]
         public required string OptionName { get; set; }
-        [Display(Name="Addtional Price")]
+        [Display(Name="Addtional Price(RM)")]
         public decimal AdditionalPrice { get; set; }
         public Product? Product { get; set; }
     }

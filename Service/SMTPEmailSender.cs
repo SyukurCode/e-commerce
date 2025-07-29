@@ -31,7 +31,7 @@ namespace E_Commers_Adelia.Service
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpFrom),
+                From = new MailAddress(smtpFrom,"StoreKeeper"),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

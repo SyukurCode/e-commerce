@@ -24,6 +24,7 @@ namespace E_Commers_Adelia.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -76,6 +77,7 @@ namespace E_Commers_Adelia.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAvatar()
         {
             var user = await _userManager.GetUserAsync(User);

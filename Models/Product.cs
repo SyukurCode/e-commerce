@@ -15,6 +15,7 @@ namespace E_Commers_Adelia.Models
         public string? Description { get; set; }
         [Display(Name = "Picture")]
         public string? ImageUrl { get; set; }
+        [Display(Name="Price(RM)")]
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public List<ProductOption>? Options { get; set; }

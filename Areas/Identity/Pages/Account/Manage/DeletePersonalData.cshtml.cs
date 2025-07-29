@@ -5,11 +5,14 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SQLitePCL;
 
 namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
 {
@@ -18,15 +21,18 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<EUser> _userManager;
         private readonly SignInManager<EUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly ApplicationDbContext _db;
 
         public DeletePersonalDataModel(
             UserManager<EUser> userManager,
             SignInManager<EUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+            ApplicationDbContext db)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _db = db;
         }
 
         /// <summary>
@@ -94,11 +100,41 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                 throw new InvalidOperationException($"Unexpected error occurred deleting user.");
             }
 
+            // remove user avatar
+            var avatar = await _db.Avatars.FirstOrDefaultAsync(a => a.UserId == userId);
+            if (avatar != null)
+            {
+                _db.Avatars.Remove(avatar);
+                await _db.SaveChangesAsync();
+            }
+            // remove qrCode User
+            var QrCode = await _db.QrCodes.FirstOrDefaultAsync(q => q.UserId == userId);
+            if (QrCode != null)
+            {
+                {
+                    _db.QrCodes.Remove(QrCode);
+                    await _db.SaveChangesAsync();
+                }
+            }
+            // remove user product
+            var product = await _db.Products.Where(p => p.userId == userId).ToListAsync();
+            if (product != null)
+            {
+                {
+                    foreach (var item in product)
+                    {
+                        _db.Products.Remove(item);
+                        await _db.SaveChangesAsync();
+                    }
+                }
+            }
+
             await _signInManager.SignOutAsync();
 
             _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
 
             return Redirect("~/");
+            
         }
     }
 }

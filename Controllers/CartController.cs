@@ -13,7 +13,7 @@ namespace E_Commers_Adelia.Controllers
 
             foreach (var item in cart)
             {
-                totalPrice += item.UnitPrice;
+                totalPrice += item.UnitPrice * item.Quantity;
             }
             ViewData["TotalToPay"] = totalPrice;
 
@@ -36,7 +36,7 @@ namespace E_Commers_Adelia.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateCartItem(Guid id, int quantity, string count)
+        public decimal UpdateCartItem(Guid id, int quantity)
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
 
@@ -48,11 +48,20 @@ namespace E_Commers_Adelia.Controllers
             }
             HttpContext.Session.SetObjectAsJson("Cart", cart);
 
-            return RedirectToAction("Index");
+            decimal totalToPay = 0;
+
+            cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+            foreach (var item in cart)
+            {
+                totalToPay += item.TotalPrice;
+            }
+
+            return totalToPay;
         }
         public IActionResult checkoutCartItem() 
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+            // - item Procuct
 
             return View();
         }

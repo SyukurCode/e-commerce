@@ -1,4 +1,5 @@
-﻿.env
+﻿# Selected file
+.env
 Upload
 # Visual Studio files
 .vs/

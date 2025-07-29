@@ -126,6 +126,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.DisplayName = Input.DisplayName;
                 user.IsActive = true; // Set default status to active
+                user.StoreName = Input.DisplayName;
                 user.CreatedAt = DateTime.UtcNow; // Set creation date to now
 
                 var randomPassword = RandomPasswordHelper.Generate(); // Generate a random password of length 8
@@ -136,20 +137,20 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    var whois = string.Empty;
                     if (_signInManager.IsSignedIn(User))
                     {
                         if (User.IsInRole("Admin"))
                         {
-                            await _userManager.AddToRoleAsync(user, "Seller");
-                            Log.Information("Seller created a new account with password.");
+                            whois = "Seller";
                         }
-                    }else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Customer");
-                        Log.Information("Customer created a new account with password.");
+                    }else{
+                        whois = "Customer";
                     }
+                    await _userManager.AddToRoleAsync(user, whois);
+                    Log.Information($"Created a new account for {whois} with password.");
 
-                        var userId = await _userManager.GetUserIdAsync(user);
+                    var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -159,7 +160,16 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                         protocol: Request.Scheme);
 
                     await _emailSender.SendEmailAsync(Input.Email, "Congratulation!",
-                        $"<p>Welcome, you has been invaited to join E-commerce Residensi Adelia.</p> <p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p> <p>Username: <strong>{Input.Email}</strong></p> <p>Password: <strong>{randomPassword}</strong> (please change your password)</p> ");
+                        $"<p>This is an auto reply message. Please do not reply to this email.</p>" +
+                        $"<br/><br/>" +
+                        $"<p>Dear {whois},</p>" +
+                        $"<p>Welcome, you has been invaited to join E-commerce Residensi Adelia.</p>" +
+                        $"<p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p>" +
+                        $"<p>Username: <strong>{Input.Email}</strong></p>" +
+                        $"<p>Password: <strong>{randomPassword}</strong> (please change your password)</p>" +
+                        $"<br/><br/>" +
+                        $"<p>Best Regard,</p>" +
+                        $"<p><i>System Administrator</i></p>");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

@@ -1,7 +1,9 @@
 ﻿using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query.Internal;
 using System.Reflection.Emit;
+using E_Commers_Adelia.Common;
 
 namespace E_Commers_Adelia.Data
 {
@@ -14,6 +16,9 @@ namespace E_Commers_Adelia.Data
         public DbSet<Avatar> Avatars { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductOption> ProductOptions { get; set; }
+        public DbSet<QrCode> QrCodes { get; set; }
+        public DbSet<SellerDeliveryOption> SellerDeliveryOptions { get; set; }
+        public DbSet<SellerPaymentMethod> SellerPaymentMethods { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -24,7 +29,6 @@ namespace E_Commers_Adelia.Data
                 .WithOne(o => o.Product)
                 .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

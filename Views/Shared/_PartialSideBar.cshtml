@@ -84,14 +84,31 @@
                             @* <span class="badge badge-success">4</span> *@
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a asp-action="Index" asp-controller="SellerPaymentMethods">
+                            <i class="fas fa-credit-card "></i>
+                            <p>Payment Options</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-action="Index" asp-controller="SellerDeliveryOptions">
+                            <i class="fas fa-truck"></i>
+                            <p>Delivery Options</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
                 }
-                <li class="nav-item">
-                    <a href="#">
-                        <i class="fas fa-envelope"></i>
-                        <p>Messages</p>
-                        @* <span class="badge badge-success">4</span> *@
-                    </a>
-                </li>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li class="nav-item">
+                        <a href="#">
+                            <i class="fas fa-envelope"></i>
+                            <p>Messages</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
+                }
             </ul>
         </div>
     </div>

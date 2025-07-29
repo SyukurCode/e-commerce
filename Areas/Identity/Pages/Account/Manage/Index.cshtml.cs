@@ -62,6 +62,9 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Display Name")]
             public string DisplayName { get; set; }
+            [Display(Name = "Store Name")]
+            public string StoreName { get; set; }
+            public string Address { get; set; }
         }
 
         private async Task LoadAsync(EUser user)
@@ -77,7 +80,9 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber,
-                DisplayName = displayName
+                DisplayName = displayName,
+                StoreName = dbUser.StoreName,
+                Address = dbUser.Address
             };
         }
 
@@ -120,8 +125,8 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
             }
 
             var dbuser = await _userManager.GetUserAsync(User);
-            var DisplayName = Input.DisplayName;
 
+            var DisplayName = Input.DisplayName;
             if(DisplayName != dbuser.DisplayName)
             {
                 dbuser.DisplayName = DisplayName;
@@ -129,6 +134,28 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                 if (!setDisplayName.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set display name.";
+                    return RedirectToPage();
+                }
+            }
+            var StoreName = Input.StoreName;
+            if (StoreName != dbuser.StoreName)
+            {
+                dbuser.StoreName = StoreName; 
+                var setStoreName = await _userManager.UpdateAsync(dbuser);
+                if (!setStoreName.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to set store name.";
+                    return RedirectToPage();
+                }
+            }
+            var Address = Input.Address;
+            if (StoreName != dbuser.StoreName)
+            {
+                dbuser.Address = Address;
+                var setAddress = await _userManager.UpdateAsync(dbuser);
+                if (!setAddress.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to set address.";
                     return RedirectToPage();
                 }
             }

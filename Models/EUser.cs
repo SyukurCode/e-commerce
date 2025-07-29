@@ -14,8 +14,11 @@ namespace E_Commers_Adelia.Models
         [Required(ErrorMessage = "Display Name is required.")]
         public required string DisplayName { get; set; }
         [Display(Name = "Store Name")]
+        [MaxLength(30)]
         public required string StoreName { get; set;}
         [Display(Name = "Status")]
+        [MaxLength (100)]
+        public string? Address { get; set; }
         public bool IsActive { get; set; } = true;
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

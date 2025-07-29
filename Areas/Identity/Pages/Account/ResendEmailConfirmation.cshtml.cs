@@ -80,6 +80,8 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
             var removePassword = await _userManager.RemovePasswordAsync(user);
             var setNewPassword = await _userManager.AddPasswordAsync(user, randomPassword);
             var userId = await _userManager.GetUserIdAsync(user);
+            var userRole = await _userManager.GetRolesAsync(user);
+            var whois = userRole[0];
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
@@ -87,13 +89,17 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                Input.Email,
-                "Congratulation!",
-                $@"<p>Welcome, you has been invaited to join E-commerce Residensi Adelia.</p>
-                <p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p>
-                <p>Username: <strong>{Input.Email}</strong></p>
-                <p>Password: <strong>{randomPassword}</strong> (please change your password)</p>");
+            await _emailSender.SendEmailAsync(Input.Email, "Congratulation!",
+                $"<p>This is an auto reply message. Please do not reply to this email.</p>" +
+                $"<br/><br/>" +
+                $"<p>Dear {whois},</p>" +
+                $"<p>Welcome, you has been invaited to join E-commerce Residensi Adelia.</p>" +
+                $"<p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p>" +
+                $"<p>Username: <strong>{Input.Email}</strong></p>" +
+                $"<p>Password: <strong>{randomPassword}</strong> (please change your password)</p>" +
+                $"<br/><br/>" +
+                $"<p>Best Regard,</p>" +
+                $"<p><i>System Administrator</i></p>");
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();
