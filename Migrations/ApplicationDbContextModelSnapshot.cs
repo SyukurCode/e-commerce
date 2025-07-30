@@ -229,10 +229,13 @@ namespace E_Commers_Adelia.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("AdditionalPrice")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("DeliveryId")
                         .HasColumnType("integer");
 
-                    b.Property<bool>("isDisable")
+                    b.Property<bool>("isEnable")
                         .HasColumnType("boolean");
 
                     b.Property<string>("userId")
@@ -259,7 +262,7 @@ namespace E_Commers_Adelia.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("isDisable")
+                    b.Property<bool>("isEnable")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");

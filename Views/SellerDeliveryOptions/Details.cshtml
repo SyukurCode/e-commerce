@@ -1,35 +1,72 @@
-﻿@model E_Commers_Adelia.Models.SellerDeliveryOption
+﻿@using E_Commers_Adelia.Common
+@model E_Commers_Adelia.Models.SellerDeliveryOption
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Delivery Options";
+    var deLiveryOption = DeliveryOption.All.FirstOrDefault(p => p.Id == Model.DeliveryId);
 }
-
-<h1>Details</h1>
-<div>
-    <h4>SellerDeliveryOption</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DeliveryId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DeliveryId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.userId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.userId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.isDisable)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.isDisable)
-        </dd>
-    </dl>
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Detail</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">@ViewData["Title"]</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Detail @ViewData["Title"]</a>
+        </li>
+    </ul>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<hr />
+<div class="card card-round">
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-2">
+                Delivery Option
+            </dt>
+            <dd class="col-sm-10">
+                @deLiveryOption.Name
+            </dd>
+            <dt class="col-sm-2">
+                Detail
+            </dt>
+            <dd class="col-sm-10">
+                @deLiveryOption.Detail
+            </dd>
+            <dt class="col-sm-2">
+                Status
+            </dt>
+            <dd class="col-sm-10">
+                @if (Model.isEnable)
+                {
+                    <span class="badge badge-primary">Enable</span>
+                }
+                else
+                {
+                    <span class="badge badge-danger">Disable</span>
+                }
+            </dd>
+            <dt class="col-sm-2">
+                Addtional Charges
+            </dt>
+            <dd class="col-sm-10">
+                <span class="text-success">RM @Model.AdditionalPrice.ToString("0.00")</span>
+            </dd>
+        </dl>
+        <div class="card-footer text-center">
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        </div>
+    </div>
 </div>

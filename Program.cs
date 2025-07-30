@@ -62,9 +62,6 @@ builder.Services.AddSignalR();
 // add MailService
 builder.Services.AddTransient<IEmailService, SMTPEmailSender>();
 
-
-
-
 var app = builder.Build();
 
 app.UseSession();

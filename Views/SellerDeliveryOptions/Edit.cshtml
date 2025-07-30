@@ -1,41 +1,78 @@
-﻿@model E_Commers_Adelia.Models.SellerDeliveryOption
-
+﻿@using E_Commers_Adelia.Common
+@model E_Commers_Adelia.Models.SellerDeliveryOption
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Delivery Option";
+    var deliveryOption = DeliveryOption.All.FirstOrDefault(p => p.Id == Model.DeliveryId);
 }
 
-<h1>Edit</h1>
-
-<h4>SellerDeliveryOption</h4>
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Edit</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">@ViewData["Title"]</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Edit @ViewData["Title"]</a>
+        </li>
+    </ul>
+</div>
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="DeliveryId" class="control-label"></label>
-                <input asp-for="DeliveryId" class="form-control" />
-                <span asp-validation-for="DeliveryId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="userId" class="control-label"></label>
-                <input asp-for="userId" class="form-control" />
-                <span asp-validation-for="userId" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="isDisable" /> @Html.DisplayNameFor(model => model.isDisable)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="col-md-12">
+
+        <div class="card card-round">
+            <form asp-action="Edit">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-2">
+                            Payment Option
+                        </dt>
+                        <dd class="col-sm-10">
+                            @deliveryOption.Name
+                        </dd>
+                        <dt class="col-sm-2">
+                            Detail
+                        </dt>
+                        <dd class="col-sm-10">
+                            @deliveryOption.Detail
+                        </dd>
+                    </dl>
+                    <hr/>
+                    <div class="form-group form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" asp-for="isEnable" />
+                        <label class="form-check-label" asp-for="isEnable"> </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="AdditionalPrice">Additional Charges (RM)</label>
+                        <input class="form-control" asp-for="AdditionalPrice" />
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="DeliveryId" />
+                    <input type="hidden" asp-for="userId" />
+                    <div class="form-group">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Identity;
+using E_Commers_Adelia.Common;
 
 namespace E_Commers_Adelia.Controllers
 {
@@ -26,7 +27,47 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
-            return View(await _db.SellerDeliveryOptions.Where(d => d.userId == userId).ToListAsync());
+
+            // Add all option if not create yet
+            var dbDeliveryOption = await _db.SellerDeliveryOptions.Where(p => p.userId == userId).ToListAsync();
+            if (dbDeliveryOption == null || dbDeliveryOption.Count == 0)
+            {
+                foreach (var item in DeliveryOption.All)
+                {
+                    var sDeliveryOption = new SellerDeliveryOption
+                    {
+                        DeliveryId = item.Id,
+                        userId = userId,
+                        isEnable = false
+                    };
+                    await _db.SellerDeliveryOptions.AddAsync(sDeliveryOption);
+                    await _db.SaveChangesAsync();
+                }
+            }
+            // Check new data is missing
+            else
+            {
+                if (dbDeliveryOption.Count() != DeliveryOption.All.Count())
+                {
+                    foreach (var item in PaymentMethod.All)
+                    {
+                        var Exist = await _db.SellerDeliveryOptions.FirstOrDefaultAsync(p => p.DeliveryId == item.Id);
+                        if (Exist == null)
+                        {
+                            var sDeliveryOption = new SellerDeliveryOption
+                            {
+                                DeliveryId = item.Id,
+                                userId = userId,
+                                isEnable = false,
+                                
+                            };
+                            await _db.SellerDeliveryOptions.AddAsync(sDeliveryOption);
+                            await _db.SaveChangesAsync();
+                        }
+                    }
+                }
+            }
+            return View(await _db.SellerDeliveryOptions.Where(P => P.userId == userId).OrderBy(p => p.Id).ToListAsync());
         }
 
         // GET: SellerDeliveryOptions/Details/5
@@ -47,34 +88,12 @@ namespace E_Commers_Adelia.Controllers
             return View(sellerDeliveryOption);
         }
 
-        // GET: SellerDeliveryOptions/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: SellerDeliveryOptions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,DeliveryId,userId,isDisable")] SellerDeliveryOption sellerDeliveryOption)
-        {
-            if (ModelState.IsValid)
-            {
-                _db.Add(sellerDeliveryOption);
-                await _db.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(sellerDeliveryOption);
-        }
-
         // GET: SellerDeliveryOptions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Delievry option not found");
             }
 
             var sellerDeliveryOption = await _db.SellerDeliveryOptions.FindAsync(id);
@@ -90,8 +109,9 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DeliveryId,userId,isDisable")] SellerDeliveryOption sellerDeliveryOption)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,DeliveryId,AdditionalPrice,userId,isEnable")] SellerDeliveryOption sellerDeliveryOption)
         {
+
             if (id != sellerDeliveryOption.Id)
             {
                 return NotFound();

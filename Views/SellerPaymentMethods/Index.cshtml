@@ -6,6 +6,7 @@
 @{
     ViewData["Title"] = "Payment Options";
     ViewData["PaymentOptionCount"] = _db.SellerPaymentMethods.Where(p => p.UserId == userManager.GetUserId(User)).Count();
+
 }
 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
     <div>
@@ -21,26 +22,34 @@
                     @foreach (var item in Model)
                     {
                         <div class="item-list">
-                            @{
-                                var PaymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == item.PaymentMethodId);
-                            }
                             <button class="btn btn-icon btn-round btn-success btn-sm me-2">
-                                @if (!item.isDisable)
+                                @if (item.isEnable)
                                 {
                                     <i class="fa fa-check"></i>
                                 }
                             </button>
-
+                            @{
+                                var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == item.PaymentMethodId);
+                            }
+                            @if (paymentOption != null){
                             <div class="info-user ms-3">
-                                <div class="username">@PaymentOption.Name</div>
-                                <div class="status">@PaymentOption.Detail</div>
+                                <div class="username">@paymentOption.Name</div>
+                                <div class="status">@paymentOption.Detail</div>
                             </div>
+                            }
                             <a asp-action="Details" asp-route-id="@item.Id"
                                data-bs-toggle="tooltip"
                                title="Details"
                                class="btn btn-link btn-primary btn-lg"
                                data-original-title="Details">
                                 <i class="fa fa-edit"></i>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.Id"
+                               data-bs-toggle="tooltip"
+                               title="Details"
+                               class="btn btn-link btn-primary btn-lg"
+                               data-original-title="Details">
+                                Buynow
                             </a>
                         </div>
                     }

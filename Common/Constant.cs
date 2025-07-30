@@ -43,7 +43,6 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public string Detail { get; set; }
-        public decimal AddtionalPrice { get; set; }
 
 
         public static readonly DeliveryOption StandardDelivery = new DeliveryOption
@@ -51,7 +50,6 @@
             Id = 1,
             Name = "Standard Delivery",
             Detail = "Akan dihantar oleh penjual",
-            AddtionalPrice = 0,
 
         };
 
@@ -60,7 +58,6 @@
             Id = 2,
             Name = "Self Pickup",
             Detail = "Ambil sendiri dari penjual",
-            AddtionalPrice = 0,
         };
 
         public static IEnumerable<DeliveryOption> All =>

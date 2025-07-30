@@ -1,46 +1,57 @@
-﻿@model IEnumerable<E_Commers_Adelia.Models.SellerDeliveryOption>
-
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<E_Commers_Adelia.Models.SellerDeliveryOption>
+@inject UserManager<EUser> userManager
+@inject ApplicationDbContext _db
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Delivery Options";
+    ViewData["PaymentOptionCount"] = _db.SellerDeliveryOptions.Where(p => p.userId == userManager.GetUserId(User)).Count();
 }
-
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.DeliveryId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.userId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.isDisable)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeliveryId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.userId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.isDisable)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">You have @ViewData["PaymentOptionCount"] delivery options</h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-round">
+            <div class="card-body">
+                <div class="card-list py-4">
+                    @foreach (var item in Model)
+                    {
+                        <div class="item-list">
+                            <button class="btn btn-icon btn-round btn-success btn-sm me-2">
+                                @if (item.isEnable)
+                                {
+                                    <i class="fa fa-check"></i>
+                                }
+                            </button>
+                            @{
+                                var deliveryOption = DeliveryOption.All.FirstOrDefault(p => p.Id == item.DeliveryId);
+                            }
+                            @if (deliveryOption != null)
+                            {
+                                
+                                <div class="info-user ms-3">
+                                    <div class="username">@deliveryOption.Name</div>
+                                    <div class="status">@deliveryOption.Detail</div>
+                                </div>
+                                <div>
+                                    <span class="badge badge-success">+ RM @item.AdditionalPrice.ToString("0.00")</span>
+                                </div>
+                            <a asp-action="Details" asp-route-id="@item.Id"
+                               data-bs-toggle="tooltip"
+                               title="Details"
+                               class="btn btn-link btn-primary btn-lg"
+                               data-original-title="Details">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

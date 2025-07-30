@@ -39,7 +39,7 @@ namespace E_Commers_Adelia.Controllers
                     var sPaymentMethode = new SellerPaymentMethod {
                         PaymentMethodId = item.Id,
                         UserId = userId,
-                        isDisable = true
+                        isEnable = true
                     };
                     await _db.SellerPaymentMethods.AddAsync(sPaymentMethode);
                     await _db.SaveChangesAsync();
@@ -58,7 +58,7 @@ namespace E_Commers_Adelia.Controllers
                             {
                                 PaymentMethodId = item.Id,
                                 UserId = userId,
-                                isDisable = true
+                                isEnable = false
                             };
                             await _db.SellerPaymentMethods.AddAsync(sPaymentMethode);
                             await _db.SaveChangesAsync();
@@ -87,35 +87,18 @@ namespace E_Commers_Adelia.Controllers
             return View(sellerPaymentMethod);
         }
 
-
-        // POST: SellerPaymentMethods/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,PaymentMethodId,userId,isDisable")] SellerPaymentMethod sellerPaymentMethod)
-        {
-            if (ModelState.IsValid)
-            {
-                _db.Add(sellerPaymentMethod);
-                await _db.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(sellerPaymentMethod);
-        }
-
         // GET: SellerPaymentMethods/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Payment option not found");
             }
 
             var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
             if (sellerPaymentMethod == null)
             {
-                return NotFound();
+                ModelState.AddModelError(string.Empty, "Payment option not found");
             }
             return View(sellerPaymentMethod);
         }
@@ -125,14 +108,33 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PaymentMethodId,userId,isDisable")] SellerPaymentMethod sellerPaymentMethod)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,PaymentMethodId,UserId,isEnable")] SellerPaymentMethod sellerPaymentMethod)
         {
-            if (ModelState.IsValid) {
-                sellerPaymentMethod.isDisable = !sellerPaymentMethod.isDisable; 
-                _db.Update(sellerPaymentMethod);
-                await _db.SaveChangesAsync();
+            if (id != sellerPaymentMethod.Id)
+            {
+                ModelState.AddModelError(string.Empty, "Payment option not found");
             }
-            return RedirectToAction("Index");
+            if (ModelState.IsValid) {
+                try
+                {
+                    _db.Update(sellerPaymentMethod);
+                    await _db.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!SellerPaymentMethodExists(sellerPaymentMethod.Id))
+                    {
+                        ModelState.AddModelError(string.Empty, "Payment option not found");
+                        return View(sellerPaymentMethod);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(sellerPaymentMethod);
         }
         private bool SellerPaymentMethodExists(int id)
         {
