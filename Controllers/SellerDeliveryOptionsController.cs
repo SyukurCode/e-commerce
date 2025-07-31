@@ -82,7 +82,8 @@ namespace E_Commers_Adelia.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (sellerDeliveryOption == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
             }
 
             return View(sellerDeliveryOption);
@@ -93,15 +94,21 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id == null)
             {
-                ModelState.AddModelError(string.Empty, "Delievry option not found");
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
             }
 
-            var sellerDeliveryOption = await _db.SellerDeliveryOptions.FindAsync(id);
-            if (sellerDeliveryOption == null)
+            var model = await _db.SellerDeliveryOptions.FindAsync(id);
+            if (model == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
             }
-            return View(sellerDeliveryOption);
+            if(id == DeliveryOption.SelfPickup.Id)
+            {
+                return RedirectToAction("EditSelftPickup", new { id = id});
+            }
+            return View(model);
         }
 
         // POST: SellerDeliveryOptions/Edit/5
@@ -109,26 +116,28 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DeliveryId,AdditionalPrice,userId,isEnable")] SellerDeliveryOption sellerDeliveryOption)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,DeliveryId,AdditionalPrice,userId,isEnable")] SellerDeliveryOption model)
         {
 
-            if (id != sellerDeliveryOption.Id)
+            if (id != model.Id)
             {
-                return NotFound();
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _db.Update(sellerDeliveryOption);
+                    _db.Update(model);
                     await _db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SellerDeliveryOptionExists(sellerDeliveryOption.Id))
+                    if (!SellerDeliveryOptionExists(model.Id))
                     {
-                        return NotFound();
+                        TempData["DialogError"] = "Delivery option not found";
+                        return RedirectToAction("Index");
                     }
                     else
                     {
@@ -137,7 +146,83 @@ namespace E_Commers_Adelia.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(sellerDeliveryOption);
+            return View(model);
+        }
+        // GET: SellerDeliveryOptions/Edit/5
+        public async Task<IActionResult> EditSelftPickup(int? id)
+        {
+            if (id == null)
+            {
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
+            }
+
+            var sellerDeliveryOption = await _db.SellerDeliveryOptions.FindAsync(id);
+            if (sellerDeliveryOption == null)
+            {
+                TempData["DialogError"] = "Delivery option not found";
+                return RedirectToAction("Index");
+            }
+            
+            var SelfPickupModel = await _db.selfPickupAddresses.FirstOrDefaultAsync(a => a.UserId == sellerDeliveryOption.userId);
+
+            var model = new EditSelfPickupView
+            {
+                DeliveryOpt = sellerDeliveryOption,
+                Selfpickup = SelfPickupModel
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditSelftPickup(EditSelfPickupView model)
+        {
+            if (ModelState.IsValid)
+            {
+                var Selftpickup = await _db.selfPickupAddresses.FirstOrDefaultAsync(s => s.UserId == model.DeliveryOpt.userId);    
+                if(Selftpickup == null)
+                {
+                    _db.selfPickupAddresses.Add(model.Selfpickup);
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    if (Selftpickup.PhoneNo != model.Selfpickup.PhoneNo)
+                    {
+                        Selftpickup.PhoneNo = model.Selfpickup.PhoneNo;
+                    }
+                    if (Selftpickup.Address != model.Selfpickup.Address)
+                    {
+                        Selftpickup.Address = model.Selfpickup.Address;
+                    }
+                    _db.selfPickupAddresses.Update(Selftpickup);
+                    await _db.SaveChangesAsync();
+                }
+
+                    try
+                    {
+                        _db.Update(model.DeliveryOpt);
+                        await _db.SaveChangesAsync();
+                        TempData["SuccessMessage"] = "Payment option successfully update!.";
+                        return RedirectToAction(nameof(Index));
+                }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!SellerDeliveryOptionExists(model.DeliveryOpt.Id))
+                        {
+                            TempData["DialogError"] = "Delivery option not found";
+                            return View(model);
+                    }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(model);
         }
         private bool SellerDeliveryOptionExists(int id)
         {

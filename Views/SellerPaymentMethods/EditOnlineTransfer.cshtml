@@ -1,10 +1,9 @@
 ﻿@using E_Commers_Adelia.Common
-@using Microsoft.AspNetCore.Identity
-@model E_Commers_Adelia.Models.SellerPaymentMethod
-@inject UserManager<EUser> UserManager
+@model E_Commers_Adelia.Models.EditOnlineTransferView
+
 @{
     ViewData["Title"] = "Payment Option";
-    var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == Model.PaymentMethodId);
+    var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == Model.PaymentOption.PaymentMethodId);
 }
 
 <div class="page-header">
@@ -30,62 +29,90 @@
     </ul>
 </div>
 <hr />
-<form asp-action="EditOnlineTransfer">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="PaymentMethodId" />
-    <input type="hidden" asp-for="UserId" />
-    <div class="col-md-12">
-        <div class="card card-round">
-            <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-2">
-                        Payment Option
-                    </dt>
-                    <dd class="col-sm-10">
-                        @paymentOption.Name
-                    </dd>
-                    <dt class="col-sm-2">
-                        Detail
-                    </dt>
-                    <dd class="col-sm-10">
-                        @paymentOption.Detail
-                    </dd>
-                </dl>
-
-                <div class="form-group form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" asp-for="isEnable" />
-                    <label class="form-check-label" asp-for="isEnable"> </label>
-                    <span asp-validation-for="isEnable" class="text-danger"></span>
+<div class="row">
+    <form asp-action="EditOnlineTransfer">
+        <input type="hidden" asp-for="PaymentOption.Id" />
+        <input type="hidden" asp-for="PaymentOption.PaymentMethodId" />
+        <input type="hidden" asp-for="PaymentOption.UserId" />
+        <input type="hidden" asp-for="OnlineTransferDetail.UserId" value="@Model.PaymentOption.UserId"/>
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Payment Details</div>
+                    </div>
+                    <div class="card-list py-4">
+                        <div class="item-list">
+                            <dl class="row">
+                                <dt class="col-sm-3">
+                                    Payment Option
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @paymentOption.Name
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Detail
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @paymentOption.Detail
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="form-group form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" asp-for="PaymentOption.isEnable" />
+                        <label class="form-check-label" asp-for="PaymentOption.isEnable"> </label>
+                        <span asp-validation-for="PaymentOption.isEnable" class="text-danger"></span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-12">
-        <div class="card card-round">
-            <div class="card-body">
-                <div class="form-floating mb-3">
-                    <input name="AccountNumber" class="form-control" value="@ViewBag.OnlineTransfer.AccountNumber" />
-                    <label for="AccountNumber" class="form-label">Account Number</label>
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Bank Account Detail</div>
+                    </div>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="row py-4">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input asp-for="OnlineTransferDetail.AccountNumber" class="form-control" />
+                                <label asp-for="OnlineTransferDetail.AccountNumber" class="form-label"></label>
+                                <span asp-validation-for="OnlineTransferDetail.AccountNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input asp-for="OnlineTransferDetail.BankName" class="form-control" />
+                                <label asp-for="OnlineTransferDetail.BankName" class="form-label"></label>
+                                <span asp-validation-for="OnlineTransferDetail.BankName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input asp-for="OnlineTransferDetail.AccounOwnerName" class="form-control" />
+                                <label asp-for="OnlineTransferDetail.AccounOwnerName" class="form-label"></label>
+                                <span asp-validation-for="OnlineTransferDetail.AccounOwnerName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-12">
-        <div class="card card-round">
-            <div class="card-body">
-                <div class="form-group text-center">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div class="form-group text-center">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
-
-
+    </form>
+</div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <partial name="_ImageUploadScripsPartial" />
     <partial name="_NotificationPartial" />
     }

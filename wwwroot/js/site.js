@@ -146,13 +146,24 @@ function showNotification(title, msg, state, icon) {
     content.icon = icon;
 
     $.notify(content, {
-        type: state, // success || danger || info || warning
+        type: state, // success || danger || info || warning || default || primary || secondary
         placement: {
             from: 'top',  //top || bottom
             align: 'right', //left,center,right
         },
         time: 1000,
         delay: 3000,
+    });
+}
+
+function showDialog(title, msg, icon, btn) {
+    swal(title, msg, {
+        icon: icon, //warning || error || success || info
+        buttons: {
+            confirm: {
+                className: "btn btn-" + btn,
+            },
+        },
     });
 }
 function changeQuantity(amount) {

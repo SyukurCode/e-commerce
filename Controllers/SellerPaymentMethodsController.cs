@@ -80,14 +80,16 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Please upload QR image";
+                return RedirectToAction("Index");
             }
 
             var sellerPaymentMethod = await _db.SellerPaymentMethods
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (sellerPaymentMethod == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Please upload QR image";
+                return RedirectToAction("Index");
             }
 
             return View(sellerPaymentMethod);
@@ -98,19 +100,22 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id == null)
             {
-                ModelState.AddModelError(string.Empty, "Payment option not found");
+                TempData["DialogError"] = "Payment option not found";
+                return RedirectToAction("Index");
             }
 
-            var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
-            if (sellerPaymentMethod == null)
+            var model = await _db.SellerPaymentMethods.FindAsync(id);
+            if (model == null)
             {
-                ModelState.AddModelError(string.Empty, "Payment option not found");
+                TempData["DialogError"] = "Payment option not found";
+                return RedirectToAction("Index");
             }
+
             switch (id) 
             {
                 
                 case 1:   //qr
-                    return View(sellerPaymentMethod);
+                    return View(model);
                 case 2:   //COD
                     return RedirectToAction("EditCOD", new { id = id });
                 case 3:  //cash
@@ -126,74 +131,51 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditQR(
-        int id,
-        [Bind("Id,PaymentMethodId,UserId,isEnable")] SellerPaymentMethod sellerPaymentMethod,
-        IFormFile qrFile)
+        public async Task<IActionResult> Edit(int id, SellerPaymentMethod model, IFormFile ImageFile)
         {
-            var qrExists = await _qr.isQRExist(sellerPaymentMethod.UserId);
-            if (id != sellerPaymentMethod.Id)
-            {
-                ModelState.AddModelError(string.Empty, "Payment option ID mismatch.");
-                return View(sellerPaymentMethod);
+            var qrExists = await _qr.isQRExist(model.UserId);
+            if (qrExists) {
+                ModelState.Remove("ImageFile");
             }
-            // --- Step 1: If user enables QR payment, QR image must be uploaded or exist ---
-            if (sellerPaymentMethod.isEnable && sellerPaymentMethod.PaymentMethodId == PaymentMethod.QR.Id)
+
+            if (ModelState.IsValid)
             {
-                
-                bool hasNewQrFile = qrFile != null && qrFile.Length > 0;
-
-                if (!hasNewQrFile && !qrExists)
+                if (model.isEnable && ImageFile != null && ImageFile.Length > 0)
                 {
-                    ModelState.AddModelError(string.Empty, "Please upload a QR Code image to enable QR payment.");
-                    return View(sellerPaymentMethod);
-                }
-
-                if (hasNewQrFile)
-                {
-                    var uploadSuccess = await _qr.UploadQrCodeAsync(qrFile, sellerPaymentMethod.UserId);
+                    var uploadSuccess = await _qr.UploadQrCodeAsync(ImageFile, model.UserId);
                     if (!uploadSuccess)
                     {
                         ModelState.AddModelError(string.Empty, "Failed to upload QR code. Please try again.");
-                        return View(sellerPaymentMethod);
+                        return View(model);
                     }
                 }
-            }
-            // Jika disable dan qr dipipilih
-            if (!sellerPaymentMethod.isEnable && sellerPaymentMethod.Id == PaymentMethod.QR.Id)
-            {
-                ModelState.Remove("qrFile");
-            }
 
-            // jika enable dan qr dh ada
-            if(sellerPaymentMethod.isEnable && sellerPaymentMethod.Id == PaymentMethod.QR.Id && qrExists)
-            {
-                ModelState.Remove("qrFile");
-            }
-
-            // --- Step 2: Save to database if everything is valid ---
-            if (!ModelState.IsValid)
-            {
-                return View(sellerPaymentMethod);
-            }
-
-            try
-            {
-                _db.Update(sellerPaymentMethod);
-                await _db.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Payment option successfully update!.";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SellerPaymentMethodExists(sellerPaymentMethod.Id))
+                try
                 {
-                    ModelState.AddModelError(string.Empty, "Payment option not exist.");
-                    return View(sellerPaymentMethod);
+                    _db.Update(model);
+                    await _db.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Payment option successfully update!.";
+                    return RedirectToAction(nameof(Index));
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!SellerPaymentMethodExists(model.Id))
+                    {
+                        ModelState.AddModelError(string.Empty, "Payment option not exist.");
+                        return View(model);
+                    }
 
-                throw; // Let it bubble up if it's a real issue
+                    throw; // Let it bubble up if it's a real issue
+                }
             }
+
+            if(ImageFile == null || ImageFile.Length == 0)
+            {
+                ModelState.AddModelError(string.Empty, "Please upload QR image");
+                TempData["DialogError"] = "Please upload QR image";
+            }
+
+            return View(model);
         }
         // GET: SellerPaymentMethods/EditCOD
         public async Task<IActionResult> EditCOD(int id)
@@ -201,45 +183,40 @@ namespace E_Commers_Adelia.Controllers
             var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
             if (sellerPaymentMethod == null)
             {
-                ModelState.AddModelError(string.Empty, "Payment option not found");
+                TempData["DialogError"] = "Payment option not found";
+                return RedirectToAction("Index");
             }
             var dbCODNote = await _db.CodNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
-            if (dbCODNote != null) {
-                ViewData["CodNote"] = dbCODNote.Note;
-            }
-            return View(sellerPaymentMethod);
+
+            var model = new EditCODView
+            {
+                PaymentOption = sellerPaymentMethod,
+                codNote = dbCODNote
+            };
+
+            return View(model);
         }
 
         // POST: SellerPaymentMethods/EditCOD
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCOD(int id, [Bind("Id,PaymentMethodId,UserId,isEnable")] SellerPaymentMethod sellerPaymentMethod, string codNote)
+        public async Task<IActionResult> EditCOD(int id, EditCODView model)
         {
-            if (!sellerPaymentMethod.isEnable)
-            {
-                ModelState.Remove("codNote");
-            }
-
             if (ModelState.IsValid)
             {
-                if (sellerPaymentMethod.isEnable)
+                if (model.PaymentOption.isEnable)
                 {
-                    var dbCODNote = await _db.CodNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
+                    var dbCODNote = await _db.CodNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
                     if (dbCODNote == null)
                     {
-                        CodNote _codNote = new CodNote
-                        {
-                            UserId = sellerPaymentMethod.UserId,
-                            Note = codNote
-                        };
-                        _db.CodNotes.Add(_codNote);
+                        _db.CodNotes.Add(model.codNote);
                         await _db.SaveChangesAsync();
                     }
                     else
                     {
-                        if (dbCODNote.Note != codNote)
+                        if (dbCODNote.Note != model.codNote.Note)
                         {
-                            dbCODNote.Note = codNote;
+                            dbCODNote.Note = model.codNote.Note;
                             _db.CodNotes.Update(dbCODNote);
                             await _db.SaveChangesAsync();
                         }
@@ -248,104 +225,97 @@ namespace E_Commers_Adelia.Controllers
                 }
                 try
                 {
-                    _db.Update(sellerPaymentMethod);
+                    _db.Update(model.PaymentOption);
                     await _db.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Payment option successfully update!.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SellerPaymentMethodExists(sellerPaymentMethod.Id))
+                    if (!SellerPaymentMethodExists(model.PaymentOption.Id))
                     {
                         ModelState.AddModelError(string.Empty, "Payment option not exist.");
-                        return View(sellerPaymentMethod);
+                        return View(model);
                     }
 
                     throw; // Let it bubble up if it's a real issue
                 }
             }
-            if((string.IsNullOrEmpty(codNote) || string.IsNullOrWhiteSpace(codNote)) && sellerPaymentMethod.isEnable)
+            if((string.IsNullOrEmpty(model.codNote.Note) || string.IsNullOrWhiteSpace(model.codNote.Note)) && model.PaymentOption.isEnable)
             {
                 ModelState.AddModelError(string.Empty, "Message to customer is required to enable COD payment.");
             }
 
-            return View(sellerPaymentMethod);
+            return View(model);
         }
         // GET: SellerPaymentMethods/EditCash
         public async Task<IActionResult> EditCash(int id)
         {
+            
             var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
             if (sellerPaymentMethod == null)
             {
-                ModelState.AddModelError(string.Empty, "Payment option not found");
+                TempData["DialogError"] = "Payment option not found";
+                return RedirectToAction("Index");
             }
             var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
-            if (dbCashNote != null)
-            {
-                ViewData["CashNote"] = dbCashNote.Note;
-            }
-            return View(sellerPaymentMethod);
+
+            var model = new EditCashView {
+                PaymentOption = sellerPaymentMethod,
+                cashNote = dbCashNote
+            };
+
+            return View(model);
         }
         // POST: SellerPaymentMethods/EditCash
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditCash(int id, [Bind("Id,PaymentMethodId,UserId,isEnable")] SellerPaymentMethod sellerPaymentMethod, string cashNote)
+        public async Task<IActionResult> EditCash(int id, EditCashView model)
         {
-            if (!sellerPaymentMethod.isEnable)
-            {
-                ModelState.Remove("cashNote");
-            }
-
             if (ModelState.IsValid)
             {
-                if (sellerPaymentMethod.isEnable)
+                if (model.PaymentOption.isEnable)
                 {
-                    var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
+                    var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
                     if (dbCashNote == null)
                     {
-                        CashNote _cashNote = new CashNote
-                        {
-                            UserId = sellerPaymentMethod.UserId,
-                            Note = cashNote
-                        };
-                        _db.CashNotes.Add(_cashNote);
+                        _db.CashNotes.Add(model.cashNote);
                         await _db.SaveChangesAsync();
                     }
                     else
                     {
-                        if (dbCashNote.Note != cashNote)
+                        if (dbCashNote.Note != model.cashNote.Note)
                         {
-                            dbCashNote.Note = cashNote;
+                            dbCashNote.Note = model.cashNote.Note;
                             _db.CashNotes.Update(dbCashNote);
                             await _db.SaveChangesAsync();
                         }
                     }
-
                 }
                 try
                 {
-                    _db.Update(sellerPaymentMethod);
+                    _db.Update(model.PaymentOption);
                     await _db.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Payment option successfully update!.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SellerPaymentMethodExists(sellerPaymentMethod.Id))
+                    if (!SellerPaymentMethodExists(model.PaymentOption.Id))
                     {
                         ModelState.AddModelError(string.Empty, "Payment option not exist.");
-                        return View(sellerPaymentMethod);
+                        return View(model);
                     }
 
                     throw; // Let it bubble up if it's a real issue
                 }
             }
-            if ((string.IsNullOrEmpty(cashNote) || string.IsNullOrWhiteSpace(cashNote)) && sellerPaymentMethod.isEnable)
+            if ((string.IsNullOrEmpty(model.cashNote.Note) || string.IsNullOrWhiteSpace(model.cashNote. Note)) && model.PaymentOption.isEnable)
             {
                 ModelState.AddModelError(string.Empty, "Message to customer is required to enable cash payment.");
             }
 
-            return View(sellerPaymentMethod);
+            return View(model);
         }
 
         // GET: SellerPaymentMethods/EditCash
@@ -354,49 +324,55 @@ namespace E_Commers_Adelia.Controllers
             var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
             if (sellerPaymentMethod == null)
             {
-                ModelState.AddModelError(string.Empty, "Payment option not found");
+                TempData["DialogError"] = "Payment option not found";
+                return RedirectToAction("Index");
             }
+
             var dbOnlineTransferNote = await _db.onlineTransferNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
-            if (dbOnlineTransferNote != null)
+            var model = new EditOnlineTransferView
             {
-                ViewBag.OnlineTransfer = dbOnlineTransferNote;
-            }
-            return View(sellerPaymentMethod);
+                PaymentOption = sellerPaymentMethod,
+                OnlineTransferDetail = dbOnlineTransferNote
+            };
+
+            return View(model);
         }
         // POST: SellerPaymentMethods/EditCash
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditOnlineTransfer(int id, [Bind("Id,PaymentMethodId,UserId,isEnable")] SellerPaymentMethod sellerPaymentMethod, OnlineTransferNote onlineTransferNote)
+        public async Task<IActionResult> EditOnlineTransfer(int id, EditOnlineTransferView model)
         {
-            if (!sellerPaymentMethod.isEnable)
+            if (!model.PaymentOption.isEnable)
             {
-                ModelState.Remove("onlineTransferNote");
+                ModelState.Remove("OnlineTransferDetail.AccountNumber");
+                ModelState.Remove("OnlineTransferDetail.BankName");
+                ModelState.Remove("OnlineTransferDetail.AccounOwnerName");
             }
 
             if (ModelState.IsValid)
             {
-                if (sellerPaymentMethod.isEnable)
+                if (model.PaymentOption.isEnable)
                 {
-                    var dbOnlineTransferNote = await _db.onlineTransferNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
+                    var dbOnlineTransferNote = await _db.onlineTransferNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
                     if (dbOnlineTransferNote == null)
                     {
-                        
-                        _db.onlineTransferNotes.Add(onlineTransferNote);
+
+                        _db.onlineTransferNotes.Add(model.OnlineTransferDetail);
                         await _db.SaveChangesAsync();
                     }
                     else
                     {
-                        if (dbOnlineTransferNote.AccountNumber != onlineTransferNote.AccountNumber)
+                        if (dbOnlineTransferNote.AccountNumber != model.OnlineTransferDetail.AccountNumber)
                         {
-                            dbOnlineTransferNote.AccountNumber = onlineTransferNote.AccountNumber;
+                            dbOnlineTransferNote.AccountNumber = model.OnlineTransferDetail.AccountNumber;
                         }
-                        if (dbOnlineTransferNote.AccounOwnerName != onlineTransferNote.AccounOwnerName)
+                        if (dbOnlineTransferNote.AccounOwnerName != model.OnlineTransferDetail.AccounOwnerName)
                         {
-                            dbOnlineTransferNote.AccounOwnerName = onlineTransferNote.AccounOwnerName;
+                            dbOnlineTransferNote.AccounOwnerName = model.OnlineTransferDetail.AccounOwnerName;
                         }
-                        if (dbOnlineTransferNote.BankName != onlineTransferNote.BankName)
+                        if (dbOnlineTransferNote.BankName != model.OnlineTransferDetail.BankName)
                         {
-                            dbOnlineTransferNote.BankName = onlineTransferNote.BankName;
+                            dbOnlineTransferNote.BankName = model.OnlineTransferDetail.BankName;
                         }
 
                         _db.onlineTransferNotes.Update(dbOnlineTransferNote);
@@ -406,25 +382,23 @@ namespace E_Commers_Adelia.Controllers
                 }
                 try
                 {
-                    _db.Update(sellerPaymentMethod);
+                    _db.Update(model.PaymentOption);
                     await _db.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Payment option successfully update!.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SellerPaymentMethodExists(sellerPaymentMethod.Id))
+                    if (!SellerPaymentMethodExists(model.PaymentOption.Id))
                     {
                         ModelState.AddModelError(string.Empty, "Payment option not exist.");
-                        return View(sellerPaymentMethod);
+                        return View(model);
                     }
 
                     throw; // Let it bubble up if it's a real issue
                 }
             }
-
-
-            return View(sellerPaymentMethod);
+            return View(model);
         }
 
         private bool SellerPaymentMethodExists(int id)

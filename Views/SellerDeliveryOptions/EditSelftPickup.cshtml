@@ -1,0 +1,117 @@
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model E_Commers_Adelia.Models.EditSelfPickupView
+@inject UserManager<EUser> UserManager
+@{
+    ViewData["Title"] = "Delivery Option";
+    var deliveryOption = DeliveryOption.All.FirstOrDefault(p => p.Id == Model.DeliveryOpt.DeliveryId);
+    var user = await UserManager.GetUserAsync(User);
+    var phoneNo = await UserManager.GetPhoneNumberAsync(user);
+    var address = user.Address;
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Detail</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Edit</a>
+        </li>
+    </ul>
+</div>
+<hr />
+<div class="row">
+    <form asp-action="EditSelftPickup">
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="DeliveryOpt.Id" />
+                    <input type="hidden" asp-for="DeliveryOpt.DeliveryId" />
+                    <input type="hidden" asp-for="DeliveryOpt.userId" />
+                    <input type="hidden" asp-for="Selfpickup.UserId" value="@Model.DeliveryOpt.userId" />
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Delivery Details</div>
+                    </div>
+                    <div class="card-list py-4">
+                        <div class="item-list">
+                            <dl class="row">
+                                <dt class="col-sm-2">
+                                    Payment Option
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @deliveryOption.Name
+                                </dd>
+                                <dt class="col-sm-2">
+                                    Detail
+                                </dt>
+                                <dd class="col-sm-10">
+                                    @deliveryOption.Detail
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="form-group form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" asp-for="DeliveryOpt.isEnable" />
+                        <label class="form-check-label" asp-for="DeliveryOpt.isEnable"> </label>
+                        <span asp-validation-for="DeliveryOpt.isEnable" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" asp-for="DeliveryOpt.AdditionalPrice">Additional Charges (RM)</label>
+                        <input class="form-control" asp-for="DeliveryOpt.AdditionalPrice" />
+                        <span asp-validation-for="DeliveryOpt.AdditionalPrice" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Pickup Details</div>
+                    </div>
+                    <div class="row py-4">
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Selfpickup.Address" class="form-control" value="@address"/>
+                                <label asp-for="Selfpickup.Address" class="form-label"></label>
+                                <span asp-validation-for="Selfpickup.Address" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Selfpickup.PhoneNo" class="form-control" value="@phoneNo" />
+                                <label asp-for="Selfpickup.PhoneNo" class="form-label"></label>
+                                <span asp-validation-for="Selfpickup.PhoneNo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-body">
+                    <div class="form-group text-center">
+                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+

@@ -1,10 +1,10 @@
 ﻿@using E_Commers_Adelia.Common
 @using Microsoft.AspNetCore.Identity
-@model E_Commers_Adelia.Models.SellerPaymentMethod
+@model E_Commers_Adelia.Models.EditCODView
 @inject UserManager<EUser> UserManager
 @{
     ViewData["Title"] = "Payment Option";
-    var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == Model.PaymentMethodId);
+    var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == Model.PaymentOption.PaymentMethodId);
 }
 
 <div class="page-header">
@@ -33,31 +33,38 @@
 
 
 <form asp-action="EditCOD">
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="PaymentMethodId" />
-    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="PaymentOption.Id" />
+    <input type="hidden" asp-for="PaymentOption.PaymentMethodId" />
+    <input type="hidden" asp-for="PaymentOption.UserId" />
+    <input type="hidden" asp-for="codNote.UserId" value="@Model.PaymentOption.UserId"/>
     <div class="col-md-12">
         <div class="card card-round">
             <div class="card-body">
-                <dl class="row">
-                    <dt class="col-sm-2">
-                        Payment Option
-                    </dt>
-                    <dd class="col-sm-10">
-                        @paymentOption.Name
-                    </dd>
-                    <dt class="col-sm-2">
-                        Detail
-                    </dt>
-                    <dd class="col-sm-10">
-                        @paymentOption.Detail
-                    </dd>
-                </dl>
-
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">Payment Details</div>
+                </div>
+                <div class="card-list py-4">
+                    <div class="item-list">
+                        <dl class="row">
+                            <dt class="col-sm-2">
+                                Payment Option
+                            </dt>
+                            <dd class="col-sm-10">
+                                @paymentOption.Name
+                            </dd>
+                            <dt class="col-sm-2">
+                                Detail
+                            </dt>
+                            <dd class="col-sm-10">
+                                @paymentOption.Detail
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
                 <div class="form-group form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" asp-for="isEnable" />
-                    <label class="form-check-label" asp-for="isEnable"> </label>
-                    <span asp-validation-for="isEnable" class="text-danger"></span>
+                    <input class="form-check-input" type="checkbox" role="switch" asp-for="PaymentOption.isEnable" />
+                    <label class="form-check-label" asp-for="PaymentOption.isEnable"> </label>
+                    <span asp-validation-for="PaymentOption.isEnable" class="text-danger"></span>
                 </div>
             </div>
         </div>
@@ -65,10 +72,18 @@
     <div class="col-md-12">
         <div class="card card-round">
             <div class="card-body">
-                <div class="form-floating mb-3">
-                    <input name="codNote" class="form-control" value="@ViewData["CodNote"]" />
-                   <label for="codNote" class="form-label">Message to customer</label>
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">Information to customer</div>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                </div>
+                <div class="row py-4">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            <input asp-for="codNote.Note" class="form-control" />
+                            <label asp-for="codNote.Note" class="form-label">Message</label>
+                            <span asp-validation-for="codNote.Note" class="text-danger"></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,6 +103,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <partial name="_ImageUploadScripsPartial" />
     <partial name="_NotificationPartial" />
     }

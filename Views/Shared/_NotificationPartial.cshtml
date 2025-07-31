@@ -2,15 +2,79 @@
 {
     <text>
         <script>
-            showNotification("Message", '@TempData["SuccessMessage"]', "info","fa fa-bell");
+            showNotification("Notification", '@TempData["SuccessMessage"]', "info","fa fa-bell");
         </script>
     </text>
 }
-@if (TempData["FailedMessage"] != null)
+@if (TempData["WarningMessage"] != null)
 {
     <text>
         <script>
-            showNotification("Message", '@TempData["FailedMessage"]', "warning", "fa fa-bell");
+            showNotification("Notification", '@TempData["WarningMessage"]', "warning", "fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Notification", '@TempData["ErrorMessage"]', "danger", "fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["DefaultMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Notification", '@TempData["DefaultMessage"]', "default", "fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["PrimaryMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Notification", '@TempData["PrimaryMessage"]', "primary", "fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["SecondaryMessage"] != null)
+{
+    <text>
+        <script>
+            showNotification("Notification", '@TempData["SecondaryMessage"]', "secondary", "fa fa-bell");
+        </script>
+    </text>
+}
+@if (TempData["DialogInfo"] != null)
+{
+    <text>
+        <script>
+            showDialog("Info", '@TempData["DialogInfo"]', "info", 'info');
+        </script>
+    </text>
+}
+@if (TempData["DialogSuccess"] != null)
+{
+    <text>
+        <script>
+            showDialog("Success", '@TempData["DialogSuccess"]', "success", "success");
+        </script>
+    </text>
+}
+@if (TempData["DialogError"] != null)
+{
+    <text>
+        <script>
+            showDialog("Error", '@TempData["DialogError"]', "error", "danger");
+        </script>
+    </text>
+}
+@if (TempData["DialogWarning"] != null)
+{
+    <text>
+        <script>
+            showDialog("Warning", '@TempData["DialogWarning"]', "warning", "warning");
         </script>
     </text>
 }
