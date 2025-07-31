@@ -18,18 +18,14 @@ namespace E_Commers_Adelia.Controllers
             _userManager = userManager;
             _db = db;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadQrCode(IFormFile qrCodeFile)
+        public async Task<bool> UploadQrCode(IFormFile qrCodeFile)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null || qrCodeFile == null || qrCodeFile.Length == 0)
-                return BadRequest();
+                return false;
 
             using var ms = new MemoryStream();
             await qrCodeFile.CopyToAsync(ms);
@@ -55,7 +51,7 @@ namespace E_Commers_Adelia.Controllers
             }
 
             await _db.SaveChangesAsync();
-            return Redirect("/Identity/Account/Manage");
+            return true;
         }
 
         [HttpGet]
@@ -67,7 +63,7 @@ namespace E_Commers_Adelia.Controllers
                 return File(qrCode.QrImage, qrCode.ImageContentType ?? "image/jpeg");
             }
 
-            var defaultAvatarPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "defaultQR.png");
+            var defaultAvatarPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "blank.jpg");
             if (System.IO.File.Exists(defaultAvatarPath))
             {
                 var defaultImage = await System.IO.File.ReadAllBytesAsync(defaultAvatarPath);
@@ -78,11 +74,11 @@ namespace E_Commers_Adelia.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteQrCode()
+        public async Task<bool> DeleteQrCode()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return Unauthorized();
+                return false;
 
             var qrCode = await _db.QrCodes.FirstOrDefaultAsync(a => a.UserId == user.Id);
             if (qrCode != null)
@@ -90,7 +86,7 @@ namespace E_Commers_Adelia.Controllers
                 _db.QrCodes.Remove(qrCode);
                 await _db.SaveChangesAsync();
             }
-            return Redirect("/Identity/Account/Manage");
+            return true;
         }
     }
 }

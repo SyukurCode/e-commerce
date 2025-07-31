@@ -19,6 +19,10 @@ namespace E_Commers_Adelia.Data
         public DbSet<QrCode> QrCodes { get; set; }
         public DbSet<SellerDeliveryOption> SellerDeliveryOptions { get; set; }
         public DbSet<SellerPaymentMethod> SellerPaymentMethods { get; set; }
+        public DbSet<CodNote> CodNotes { get; set; }
+        public DbSet<CashNote> CashNotes { get; set; }
+        public DbSet<OnlineTransferNote> onlineTransferNotes { get; set; }
+        public DbSet<SelfPickupAddress> selfPickupAddresses { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

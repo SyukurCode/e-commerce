@@ -47,6 +47,9 @@ builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConf
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+// Add upload qr sevice
+builder.Services.AddScoped<IUploadQRImage, UploadQRImage>();
+
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();
 

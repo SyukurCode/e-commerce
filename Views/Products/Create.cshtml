@@ -43,11 +43,10 @@
                                  class="d-block rounded"
                                  height="200"
                                  width="200"
-                                 id="uploadedAvatar" />
+                                 id="UploadedImage" />
 
-                            <label for="upload" class="btn btn-primary mb-0" tabindex="0">
-                                <span class="d-none d-sm-block">Upload photo</span>
-                                <i class="bx bx-upload d-block d-sm-none"></i>
+                            <label for="upload" class="btn btn-primary mb-0" style="width:200px;" tabindex="0">
+                                <span class="d-none d-sm-block text-white">Upload photo</span>
                             </label>
 
                             <input type="file"
@@ -91,7 +90,7 @@
 </div>
 
 @section Scripts {
-    <partial name="_ProductProfileScriptsPartial" />
     <partial name="_NotificationPartial" />
+    <partial name="_ImageUploadScripsPartial" />
     <partial name="_ValidationScriptsPartial" />
     }

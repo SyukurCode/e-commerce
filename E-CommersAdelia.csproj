@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logs\" />
     <Folder Include="Repository\" />
     <Folder Include="wwwroot\Upload\Products\" />
   </ItemGroup>

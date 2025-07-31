@@ -1,13 +1,15 @@
 ﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
 @model E_Commers_Adelia.Models.SellerPaymentMethod
-
+@inject UserManager<EUser> UserManager
 @{
     ViewData["Title"] = "Payment Option";
+    ViewData["QRImage"] = Url.Action("GetQrCode", "QrCode", new { userId = UserManager.GetUserId(User) });
     var paymentOption = PaymentMethod.All.FirstOrDefault(p => p.Id == Model.PaymentMethodId);
 }
 
 <div class="page-header">
-    <h3 class="fw-bold mb-3">Edit</h3>
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
             <a asp-action="Index">
@@ -18,58 +20,91 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a href="#">@ViewData["Title"]</a>
+            <a href="#">Detail</a>
         </li>
         <li class="separator">
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a href="#">Edit @ViewData["Title"]</a>
+            <a href="#">Edit</a>
         </li>
     </ul>
 </div>
 <hr />
-<div class="row">
+
+
+<form asp-action="EditQR" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="PaymentMethodId" />
+    <input type="hidden" asp-for="UserId" />
     <div class="col-md-12">
-
         <div class="card card-round">
-            <form asp-action="Edit">
-                <div class="card-body">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-2">
+                        Payment Option
+                    </dt>
+                    <dd class="col-sm-10">
+                        @paymentOption.Name
+                    </dd>
+                    <dt class="col-sm-2">
+                        Detail
+                    </dt>
+                    <dd class="col-sm-10">
+                        @paymentOption.Detail
+                    </dd>
+                </dl>
 
-                    <dl class="row">
-                        <dt class="col-sm-2">
-                            Payment Option
-                        </dt>
-                        <dd class="col-sm-10">
-                            @paymentOption.Name
-                        </dd>
-                        <dt class="col-sm-2">
-                            Detail
-                        </dt>
-                        <dd class="col-sm-10">
-                            @paymentOption.Detail
-                        </dd>
-                    </dl>
-                    <div class="form-group form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" asp-for="isEnable" />
-                        <label class="form-check-label" asp-for="isEnable"> </label>
-                    </div>
+                <div class="form-group form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" asp-for="isEnable" />
+                    <label class="form-check-label" asp-for="isEnable"> </label>
+                    <span asp-validation-for="isEnable" class="text-danger"></span>
                 </div>
-                <div class="card-footer text-center">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="PaymentMethodId" />
-                    <input type="hidden" asp-for="UserId" />
-                    <div class="form-group">
-                        <input type="submit" value="Save" class="btn btn-primary" />
-                        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+    <div class="col-md-12">
+        <div class="card card-round">
+            <div class="card-body">
+                <div class="d-flex flex-column align-items-center gap-3">
+                    <img src="@(@ViewData["QRImage"] ?? Url.Content("~/img/blank.jpg"))"
+                         alt="Product-Image"
+                         class="d-block rounded"
+                         style="max-width: 200px; height: auto;"
+                         id="UploadedImage" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <label for="upload" class="btn btn-primary mb-0 " style="width: 200px;" tabindex="0">
+                        <span class="d-none d-sm-block text-white">Upload QR Code</span>
+                        <i class="bx bx-upload d-block d-sm-none"></i>
+                    </label>
+
+                    <input type="file"
+                           for="qrFile"
+                           name="qrFile"
+                           id="upload"
+                           class="account-file-input "
+                           hidden
+                           accept="image/png, image/jpeg" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card card-round">
+            <div class="card-body">
+                <div class="form-group text-center">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_ImageUploadScripsPartial" />
+    <partial name="_NotificationPartial" />
     }
