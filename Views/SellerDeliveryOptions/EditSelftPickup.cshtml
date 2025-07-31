@@ -5,9 +5,6 @@
 @{
     ViewData["Title"] = "Delivery Option";
     var deliveryOption = DeliveryOption.All.FirstOrDefault(p => p.Id == Model.DeliveryOpt.DeliveryId);
-    var user = await UserManager.GetUserAsync(User);
-    var phoneNo = await UserManager.GetPhoneNumberAsync(user);
-    var address = user.Address;
 }
 
 <div class="page-header">
@@ -86,14 +83,14 @@
                     <div class="row py-4">
                         <div class="col-md-12">
                             <div class="form-floating mb-3">
-                                <input asp-for="Selfpickup.Address" class="form-control" value="@address"/>
+                                <input asp-for="Selfpickup.Address" class="form-control"/>
                                 <label asp-for="Selfpickup.Address" class="form-label"></label>
                                 <span asp-validation-for="Selfpickup.Address" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="form-floating mb-3">
-                                <input asp-for="Selfpickup.PhoneNo" class="form-control" value="@phoneNo" />
+                                <input asp-for="Selfpickup.PhoneNo" class="form-control" />
                                 <label asp-for="Selfpickup.PhoneNo" class="form-label"></label>
                                 <span asp-validation-for="Selfpickup.PhoneNo" class="text-danger"></span>
                             </div>

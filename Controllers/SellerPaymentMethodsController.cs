@@ -44,7 +44,7 @@ namespace E_Commers_Adelia.Controllers
                     {
                         PaymentMethodId = item.Id,
                         UserId = userId,
-                        isEnable = true
+                        isEnable = false
                     };
                     await _db.SellerPaymentMethods.AddAsync(sPaymentMethode);
                     await _db.SaveChangesAsync();
@@ -103,7 +103,7 @@ namespace E_Commers_Adelia.Controllers
                 TempData["DialogError"] = "Payment option not found";
                 return RedirectToAction("Index");
             }
-
+            var userId = _userManager.GetUserId(User);
             var model = await _db.SellerPaymentMethods.FindAsync(id);
             if (model == null)
             {
@@ -111,9 +111,9 @@ namespace E_Commers_Adelia.Controllers
                 return RedirectToAction("Index");
             }
 
-            switch (id) 
+            switch (model.PaymentMethodId)
             {
-                
+
                 case 1:   //qr
                     return View(model);
                 case 2:   //COD
@@ -134,13 +134,14 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Edit(int id, SellerPaymentMethod model, IFormFile ImageFile)
         {
             var qrExists = await _qr.isQRExist(model.UserId);
-            if (qrExists) {
+            if (qrExists)
+            {
                 ModelState.Remove("ImageFile");
             }
 
             if (ModelState.IsValid)
             {
-                if (model.isEnable && ImageFile != null && ImageFile.Length > 0)
+                if (ImageFile != null && ImageFile.Length > 0)
                 {
                     var uploadSuccess = await _qr.UploadQrCodeAsync(ImageFile, model.UserId);
                     if (!uploadSuccess)
@@ -169,7 +170,7 @@ namespace E_Commers_Adelia.Controllers
                 }
             }
 
-            if(ImageFile == null || ImageFile.Length == 0)
+            if (ImageFile == null || ImageFile.Length == 0)
             {
                 ModelState.AddModelError(string.Empty, "Please upload QR image");
                 TempData["DialogError"] = "Please upload QR image";
@@ -204,25 +205,24 @@ namespace E_Commers_Adelia.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (model.PaymentOption.isEnable)
+
+                var dbCODNote = await _db.CodNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
+                if (dbCODNote == null)
                 {
-                    var dbCODNote = await _db.CodNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
-                    if (dbCODNote == null)
+                    _db.CodNotes.Add(model.codNote);
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    if (dbCODNote.Note != model.codNote.Note)
                     {
-                        _db.CodNotes.Add(model.codNote);
+                        dbCODNote.Note = model.codNote.Note;
+                        _db.CodNotes.Update(dbCODNote);
                         await _db.SaveChangesAsync();
                     }
-                    else
-                    {
-                        if (dbCODNote.Note != model.codNote.Note)
-                        {
-                            dbCODNote.Note = model.codNote.Note;
-                            _db.CodNotes.Update(dbCODNote);
-                            await _db.SaveChangesAsync();
-                        }
-                    }
-                    
                 }
+
+
                 try
                 {
                     _db.Update(model.PaymentOption);
@@ -241,7 +241,7 @@ namespace E_Commers_Adelia.Controllers
                     throw; // Let it bubble up if it's a real issue
                 }
             }
-            if((string.IsNullOrEmpty(model.codNote.Note) || string.IsNullOrWhiteSpace(model.codNote.Note)) && model.PaymentOption.isEnable)
+            if ((string.IsNullOrEmpty(model.codNote.Note) || string.IsNullOrWhiteSpace(model.codNote.Note)) && model.PaymentOption.isEnable)
             {
                 ModelState.AddModelError(string.Empty, "Message to customer is required to enable COD payment.");
             }
@@ -251,7 +251,7 @@ namespace E_Commers_Adelia.Controllers
         // GET: SellerPaymentMethods/EditCash
         public async Task<IActionResult> EditCash(int id)
         {
-            
+
             var sellerPaymentMethod = await _db.SellerPaymentMethods.FindAsync(id);
             if (sellerPaymentMethod == null)
             {
@@ -260,7 +260,8 @@ namespace E_Commers_Adelia.Controllers
             }
             var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == sellerPaymentMethod.UserId);
 
-            var model = new EditCashView {
+            var model = new EditCashView
+            {
                 PaymentOption = sellerPaymentMethod,
                 cashNote = dbCashNote
             };
@@ -274,22 +275,19 @@ namespace E_Commers_Adelia.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (model.PaymentOption.isEnable)
+                var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
+                if (dbCashNote == null)
                 {
-                    var dbCashNote = await _db.CashNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
-                    if (dbCashNote == null)
+                    _db.CashNotes.Add(model.cashNote);
+                    await _db.SaveChangesAsync();
+                }
+                else
+                {
+                    if (dbCashNote.Note != model.cashNote.Note)
                     {
-                        _db.CashNotes.Add(model.cashNote);
+                        dbCashNote.Note = model.cashNote.Note;
+                        _db.CashNotes.Update(dbCashNote);
                         await _db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        if (dbCashNote.Note != model.cashNote.Note)
-                        {
-                            dbCashNote.Note = model.cashNote.Note;
-                            _db.CashNotes.Update(dbCashNote);
-                            await _db.SaveChangesAsync();
-                        }
                     }
                 }
                 try
@@ -310,7 +308,7 @@ namespace E_Commers_Adelia.Controllers
                     throw; // Let it bubble up if it's a real issue
                 }
             }
-            if ((string.IsNullOrEmpty(model.cashNote.Note) || string.IsNullOrWhiteSpace(model.cashNote. Note)) && model.PaymentOption.isEnable)
+            if ((string.IsNullOrEmpty(model.cashNote.Note) || string.IsNullOrWhiteSpace(model.cashNote.Note)) && model.PaymentOption.isEnable)
             {
                 ModelState.AddModelError(string.Empty, "Message to customer is required to enable cash payment.");
             }
@@ -342,44 +340,34 @@ namespace E_Commers_Adelia.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditOnlineTransfer(int id, EditOnlineTransferView model)
         {
-            if (!model.PaymentOption.isEnable)
-            {
-                ModelState.Remove("OnlineTransferDetail.AccountNumber");
-                ModelState.Remove("OnlineTransferDetail.BankName");
-                ModelState.Remove("OnlineTransferDetail.AccounOwnerName");
-            }
-
             if (ModelState.IsValid)
             {
-                if (model.PaymentOption.isEnable)
+                var dbOnlineTransferNote = await _db.onlineTransferNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
+                if (dbOnlineTransferNote == null)
                 {
-                    var dbOnlineTransferNote = await _db.onlineTransferNotes.FirstOrDefaultAsync(c => c.UserId == model.PaymentOption.UserId);
-                    if (dbOnlineTransferNote == null)
-                    {
 
-                        _db.onlineTransferNotes.Add(model.OnlineTransferDetail);
-                        await _db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        if (dbOnlineTransferNote.AccountNumber != model.OnlineTransferDetail.AccountNumber)
-                        {
-                            dbOnlineTransferNote.AccountNumber = model.OnlineTransferDetail.AccountNumber;
-                        }
-                        if (dbOnlineTransferNote.AccounOwnerName != model.OnlineTransferDetail.AccounOwnerName)
-                        {
-                            dbOnlineTransferNote.AccounOwnerName = model.OnlineTransferDetail.AccounOwnerName;
-                        }
-                        if (dbOnlineTransferNote.BankName != model.OnlineTransferDetail.BankName)
-                        {
-                            dbOnlineTransferNote.BankName = model.OnlineTransferDetail.BankName;
-                        }
-
-                        _db.onlineTransferNotes.Update(dbOnlineTransferNote);
-                        await _db.SaveChangesAsync();
-                    }
-
+                    _db.onlineTransferNotes.Add(model.OnlineTransferDetail);
+                    await _db.SaveChangesAsync();
                 }
+                else
+                {
+                    if (dbOnlineTransferNote.AccountNumber != model.OnlineTransferDetail.AccountNumber)
+                    {
+                        dbOnlineTransferNote.AccountNumber = model.OnlineTransferDetail.AccountNumber;
+                    }
+                    if (dbOnlineTransferNote.AccounOwnerName != model.OnlineTransferDetail.AccounOwnerName)
+                    {
+                        dbOnlineTransferNote.AccounOwnerName = model.OnlineTransferDetail.AccounOwnerName;
+                    }
+                    if (dbOnlineTransferNote.BankName != model.OnlineTransferDetail.BankName)
+                    {
+                        dbOnlineTransferNote.BankName = model.OnlineTransferDetail.BankName;
+                    }
+
+                    _db.onlineTransferNotes.Update(dbOnlineTransferNote);
+                    await _db.SaveChangesAsync();
+                }
+
                 try
                 {
                     _db.Update(model.PaymentOption);

@@ -1,7 +1,7 @@
 ﻿@model E_Commers_Adelia.Models.Product
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Product";
 }
 
 <div class="page-header">
@@ -16,135 +16,69 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a href="#">Products</a>
-        </li>
-        <li class="separator">
-            <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-            <a href="#">Detail Product</a>
+            <a href="#">Detail</a>
         </li>
     </ul>
 </div>
 <hr />
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-6">
-            <div class="card card-round">
-                <div class="card-header">
-                    <h4 class="d-inline-block">Detail Product</h4>
-
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-column align-items-center mb-4">
-                        <img src="@(string.IsNullOrEmpty(Model?.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.ImageUrl))"
-                        alt="Product Image"
-                        class="rounded" 
-                        style="width: 200px; height: 200px; object-fit: cover;" />
-                    </div>
-                    <dl class="row ps-5">
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.Name)
-                        </dt>
-                        <dd class="col-sm-7">
-                            @Html.DisplayFor(model => model.Name)
-                        </dd>
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.Description)
-                        </dt>
-                        <dd class="col-sm-7">
-                            @Html.DisplayFor(model => model.Description)
-                        </dd>
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.Price)
-                        </dt>
-                        <dd class="col-sm-7">
-                            RM<span>@Html.DisplayFor(model => model.Price)</span>
-                        </dd>
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.Stock)
-                        </dt>
-                        <dd class="col-sm-7">
-                            @Html.DisplayFor(model => model.Stock)
-                        </dd>
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.CreateDate)
-                        </dt>
-                        <dd class="col-sm-7">
-                            @if (Model != null)
-                            {
-                                @Model.CreateDate.ToLocalTime();
-                            }
-                        </dd>
-                        <dt class="col-sm-5">
-                            @Html.DisplayNameFor(model => model.UpdateDate)
-                        </dt>
-                        <dd class="col-sm-7">
-                            @if(Model != null)
-                            {
-                                @Model.UpdateDate.ToLocalTime();
-                            }
-                        </dd>
-                    </dl>
-                </div>
-                <div class="card-footer text-center">
-                    <a asp-action="Index" class="btn btn-secondary text-white ms-2 d-inline-block">Back</a>
-                    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2 d-inline-block">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-danger ms-2 d-inline-block">Delete</a>
-                </div>
-            </div>
-
-            <div class="card card-round">
-                <div class="card-header">
-                    <div class="card-head-row card-tools-still-right">
-                        <div class="card-title">Product Option</div>
-                        <div class="card-tools">
-                            <a asp-action="CreateOption" asp-route-id="@Model?.Id" class="btn btn-outline-primary ms-2 d-inline-block float-end"><i class="fa fa-plus"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <!-- Projects table -->
-                        <table class="table align-items-center mb-0">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th scope="col">No.</th>
-                                    <th scope="col">Items</th>
-                                    <th scope="col" class="text-end">Additional Price</th>
-                                    <th scope="col" class="text-end"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var index = 1;
-                                }
-                                @foreach (var option in Model.Options)
-                                {
-                                    <tr>
-                                        <td>
-                                            <button class="btn btn-icon btn-round btn-success btn-sm me-2">
-                                                <strong>@index</strong>
-                                            </button>
-                                        </td>
-                                        <td scope="row">
-
-                                            @option.OptionName
-                                        </td>
-                                        <td class="text-end">RM @option.AdditionalPrice</td>
-                                        <td class="text-end">
-                                            <form id="@option.Id" asp-action="DeleteOption" asp-route-id="@option.Id" method="post">
-                                                <button type="button" class="badge badge-danger" data-bs-toggle="tooltip" title="Delete Option" onclick="submitDelete(@option.Id)"><i class="fa fa-trash"></i></button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    index++;
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<div class="col-md-4">
+    <div class="card card-post card-round">
+        <img src="@(string.IsNullOrEmpty(Model?.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.ImageUrl))"
+             alt="Product Image"
+             class="rounded card-img-top"
+             style="width: 100%; height: auto; object-fit: cover;" />
+        <div class="card-body d-flex justify-content-center">
+            <dl class="row ps-5">
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.Name)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Name)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.Description)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Description)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.Price)
+                </dt>
+                <dd class="col-sm-8">
+                    RM<span>@Html.DisplayFor(model => model.Price)</span>
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.Stock)
+                </dt>
+                <dd class="col-sm-8">
+                    @Html.DisplayFor(model => model.Stock)
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.CreateDate)
+                </dt>
+                <dd class="col-sm-8">
+                    @if (Model != null)
+                    {
+                        @Model.CreateDate.ToLocalTime()
+                        ;
+                    }
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.UpdateDate)
+                </dt>
+                <dd class="col-sm-8">
+                    @if (Model != null)
+                    {
+                        @Model.UpdateDate.ToLocalTime()
+                        ;
+                    }
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer text-center">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2 d-inline-block">Edit</a>
+            <a asp-action="Index" class="btn btn-outline-secondary ms-2 d-inline-block">Back</a>
+            @* <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-danger ms-2 d-inline-block">Delete</a> *@
         </div>
     </div>
 </div>

@@ -22,26 +22,26 @@
     </ul>
 </div>
 <hr />
+<div class="col-md-4">
 <div class="card card-round">
     <div class="card-body">
-
         <dl class="row">
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Delivery Option
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @deLiveryOption.Name
             </dd>
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Detail
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @deLiveryOption.Detail
             </dd>
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Status
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @if (Model.isEnable)
                 {
                     <span class="badge badge-primary">Enable</span>
@@ -51,10 +51,10 @@
                     <span class="badge badge-danger">Disable</span>
                 }
             </dd>
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Addtional Charges
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 <span class="text-success">RM @Model.AdditionalPrice.ToString("0.00")</span>
             </dd>
         </dl>
@@ -63,4 +63,5 @@
             <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
         </div>
     </div>
+</div>
 </div>

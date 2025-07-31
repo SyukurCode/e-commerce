@@ -23,26 +23,27 @@
     </ul>
 </div>
 <hr />
+<div class="col-md-4">
 <div class="card card-round">
     <div class="card-body">
 
         <dl class="row">
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Payment Option
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @paymentOption.Name
             </dd>
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Detail
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @paymentOption.Detail
             </dd>
-            <dt class="col-sm-2">
+            <dt class="col-sm-6">
                 Status
             </dt>
-            <dd class="col-sm-10">
+            <dd class="col-sm-6">
                 @if (Model.isEnable)
                 {
                     <span class="badge badge-success">Enable</span>
@@ -59,4 +60,4 @@
         </div>
     </div>
 </div>
-
+</div>

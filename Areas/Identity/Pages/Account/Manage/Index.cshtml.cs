@@ -149,7 +149,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                 }
             }
             var Address = Input.Address;
-            if (StoreName != dbuser.StoreName)
+            if (Address != dbuser.Address)
             {
                 dbuser.Address = Address;
                 var setAddress = await _userManager.UpdateAsync(dbuser);

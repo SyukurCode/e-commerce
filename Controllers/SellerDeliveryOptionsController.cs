@@ -9,7 +9,7 @@ using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Identity;
 using E_Commers_Adelia.Common;
-
+using Serilog;
 namespace E_Commers_Adelia.Controllers
 {
     public class SellerDeliveryOptionsController : Controller
@@ -32,6 +32,7 @@ namespace E_Commers_Adelia.Controllers
             var dbDeliveryOption = await _db.SellerDeliveryOptions.Where(p => p.userId == userId).ToListAsync();
             if (dbDeliveryOption == null || dbDeliveryOption.Count == 0)
             {
+                Log.Information("Add delivery option");
                 foreach (var item in DeliveryOption.All)
                 {
                     var sDeliveryOption = new SellerDeliveryOption
@@ -47,6 +48,7 @@ namespace E_Commers_Adelia.Controllers
             // Check new data is missing
             else
             {
+                Log.Information("Delivery option, find missing and add if found");
                 if (dbDeliveryOption.Count() != DeliveryOption.All.Count())
                 {
                     foreach (var item in PaymentMethod.All)
@@ -75,14 +77,19 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                string errMsg = "Delivery option id not found";
+                Log.Error(errMsg);
+                TempData["DialogError"] = errMsg;
+                return RedirectToAction("Index");
             }
 
             var sellerDeliveryOption = await _db.SellerDeliveryOptions
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (sellerDeliveryOption == null)
             {
-                TempData["DialogError"] = "Delivery option not found";
+                string errMsg = "Delivery option id not found";
+                Log.Error(errMsg);
+                TempData["DialogError"] = errMsg;
                 return RedirectToAction("Index");
             }
 
@@ -104,11 +111,16 @@ namespace E_Commers_Adelia.Controllers
                 TempData["DialogError"] = "Delivery option not found";
                 return RedirectToAction("Index");
             }
-            if(id == DeliveryOption.SelfPickup.Id)
+            if(model.DeliveryId == DeliveryOption.SelfPickup.Id)
             {
                 return RedirectToAction("EditSelftPickup", new { id = id});
             }
-            return View(model);
+            if (model.DeliveryId == DeliveryOption.StandardDelivery.Id)
+            {
+                return View(model);
+            }
+            TempData["DialogError"] = "Delivery option not found";
+            return RedirectToAction("Index");
         }
 
         // POST: SellerDeliveryOptions/Edit/5
@@ -163,13 +175,24 @@ namespace E_Commers_Adelia.Controllers
                 TempData["DialogError"] = "Delivery option not found";
                 return RedirectToAction("Index");
             }
-            
-            var SelfPickupModel = await _db.selfPickupAddresses.FirstOrDefaultAsync(a => a.UserId == sellerDeliveryOption.userId);
+            var user = await _userManager.GetUserAsync(User);
+            var selfPickupModel = await _db.selfPickupAddresses.FirstOrDefaultAsync(a => a.UserId == sellerDeliveryOption.userId);
+
+            if (selfPickupModel == null)
+            {
+                selfPickupModel = new SelfPickupAddress
+                {
+
+                    UserId = sellerDeliveryOption.userId,
+                    PhoneNo = user.PhoneNumber,
+                    Address = user.Address
+                };
+            }
 
             var model = new EditSelfPickupView
             {
                 DeliveryOpt = sellerDeliveryOption,
-                Selfpickup = SelfPickupModel
+                Selfpickup = selfPickupModel
             };
 
             return View(model);
@@ -219,8 +242,6 @@ namespace E_Commers_Adelia.Controllers
                             throw;
                         }
                     }
-
-                return RedirectToAction(nameof(Index));
             }
             return View(model);
         }

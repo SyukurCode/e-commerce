@@ -12,6 +12,7 @@ using DotNetEnv;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.CodeAnalysis.Options;
 
 namespace E_Commers_Adelia.Controllers
 {
@@ -118,7 +119,8 @@ namespace E_Commers_Adelia.Controllers
                 return NotFound();
             }
 
-            var product = await _db.Products.FindAsync(id);
+            var product = await _db.Products.Include(o => o.Options)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -135,7 +137,8 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id != product.Id)
             {
-                return NotFound();
+                TempData["DialogError"] = "Product not found";
+                return RedirectToAction("Index");
             }
 
             if (ModelState.IsValid)
@@ -151,14 +154,16 @@ namespace E_Commers_Adelia.Controllers
                 {
                     if (!ProductExists(product.Id))
                     {
-                        return NotFound();
+                        TempData["DialogError"] = "Product not found";
+                        return RedirectToAction("Index");
                     }
                     else
                     {
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = "Product successfully update!.";
+                return RedirectToAction("Edit", new { id = id });
             }
             return View(product);
         }
@@ -168,14 +173,16 @@ namespace E_Commers_Adelia.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Product not found";
+                return RedirectToAction("Index");
             }
 
             var product = await _db.Products
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
-                return NotFound();
+                TempData["DialogError"] = "Product not found";
+                return RedirectToAction("Index");
             }
 
             return View(product);
@@ -202,7 +209,7 @@ namespace E_Commers_Adelia.Controllers
             {
                 Log.Error("File not found, and fail to delete");
             }
-
+            TempData["WarningMessage"] = "Product deleted!.";
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -227,7 +234,7 @@ namespace E_Commers_Adelia.Controllers
                 _db.ProductOptions.Add(productOption);
                 await _db.SaveChangesAsync();
             }
-            return RedirectToAction("Details", new { id = productOption.ProductId });
+            return RedirectToAction("Edit", new { id = productOption.ProductId });
         }
         [HttpPost]
         [ValidateAntiForgeryToken] 
@@ -239,7 +246,7 @@ namespace E_Commers_Adelia.Controllers
                 _db.Remove(option);
             }
             await _db.SaveChangesAsync();
-            return RedirectToAction("Details", new { id = option.ProductId });
+            return RedirectToAction("Edit", new { id = option.ProductId });
         }
 
         [HttpPost]
