@@ -16,7 +16,7 @@ using Microsoft.CodeAnalysis.Options;
 
 namespace E_Commers_Adelia.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Seller")]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -100,6 +100,7 @@ namespace E_Commers_Adelia.Controllers
                     return View(product);
                 }
                 product.isEnable = true;
+                product.isHide = true;
                 product.CreateDate = DateTime.UtcNow;
                 product.UpdateDate = DateTime.UtcNow;
 
@@ -133,7 +134,7 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate,isEnable")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate,isEnable,isHide")] Product product)
         {
             if (id != product.Id)
             {
@@ -247,20 +248,6 @@ namespace E_Commers_Adelia.Controllers
             }
             await _db.SaveChangesAsync();
             return RedirectToAction("Edit", new { id = option.ProductId });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleEnableProduct(int id)
-        {
-            var product = await _db.Products.FindAsync(id);
-            if (product != null)
-            {
-                product.isEnable = !product.isEnable;
-                _db.Update(product);
-                await _db.SaveChangesAsync();
-            }
-            return RedirectToAction("Index");
         }
     }
 }

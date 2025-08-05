@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commers_Adelia.Controllers
 {
-    [Authorize]
+    [Authorize()]
     public class QrCodeController : Controller
     {
         private readonly UserManager<EUser> _userManager;

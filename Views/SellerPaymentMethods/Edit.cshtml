@@ -31,8 +31,6 @@
     </ul>
 </div>
 <hr />
-
-
 <form asp-action="Edit" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="PaymentMethodId" />
@@ -46,16 +44,16 @@
                 <div class="card-list py-4">
                     <div class="item-list">
                         <dl class="row">
-                            <dt class="col-sm-2">
+                            <dt class="col-sm-6">
                                 Payment Option
                             </dt>
-                            <dd class="col-sm-10">
+                            <dd class="col-sm-6">
                                 @paymentOption.Name
                             </dd>
-                            <dt class="col-sm-2">
+                            <dt class="col-sm-6">
                                 Detail
                             </dt>
-                            <dd class="col-sm-10">
+                            <dd class="col-sm-6">
                                 @paymentOption.Detail
                             </dd>
                         </dl>

@@ -54,6 +54,22 @@
                     @Html.DisplayFor(model => model.Stock)
                 </dd>
                 <dt class="col-sm-4">
+                    Available
+                </dt>
+                <dd class="col-sm-8">
+                    <span class="badge @(Model.isEnable ? "badge-success" : "badge-danger")">
+                        @(Model.isEnable ? "Yes" : "No")
+                    </span>
+                </dd>
+                <dt class="col-sm-4">
+                    @Html.DisplayNameFor(model => model.isHide)
+                </dt>
+                <dd class="col-sm-8">
+                    <span class="badge @(Model.isHide ? "badge-success" : "badge-danger")">
+                        @(Model.isHide ? "Yes" : "No")
+                    </span>
+                </dd>
+                <dt class="col-sm-4">
                     @Html.DisplayNameFor(model => model.CreateDate)
                 </dt>
                 <dd class="col-sm-8">

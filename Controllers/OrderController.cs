@@ -1,10 +1,12 @@
-﻿using E_Commers_Adelia.Data;
+﻿using E_Commers_Adelia.Common;
+using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using System.Threading.Tasks;
 using static System.Collections.Specialized.BitVector32;
 using static System.Net.Mime.MediaTypeNames;
@@ -35,10 +37,76 @@ namespace E_Commers_Adelia.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(OrderDetails orderDetails, string action)
         {
-            
+            var orderNo = OrderNumber.Generate();
+
+            if (orderDetails.Quantity > orderDetails.Product.Stock)
+            {
+                TempData["DialogWarning"] = "Product in low stock, please reduce quantity";
+                return RedirectToAction("Index");
+            }
+
             if (action == "BuyNow")
             {
-                return View(orderDetails);
+
+                // kira additional price
+                decimal additionalPrice = 0;
+                decimal productPrice = 0;
+
+                if (orderDetails.SelectedOptionIds != null && orderDetails.SelectedOptionIds.Count > 0)
+                {
+                    foreach (var item in orderDetails.SelectedOptionIds)
+                    {
+                        var option = await _db.ProductOptions.FirstOrDefaultAsync(po => po.Id == item);
+                        if (option != null)
+                        {
+                            additionalPrice += option.AdditionalPrice;
+                        }
+                    }
+                }
+
+                if (orderDetails.Product != null)
+                {
+                    productPrice = orderDetails.Product.Price;
+                }
+
+                // product option
+                string selectedOption = String.Empty;
+                bool isFirst = false;
+
+                if (orderDetails.SelectedOptionIds != null)
+                {
+                    foreach (var id in orderDetails.SelectedOptionIds)
+                    {
+                        var option = await _db.ProductOptions.FindAsync(id);
+                        if (orderDetails.SelectedOptionIds.Count() > 1)
+                        {
+                            if (isFirst) { selectedOption = string.Format("+RM{0} {1},", option.AdditionalPrice, option.OptionName); }
+                            else { selectedOption += string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName); }
+                        }
+                        else
+                        {
+                            selectedOption = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
+                        }
+                    }
+                }
+
+                var order = new Models.Order 
+                {
+                    OrderNo = orderNo,
+                    CustomerId = _userManager.GetUserId(User) ?? "Guest",
+                    UnitPrice = productPrice + additionalPrice,
+                    SubTotalPrice = (productPrice + additionalPrice) * orderDetails.Quantity,
+                    PlaceDateTime = DateTime.UtcNow,
+                    ProductId = orderDetails.Product.Id,
+                    Quantity = orderDetails.Quantity,
+                    SelectedOption = selectedOption,
+                    StatusId = OrderStatus.ToPay.Id,
+                };
+
+                _db.Orders.Add(order);
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Index","Checkout", new { orderNo = orderNo});
             } 
             else if(action == "AddToCart")
             {
@@ -47,7 +115,20 @@ namespace E_Commers_Adelia.Controllers
                     TempData["SuccessMessage"] = "Item added to cart!";
                     return RedirectToAction("Index", "Home");
             }
-            return View(orderDetails);
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<decimal> ChooseChecked(List<int> ids)
+        {
+            decimal price = 0;
+            foreach(var id in ids)
+            {
+                var option = await _db.ProductOptions.FindAsync(id);
+                price = price +  option.AdditionalPrice;
+            }
+            return price;
         }
 
         private async Task AddProductToCart(OrderDetails orderDetails)

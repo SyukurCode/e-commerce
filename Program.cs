@@ -65,6 +65,26 @@ builder.Services.AddSignalR();
 // add MailService
 builder.Services.AddTransient<IEmailService, SMTPEmailSender>();
 
+//string? redis = EnvHelper.GetEnv("REDIS_HOST");
+//string? redisport = EnvHelper.GetEnv("REDIS_PORT");
+//string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
+
+//// add Redis
+//builder.Services.AddStackExchangeRedisCache(options =>
+//{
+//    options.Configuration = string.Format("{0}:{1}," +
+//        "{2},ConnectTimeout = 5000," +
+//        "SyncTimeout = 5000," +
+//        "AbortOnConnectFail = false", redis, redisport, redispassword); // Sesuai bila dalam Docker Swarm
+//});
+
+//builder.Services.AddSession(options =>
+//{
+//    options.IdleTimeout = TimeSpan.FromMinutes(30);
+//    options.Cookie.HttpOnly = false;
+//    options.Cookie.IsEssential = true;
+//});
+
 var app = builder.Build();
 
 app.UseSession();

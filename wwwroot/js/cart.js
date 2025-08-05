@@ -15,12 +15,11 @@
             quantity: current
         },
         success: function (response) {
-            console.log("Update berjaya!", response);
             totalToPay.innerHTML = response.toFixed(2)
             calculatePrice(current,id)
         },
         error: function (xhr, status, error) {
-            console.log("Ada error:", error);
+            console.log("error:", error);
         }
     });
 }

@@ -10,8 +10,10 @@ using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Identity;
 using E_Commers_Adelia.Common;
 using Serilog;
+using Microsoft.AspNetCore.Authorization;
 namespace E_Commers_Adelia.Controllers
 {
+    [Authorize]
     public class SellerDeliveryOptionsController : Controller
     {
         private readonly ApplicationDbContext _db;

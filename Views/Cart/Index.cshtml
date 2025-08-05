@@ -87,7 +87,7 @@
                             <div class="input-group justify-content-center">
                                 <button type="button" class="btn btn-outline-secondary" onclick="changeCartQuantity(-1,'@item.Id')">−</button>
                                 <input type="number" id="@item.Id" name="quantity" value="@item.Quantity"
-                                       class="form-control text-center mx-2" style="max-width: 80px;" min="1" />
+                                       class="form-control text-center mx-2" style="max-width: 80px;" min="1"/>
                                 <button type="button" class="btn btn-outline-secondary" onclick="changeCartQuantity(1,'@item.Id')">+</button>
                             </div>
                         </div>
@@ -120,7 +120,7 @@
 
                         <!-- Right: Checkout button -->
                         <div>
-                            <button class="btn btn-primary">Checkout</button>
+                            <a asp-action="checkoutCartItem" class="btn btn-primary">Checkout</a>
                         </div>
                     </div>
                 </div>
