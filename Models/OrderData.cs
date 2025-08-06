@@ -1,6 +1,6 @@
 ﻿namespace E_Commers_Adelia.Models
 {
-    public class OrderViewcs
+    public class OrderData
     {
         // Maklumat Pengguna
         public string UserId { get; set; }

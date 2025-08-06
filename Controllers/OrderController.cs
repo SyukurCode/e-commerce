@@ -93,6 +93,7 @@ namespace E_Commers_Adelia.Controllers
                 var order = new Models.Order 
                 {
                     OrderNo = orderNo,
+                    SellerId = orderDetails.Product.userId,
                     CustomerId = _userManager.GetUserId(User) ?? "Guest",
                     UnitPrice = productPrice + additionalPrice,
                     SubTotalPrice = (productPrice + additionalPrice) * orderDetails.Quantity,
@@ -103,7 +104,7 @@ namespace E_Commers_Adelia.Controllers
                     StatusId = OrderStatus.ToPay.Id,
                 };
 
-                //_db.Orders.Add(order);
+                _db.Orders.Add(order);
                 await _db.SaveChangesAsync();
 
                 return RedirectToAction("Index","Checkout", new { orderNo = orderNo});
@@ -183,7 +184,13 @@ namespace E_Commers_Adelia.Controllers
             });
 
             HttpContext.Session.SetObjectAsJson("Cart", cart);
-            
+
+        }
+
+        public async Task<IActionResult> UserOrder(string orderNo)
+        {
+            var model = await _db.Orders.Where(o => o.OrderNo == orderNo).ToListAsync();
+            return View(model);
         }
 
     }

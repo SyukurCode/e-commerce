@@ -125,11 +125,11 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
             }
 
             var dbuser = await _userManager.GetUserAsync(User);
-
             var DisplayName = Input.DisplayName;
             if(DisplayName != dbuser.DisplayName)
             {
                 dbuser.DisplayName = DisplayName;
+                dbuser.UpdateAt = DateTime.UtcNow;
                 var setDisplayName = await _userManager.UpdateAsync(dbuser);
                 if (!setDisplayName.Succeeded)
                 {
@@ -137,21 +137,26 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
-            var StoreName = Input.StoreName;
-            if (StoreName != dbuser.StoreName)
+            if (User.IsInRole("Admin") || User.IsInRole("Seller"))
             {
-                dbuser.StoreName = StoreName; 
-                var setStoreName = await _userManager.UpdateAsync(dbuser);
-                if (!setStoreName.Succeeded)
+                var StoreName = Input.StoreName;
+                if (StoreName != dbuser.StoreName)
                 {
-                    StatusMessage = "Unexpected error when trying to set store name.";
-                    return RedirectToPage();
+                    dbuser.StoreName = StoreName;
+                    dbuser.UpdateAt = DateTime.UtcNow;
+                    var setStoreName = await _userManager.UpdateAsync(dbuser);
+                    if (!setStoreName.Succeeded)
+                    {
+                        StatusMessage = "Unexpected error when trying to set store name.";
+                        return RedirectToPage();
+                    }
                 }
             }
             var Address = Input.Address;
             if (Address != dbuser.Address)
             {
                 dbuser.Address = Address;
+                dbuser.UpdateAt = DateTime.UtcNow;
                 var setAddress = await _userManager.UpdateAsync(dbuser);
                 if (!setAddress.Succeeded)
                 {
@@ -159,6 +164,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+            
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

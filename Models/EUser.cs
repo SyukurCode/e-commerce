@@ -20,8 +20,10 @@ namespace E_Commers_Adelia.Models
         [MaxLength (100)]
         public string? Address { get; set; }
         public bool IsActive { get; set; } = true;
+        public int AccountTypeId { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatedAt { get; set; } 
+        public DateTime UpdateAt { get; set; }
     }
 }

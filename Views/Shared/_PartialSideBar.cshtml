@@ -45,7 +45,7 @@
                         <div class="collapse" id="dashboard">
                             <ul class="nav nav-collapse">
                                 <li>
-                                    <a href="#">
+                                    <a asp-action="Index" asp-controller="Dashboard">
                                         <span class="sub-item">Dashboard</span>
                                     </a>
                                 </li>
@@ -101,6 +101,19 @@
                 }
                 @if (SignInManager.IsSignedIn(User))
                 {
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Customer</h4>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#">
+                            <i class="fas fa-list"></i>
+                            <p>Orders</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="#">
                             <i class="fas fa-envelope"></i>

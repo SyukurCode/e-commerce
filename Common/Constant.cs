@@ -172,5 +172,30 @@ namespace E_Commers_Adelia.Common
             Returned
         };
     }
+    public class AccountType
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public static readonly AccountType Real = new AccountType
+        {
+            Id = 1,
+            Name = "Real"
+        };
+        public static readonly AccountType Dummy = new AccountType
+        {
+            Id = 2,
+            Name = "Dummy"
+        };
+        public static readonly AccountType Test = new AccountType
+        {
+            Id = 3,
+            Name = "Test",
+        };
+        public static IEnumerable<AccountType> All => new[] {
+            Real,
+            Dummy,
+            Test
+        };
 
+    };
 }

@@ -71,6 +71,11 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
             }
 
             var user = await _userManager.FindByEmailAsync(Input.Email);
+            if (user.AccountTypeId == AccountType.Dummy.Id)
+            {
+                ModelState.AddModelError(string.Empty, string.Format("Email can'verify because it {0} account.",AccountType.Dummy.Name));
+                return Page();
+            }
             if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");

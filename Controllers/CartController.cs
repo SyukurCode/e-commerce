@@ -113,6 +113,7 @@ namespace E_Commers_Adelia.Controllers
                     var order = new Order
                     {
                         OrderNo = orderNo,
+                        SellerId = item.Product.userId,
                         CustomerId = _userManager.GetUserId(User) ?? "Guest",
                         UnitPrice = item.UnitPrice,
                         SubTotalPrice = item.TotalPrice,

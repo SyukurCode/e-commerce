@@ -67,7 +67,7 @@ namespace E_Commers_Adelia.Controllers
                 return File(avatar.AvatarImage, avatar.AvatarContentType ?? "image/jpeg");
             }
 
-            var defaultAvatarPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "default-avatar.png");
+            var defaultAvatarPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "Avatar,jpg");
             if (System.IO.File.Exists(defaultAvatarPath))
             {
                 var defaultImage = await System.IO.File.ReadAllBytesAsync(defaultAvatarPath);

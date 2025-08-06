@@ -25,6 +25,7 @@
                                 <th>No.</th>
                                 <th>
                                     @Html.DisplayNameFor(Model => Model.DisplayName)
+                                    
                                 </th>
                                 <th>
                                     @Html.DisplayNameFor(Model => Model.Email)
@@ -45,6 +46,8 @@
                             @foreach (var item in Model)
                             {
                                 var userRole = UserManager.GetRolesAsync(item).Result;
+                                var roles = await UserManager.GetRolesAsync(item);
+                                var userWithRoles = new List<(ApplicationDbContext User, IList<string> Roles)>();
 
                                 @if (!userRole.Contains("Admin"))
                                 {
@@ -52,6 +55,8 @@
                                         <td>@(++index)</td>
                                         <td>
                                             @Html.DisplayFor(modelItem => item.DisplayName)
+                                            <br />
+                                            <small class="badge badge-primary">@string.Join(", ", roles)</small>
                                         </td>
                                         <td>
                                             @Html.DisplayFor(modelItem => item.Email)

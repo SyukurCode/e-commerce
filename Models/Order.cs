@@ -11,6 +11,7 @@ namespace E_Commers_Adelia.Models
         [Display(Name ="Order No")]
         public string OrderNo { get; set; }
         public string CustomerId { get; set; }
+        public string SellerId { get; set; }    
         public int ProductId { get; set; }
         public string SelectedOption { get; set; }
         public int Quantity { get; set; }

@@ -140,6 +140,7 @@ using (var scope = app.Services.CreateScope())
             DisplayName = "SystemAdmin",
             EmailConfirmed = true,
             IsActive = true,
+            AccountTypeId = AccountType.Dummy.Id,
             CreatedAt = DateTime.UtcNow
         };
 

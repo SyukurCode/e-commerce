@@ -127,7 +127,9 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                 user.DisplayName = Input.DisplayName;
                 user.IsActive = true; // Set default status to active
                 user.StoreName = Input.DisplayName;
+                user.AccountTypeId = AccountType.Real.Id;
                 user.CreatedAt = DateTime.UtcNow; // Set creation date to now
+                user.UpdateAt = DateTime.UtcNow;
 
                 var randomPassword = RandomPasswordHelper.Generate(); // Generate a random password of length 8
 

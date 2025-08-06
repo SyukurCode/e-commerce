@@ -1,5 +1,6 @@
-﻿@using Microsoft.AspNetCore.Identity
-@model IEnumerable<E_Commers_Adelia.Models.Order>
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model E_Commers_Adelia.Models.OrderView;
 @inject UserManager<EUser> UserManager
 @inject ApplicationDbContext db
 @{
@@ -23,90 +24,102 @@
     </ul>
 </div>
 <hr />
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-6">
-            @foreach (var item in Model)
-            {
-                var product = await db.Products.FindAsync(item.ProductId);
-                var seller = await UserManager.FindByIdAsync(product.userId);
-                var user = await UserManager.FindByIdAsync(item.CustomerId);
+@* <div class="container d-flex justify-content-center align-items-center min-vh-100"> *@
+@*     <div class="row w-100 justify-content-center"> *@
+<div class="col-md-12">
+    @foreach (var item in Model.Orders)
+    {
+        var product = await db.Products.FindAsync(item.ProductId);
+        var seller = await UserManager.FindByIdAsync(product.userId);
+        var user = await UserManager.FindByIdAsync(item.CustomerId);
 
-                <div class="card shadow rounded-3 mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-                        <h5 class="card-title mb-0 text-primary"># @seller.StoreName</h5>
-                    </div>
+        <div class="card shadow rounded-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                <h5 class="card-title mb-0 text-primary"># @seller.StoreName</h5>
+            </div>
 
-                    <div class="card-body text-center">
-                        <!-- Product Image -->
-                        <div class="mb-3">
-                            <img src="@(string.IsNullOrEmpty(@product.ImageUrl) ? Url.Content("~/img/blank.jpg") : Url.Content("~/" + product.ImageUrl))"
-                                 alt="Product Image"
-                                 class="rounded shadow-sm"
-                                 style="width: 200px; height: 200px; object-fit: cover;" />
-                        </div>
-
-                        <!-- Product Info -->
-                        <h6 class="text-dark fw-semibold mb-1">@product.Name</h6>
-                        <p class="text-muted small">@product.Description</p>
-
-                        <!-- Unit Price -->
-                        <div class="text-danger fs-5 mb-2">
-                            <small class="me-1">RM</small>
-                            <span id="@($"price{item.Id}")">@item.UnitPrice</span>
-                        </div>
-
-                        <!-- Options -->
-                        @if (item.SelectedOption != null && item.SelectedOption.Any())
-                        {
-                            <div class="mb-3">
-                                <label class="fw-semibold d-block mb-2">Options:</label>
-                                    <span class="badge bg-info text-dark text-wrap me-1 mb-1">
-                                        @item.SelectedOption
-                                    </span>
-                            </div>
-                        }
-
-                        <!-- Quantity Control -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Quantity:</label>
-                            <strong class="text-dark">@item.Quantity</strong>
-                        </div>
-
-                        <!-- Total Price -->
-                        <div class="bg-light rounded p-3">
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <span class="fw-semibold">Total:</span>
-                                <h4 class="mb-0 text-success">RM<span id="@($"totalPrice{item.Id}")">@item.SubTotalPrice</span></h4>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-body text-center">
+                <!-- Product Image -->
+                <div class="mb-3">
+                    <img src="@(string.IsNullOrEmpty(@product.ImageUrl) ? Url.Content("~/img/blank.jpg") : Url.Content("~/" + product.ImageUrl))"
+                    alt="Product Image"
+                    class="rounded shadow-sm"
+                    style="width: 200px; height: 200px; object-fit: cover;" />
                 </div>
 
+                <!-- Product Info -->
+                <h6 class="text-dark fw-semibold mb-1">@product.Name</h6>
+                <p class="text-muted small">@product.Description</p>
+
+                <!-- Unit Price -->
+                <div class="text-danger fs-5 mb-2">
+                    <small class="me-1">RM</small>
+                    <span id="@($"price{item.Id}")">@item.UnitPrice</span>
+                </div>
+
+                <!-- Options -->
+                @if (item.SelectedOption != null && item.SelectedOption.Any())
+                {
+                    <div class="mb-3">
+                        <label class="fw-semibold d-block mb-2">Options:</label>
+                        <span class="badge bg-info text-dark text-wrap me-1 mb-1">
+                            @item.SelectedOption
+                        </span>
+                    </div>
+                }
+
+                <!-- Quantity Control -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Quantity:</label>
+                    <strong class="text-dark">@item.Quantity</strong>
+                </div>
+
+                <!-- Total Price -->
+                <div class="bg-light rounded p-3">
+                    <div class="d-flex justify-content-center align-items-center gap-2">
+                        <span class="fw-semibold">Total:</span>
+                        <h4 class="mb-0 text-success">RM<span id="@($"totalPrice{item.Id}")">@item.SubTotalPrice</span></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    <div class="card card-round">
+        <div class="d-flex justify-content-center align-items-center p-3">
+            <!-- Left: Total label -->
+            <div >
+                <h3 class="mb-0 fw-bold">Total(@Model.Orders.Count())</h3>
+            </div>
+
+            <!-- Center: RM and TotalToPay -->
+            <div class="text-center mx-auto d-flex align-items-center gap-2">
+                <span class="mb-0">RM</span>
+                <h3 id="totalToPay" class="mb-0 text-decoration-underline">@Model.TotalToPay</h3>
+            </div>
+        </div>
+    </div>
+    @{
+        var paymentOptions = db.SellerPaymentMethods.Where(p => p.UserId == Model.SellerId).ToList();
+    }
+    <div class="card card-round">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+            <h5 class="card-title mb-0 text-dark">Payment Option</h5>
+        </div>
+        @* <div class="d-flex justify-content-center align-items-center p-3"> *@
+        @foreach (var Option in paymentOptions)
+        {
+            var paymentName = PaymentMethod.All.FirstOrDefault(p => p.Id == Option.PaymentMethodId);
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="PaymentMethodId" id="pm_1" value="@Option.PaymentMethodId">
+                <label class="form-check-label" for="pm_1">
+                    <span>@paymentName.Name</span>
+                    </label>
+                </div>
             }
-            <div class="card card-round">
-                <div class="d-flex justify-content-center align-items-center p-3">
-                    <!-- Left: Total label -->
-                    <div >
-                        <h3 class="mb-0 fw-bold">Total(@Model.Count())</h3>
-                    </div>
-
-                    <!-- Center: RM and TotalToPay -->
-                    <div class="text-center mx-auto d-flex align-items-center gap-2">
-                        <span class="mb-0">RM</span>
-                        <h3 id="totalToPay" class="mb-0 text-decoration-underline">@ViewData["TotalToPay"]</h3>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card card-round">
-                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-                    <h5 class="card-title mb-0 text-dark">Payment Option</h5>
-                </div>
-                <div class="d-flex justify-content-center align-items-center p-3">
-                     
-                </div>
-            </div>
+        @* </div> *@
+    </div>
 </div>
-</div>
-</div>
+@* </div> *@
+@* </div> *@

@@ -20,14 +20,20 @@ namespace E_Commers_Adelia.Controllers
         {
             decimal totalPrice = 0;
             var orders = await _db.Orders.Where(o => o.OrderNo == orderNo).ToListAsync();
+            var sellerId = string.Empty;
             foreach (var order in orders)
             {
                 totalPrice += order.SubTotalPrice;
+                sellerId = order.SellerId;
             }
+            var oderView = new OrderView
+            {
+                Orders = orders,
+                SellerId = sellerId,
+                TotalToPay = totalPrice,
+            };
 
-            ViewData["TotalToPay"] = totalPrice;
-
-            return View(orders);
+            return View(oderView);
         }
     }
 }
