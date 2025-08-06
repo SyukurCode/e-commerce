@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace E_Commers_Adelia.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250805162432_fix quantity speel")]
-    partial class fixquantityspeel
+    [Migration("20250806013053_add order")]
+    partial class addorder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,8 +205,11 @@ namespace E_Commers_Adelia.Migrations
 
             modelBuilder.Entity("E_Commers_Adelia.Models.Order", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CustomerId")
                         .IsRequired()

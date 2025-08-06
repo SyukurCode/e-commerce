@@ -103,7 +103,7 @@ namespace E_Commers_Adelia.Controllers
                     StatusId = OrderStatus.ToPay.Id,
                 };
 
-                _db.Orders.Add(order);
+                //_db.Orders.Add(order);
                 await _db.SaveChangesAsync();
 
                 return RedirectToAction("Index","Checkout", new { orderNo = orderNo});

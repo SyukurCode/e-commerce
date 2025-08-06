@@ -20,16 +20,37 @@ namespace E_Commers_Adelia.Controllers
         }
         public IActionResult Index()
         {
-            decimal totalPrice = 0;
+            List<string> sellerId = [];
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
 
             foreach (var item in cart)
             {
-                totalPrice += item.UnitPrice * item.Quantity;
+                if (!sellerId.Contains(item.Product.userId))
+                {
+                    sellerId.Add(item.Product.userId);
+                }
+               
             }
-            ViewData["TotalToPay"] = totalPrice;
+            // kire ikut seller
+            foreach (var id in sellerId)
+            {
+                decimal totalPrice = 0;
+                var sellerCart = cart.Where(c => c.Product.userId == id);
+                foreach (var item in sellerCart)
+                {
+                    totalPrice += item.UnitPrice * item.Quantity;
+                }
+                ViewData[id] = totalPrice;
+            }
 
-            return View(cart);
+           
+            var cartview = new CartView
+            {
+                ItemCart = cart,
+                Seller = sellerId
+            };
+
+            return View(cartview);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -70,7 +91,7 @@ namespace E_Commers_Adelia.Controllers
 
             return totalToPay;
         }
-        public async Task<IActionResult> checkoutCartItem() 
+        public async Task<IActionResult> checkoutCartItem(string id) 
         {
             var cart = HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
             var orderNo = OrderNumber.Generate();
@@ -78,36 +99,47 @@ namespace E_Commers_Adelia.Controllers
 
             foreach (var item in cart)
             {
-                string selectedOption = "";
-
-                if (item.SelectedOptions != null && item.SelectedOptions.Any())
+                if (item.Product.userId == id)
                 {
-                    selectedOption = string.Join(", ", item.SelectedOptions.Select(opt =>
-                        $"+RM{opt.AdditionalPrice} {opt.OptionName}"
-                    ));
+                    string selectedOption = "";
+
+                    if (item.SelectedOptions != null && item.SelectedOptions.Any())
+                    {
+                        selectedOption = string.Join(", ", item.SelectedOptions.Select(opt =>
+                            $"+RM{opt.AdditionalPrice} {opt.OptionName}"
+                        ));
+                    }
+
+                    var order = new Order
+                    {
+                        OrderNo = orderNo,
+                        CustomerId = _userManager.GetUserId(User) ?? "Guest",
+                        UnitPrice = item.UnitPrice,
+                        SubTotalPrice = item.TotalPrice,
+                        PlaceDateTime = DateTime.UtcNow,
+                        ProductId = item.Product.Id,
+                        Quantity = item.Quantity,
+                        SelectedOption = selectedOption,
+                        StatusId = OrderStatus.ToPay.Id,
+                    };
+
+                    orders.Add(order);
                 }
-
-                var order = new Order
-                {
-                    OrderNo = orderNo,
-                    CustomerId = _userManager.GetUserId(User) ?? "Guest",
-                    UnitPrice = item.UnitPrice,
-                    SubTotalPrice = item.TotalPrice,
-                    PlaceDateTime = DateTime.UtcNow,
-                    ProductId = item.Product.Id,
-                    Quantity = item.Quantity,
-                    SelectedOption = selectedOption,
-                    StatusId = OrderStatus.ToPay.Id,
-                };
-
-                orders.Add(order);
             }
 
             // Simpan semua order ke database
             _db.Orders.AddRange(orders);
 
             // Kosongkan cart selepas selesai
-            HttpContext.Session.SetObjectAsJson("Cart", new List<CartItem>());
+            var itemToRemove = cart.Where(x => x.Product.userId == id).ToList();
+            if (itemToRemove != null)
+            {
+                foreach (var item in itemToRemove)
+                {
+                    cart.Remove(item);
+                    HttpContext.Session.SetObjectAsJson("Cart", cart);
+                }
+            }
 
             await _db.SaveChangesAsync();
             return RedirectToAction("index", "Checkout", new { orderNo = orderNo });

@@ -1,10 +1,10 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@model IEnumerable<E_Commers_Adelia.Models.CartItem>
-@inject UserManager<EUser> UserManager
+@model E_Commers_Adelia.Models.CartView
+@inject UserManager<EUser> userManager
 
 @{
     ViewData["Title"] = "Cart Items";
-    
+
 }
 
 <div class="page-header">
@@ -30,111 +30,120 @@
     </ul>
 </div>
 <hr />
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-6">
-            @foreach (var item in Model)
-            {
-                <input id="cardId" type="hidden" value="@item.Id" />
-                var user = await UserManager.FindByIdAsync(item.Product.userId);
-                <div class="card shadow rounded-3 mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-                        <h5 class="card-title mb-0 text-primary"># @user.StoreName</h5>
-                        <form asp-action="RemoveCartItem" asp-route-id="@item.Id" method="post" class="m-0">
-                            <button class="btn btn-sm btn-outline-danger" type="submit" data-bs-toggle="tooltip" title="Remove">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="card-body text-center">
-                        <!-- Product Image -->
-                        <div class="mb-3">
-                            <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl) ? Url.Content("~/img/blank.jpg") : Url.Content("~/" + item.Product.ImageUrl))"
-                                 alt="Product Image"
-                                 class="rounded shadow-sm"
-                                 style="width: 200px; height: 200px; object-fit: cover;" />
-                        </div>
-
-                        <!-- Product Info -->
-                        <h6 class="text-dark fw-semibold mb-1">@item.Product.Name</h6>
-                        <p class="text-muted small">@item.Product.Description</p>
-
-                        <!-- Unit Price -->
-                        <div class="text-danger fs-5 mb-2">
-                            <small class="me-1">RM</small>
-                            <span id="@($"price{item.Id}")">@item.UnitPrice</span>
-                        </div>
-
-                        <!-- Options -->
-                        @if (item.SelectedOptions != null && item.SelectedOptions.Any())
-                        {
-                            <div class="mb-3">
-                                <label class="fw-semibold d-block mb-2">Options:</label>
-                                @foreach (var option in item.SelectedOptions)
-                                {
-                                    <span class="badge bg-info text-dark me-1 mb-1">
-                                        +RM @option.AdditionalPrice @option.OptionName
-                                    </span>
-                                }
-                            </div>
-                        }
-
-                        <!-- Quantity Control -->
-                        @Html.AntiForgeryToken()
-                        <div class="form-group mb-4">
-                            <label class="form-label fw-semibold">Quantity</label>
-                            <div class="input-group justify-content-center">
-                                <button type="button" class="btn btn-outline-secondary" onclick="changeCartQuantity(-1,'@item.Id')">−</button>
-                                <input type="number" id="@item.Id" name="quantity" value="@item.Quantity"
-                                       class="form-control text-center mx-2" style="max-width: 80px;" min="1"/>
-                                <button type="button" class="btn btn-outline-secondary" onclick="changeCartQuantity(1,'@item.Id')">+</button>
-                            </div>
-                        </div>
-
-                        <!-- Total Price -->
-                        <div class="bg-light rounded p-3">
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <span class="fw-semibold">Total:</span>
-                                <h4 class="mb-0 text-success">RM<span id="@($"totalPrice{item.Id}")">@item.TotalPrice</span></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            }
-            @if (Model.Count() > 0)
-            {
+<div class="row">
+    @if (Model.Seller.Count > 0)
+    {
+        @foreach (var seller in Model.Seller)
+        {
+            var shopOwnwer = await userManager.FindByIdAsync(seller);
+            <div class="col-md-12">
                 <div class="card card-round">
-                    <div class="d-flex justify-content-between align-items-center p-3">
-                        <!-- Left: Total label -->
-                        <div>
-                            <h3 class="mb-0 fw-bold">Total(@Model.Count())</h3>
+                    <div class="card-body">
+                        <div class="card-head-row card-tools-still-right">
+                            <div class="card-title"># @shopOwnwer.StoreName</div>
                         </div>
+                        <hr />
+                        <!-- Item List -->
 
-                        <!-- Center: RM and TotalToPay -->
-                        <div class="text-center mx-auto d-flex align-items-center gap-2">
-                            <span class="mb-0">RM</span>
-                            <h3 id="totalToPay" class="mb-0 text-decoration-underline">@ViewData["TotalToPay"]</h3>
-                        </div>
+                        <div class="card-list py-4">
 
-                        <!-- Right: Checkout button -->
-                        <div>
-                            <a asp-action="checkoutCartItem" class="btn btn-primary">Checkout</a>
+                            @foreach (var item in Model.ItemCart)
+                            {
+                                @if (shopOwnwer.Id == item.Product.userId)
+                                {
+                                    <input id="@($"price{item.Id}")" asp-for="@item.UnitPrice" type="hidden" />
+                                    <input asp-for="@item.Quantity" type="hidden" />
+                                    <div class="item-list d-flex align-items-center flex-wrap gap-3 py-3 border-bottom">
+                                        <!-- Product Image & Info -->
+                                        <div class="d-flex align-items-center flex-grow-1" style="min-width: 200px;">
+                                            <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl) ? Url.Content("~/img/blank.jpg") : Url.Content("~/" + item.Product.ImageUrl))"
+                                                 alt="..."
+                                                 class="avatar-img rounded-circle me-3"
+                                                 style="width: 50px; height: 50px;" />
+                                            <div>
+                                                <div class="fw-bold">@item.Product.Name</div>
+                                                <div class="text-muted small">@item.Product.Description</div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Option -->
+                                        @if (item.SelectedOptions.Count() > 0)
+                                        {
+                                            <div class="text-nowrap me-3">
+                                                <div class="fw-bold">Option</div>
+                                                <div class="d-flex flex-column">
+                                                    @foreach (var option in item.SelectedOptions)
+                                                    {
+                                                        <span class="text-muted small">
+                                                            +RM @option.AdditionalPrice @option.OptionName
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+
+
+                                        <div class="text-nowrap me-3">
+                                            <div class="fw-bold">RM @item.UnitPrice</div>
+                                        </div>
+                                        <!-- Quantity -->
+                                        <div class="text-nowrap me-3">
+                                            @Html.AntiForgeryToken()
+                                            <span>x @item.Quantity</span>
+                                        </div>
+                                        <!-- Total Price -->
+                                        <div class="text-nowrap me-3">
+                                            <small class="me-1">RM</small>
+                                            <span id="@($"totalPrice{@shopOwnwer.Id}")">@item.TotalPrice.ToString("0.00")</span>
+                                        </div>
+
+                                        <!-- Delete Button -->
+                                        <div class="text-nowrap">
+                                            <form asp-action="RemoveCartItem" asp-route-id="@item.Id" method="post" class="m-0">
+                                                <button class="btn btn-sm btn-outline-danger" type="submit" data-bs-toggle="tooltip" title="Remove">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                }
+                            }
+                            <div class="card-footer">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center pt-4 mt-4">
+
+                                    <!-- Left: Total label -->
+                                    <div class="d-flex align-items-center">
+                                        <h5 class="mb-0 fw-bold">
+                                            Total (<span class="text-primary">@Model.ItemCart.Where(i => i.Product.userId == shopOwnwer.Id).Count()</span> item@((Model.ItemCart.Where(i => i.Product.userId == shopOwnwer.Id).Count() > 1) ? "s" : "")):
+                                        </h5>
+                                    </div>
+
+                                    <!-- Center: Total Amount -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="fs-5">RM</span>
+                                        <h3 id="@($"totalToPay{@shopOwnwer.Id}") class="mb-0 text-danger fw-bold text-decoration-underline">
+                                            @ViewData[shopOwnwer.Id]
+                                        </h3>
+                                    </div>
+
+                                    <!-- Right: Checkout button -->
+                                    <div>
+                                        <a asp-action="checkoutCartItem" asp-route-id="@shopOwnwer.Id" class="btn btn-primary px-4">
+                                            Checkout
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            }
-            else
-            {
-                <div class="text-center">
-                    <h1>No Item in cart</h1>
-                    <a asp-action="Index" asp-controller="Home">Back to Menu</a>
-                </div>
-            }
-        </div>
-    </div>
+            </div>
+        }
+    }
 </div>
+
 @section Scripts
 {
     <partial name="_CartScriptsPartial" />

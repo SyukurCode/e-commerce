@@ -1,7 +1,8 @@
-﻿function changeCartQuantity(amount, id) {
+﻿function changeCartQuantity(amount, id, owner) {
     const input = document.getElementById(id);
-    const totalToPay = document.getElementById("totalToPay")
+    const totalToPay = document.getElementById("totalToPay" + owner)
     var token = $('input[name="__RequestVerificationToken"]').val();
+    console.log("id", owner);
     let current = parseInt(input.value) || 1;
     current += amount;
     if (current < 1) current = 1;
@@ -27,14 +28,14 @@
 function calculatePrice(amount, id) {
     const priceEl = document.getElementById("price" + id);
     const totalEl = document.getElementById("totalPrice" + id);
-    const totalToPay = document.getElementById("tottalTpPay");
+    const totalToPay = document.getElementById("totalToPay" + owner);
 
     if (!priceEl || !totalEl) {
         console.error("Missing element for ID:", id);
         return;
     }
 
-    const unitPrice = parseFloat(priceEl.textContent.trim().replace('RM', ''));
+    const unitPrice = parseFloat(priceEl.value);
     
 
     const total = unitPrice * parseInt(amount);
