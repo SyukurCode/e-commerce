@@ -27,6 +27,5 @@ namespace E_Commers_Adelia.Models
         public DateTime CreateDate { get; set; }
         [Display(Name="Update Date")]
         public DateTime UpdateDate { get; set; }
-
     }
 }

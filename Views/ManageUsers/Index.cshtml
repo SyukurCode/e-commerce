@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
 @model IEnumerable<E_Commers_Adelia.Models.EUser>
 @inject UserManager<EUser> UserManager
 
@@ -10,7 +11,7 @@
                 <div class="d-flex align-items-center">
                     <h4 class="card-title">List of User</h4>
                     <a class="btn btn-primary btn-round ms-auto"
-                       id="register" asp-area="Identity" asp-page="/Account/Register">
+                    id="register" asp-area="Identity" asp-page="/Account/Register">
                         <i class="fa fa-plus"></i>
                         Add User
                     </a>
@@ -19,13 +20,13 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="lsUser"
-                           class="display table table-striped table-hover">
+                    class="display table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>No.</th>
                                 <th>
                                     @Html.DisplayNameFor(Model => Model.DisplayName)
-                                    
+
                                 </th>
                                 <th>
                                     @Html.DisplayNameFor(Model => Model.Email)
@@ -48,6 +49,7 @@
                                 var userRole = UserManager.GetRolesAsync(item).Result;
                                 var roles = await UserManager.GetRolesAsync(item);
                                 var userWithRoles = new List<(ApplicationDbContext User, IList<string> Roles)>();
+                                var accountType = AccountType.All.FirstOrDefault(a => a.Id == item.AccountTypeId)?.Name ?? "Unknown";
 
                                 @if (!userRole.Contains("Admin"))
                                 {
@@ -60,6 +62,8 @@
                                         </td>
                                         <td>
                                             @Html.DisplayFor(modelItem => item.Email)
+                                            <br />
+                                            <small class="badge badge-primary">@accountType</small>
                                         </td>
                                         <td>
                                             @(item.IsActive ? "Active" : "Inactive")

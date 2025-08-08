@@ -24,10 +24,10 @@
                 <!-- Pastikan elemen dalam ni susun secara mendatar -->
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <!-- This makes buttons inline -->
-                    <label for="upload" class="btn btn-primary mb-0" tabindex="0">
-                        <span class="d-none d-sm-block">Upload new photo</span>
-                        <i class="bx bx-upload d-block d-sm-none"></i>
-                    </label>
+                    <button for="upload" class="btn btn-primary mb-0">
+                        <span class="d-none d-sm-block">Upload</span>
+                        <i class="fa fa-upload d-block d-sm-none"></i>
+                    </button>
 
                     <input type="file"
                     name="avatarFile"
@@ -36,10 +36,12 @@
                     hidden
                     accept="image/png, image/jpeg" />
 
-                    <button type="submit" class="btn btn-outline-primary account-image-apply mb-0" disabled>Apply</button>
-
+                    <button type="submit" class="btn btn-outline-primary account-image-apply mb-0" disabled>
+                        <i class="fas fa-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Apply</span>
+                    </button>
                     <button type="button" class="btn btn-outline-secondary account-image-reset mb-0" disabled>
-                        <i class="bx bx-reset d-block d-sm-none"></i>
+                        <i class="fa fa-history d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">Reset</span>
                     </button>
                 </div>

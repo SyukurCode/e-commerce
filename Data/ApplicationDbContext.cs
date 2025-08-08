@@ -24,6 +24,8 @@ namespace E_Commers_Adelia.Data
         public DbSet<OnlineTransferNote> onlineTransferNotes { get; set; }
         public DbSet<SelfPickupAddress> selfPickupAddresses { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<CustomerDeliveryInfo> CustomerDeliveryInfo { get; set; }
+        public DbSet<CustomerPayment> CustomerPayments { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

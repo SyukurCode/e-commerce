@@ -3,6 +3,7 @@ using System;
 using E_Commers_Adelia.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace E_Commers_Adelia.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250807033141_add cus delivery info and payment info")]
+    partial class addcusdeliveryinfoandpaymentinfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,7 +44,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Avatars", (string)null);
+                    b.ToTable("Avatars");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.CashNote", b =>
@@ -62,7 +65,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CashNotes", (string)null);
+                    b.ToTable("CashNotes");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.CodNote", b =>
@@ -83,7 +86,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CodNotes", (string)null);
+                    b.ToTable("CodNotes");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.CustomerDeliveryInfo", b =>
@@ -116,7 +119,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CustomerDeliveryInfo", (string)null);
+                    b.ToTable("CustomerDeliveryInfo");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.CustomerPayment", b =>
@@ -130,7 +133,7 @@ namespace E_Commers_Adelia.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("OrderNo")
+                    b.Property<string>("OrderId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -151,7 +154,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CustomerPayments", (string)null);
+                    b.ToTable("CustomerPayments");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.EUser", b =>
@@ -271,7 +274,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("onlineTransferNotes", (string)null);
+                    b.ToTable("onlineTransferNotes");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.Order", b =>
@@ -318,7 +321,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.Product", b =>
@@ -365,7 +368,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.ProductOption", b =>
@@ -390,7 +393,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOptions", (string)null);
+                    b.ToTable("ProductOptions");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.QrCode", b =>
@@ -413,7 +416,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("QrCodes", (string)null);
+                    b.ToTable("QrCodes");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.SelfPickupAddress", b =>
@@ -438,7 +441,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("selfPickupAddresses", (string)null);
+                    b.ToTable("selfPickupAddresses");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.SellerDeliveryOption", b =>
@@ -464,7 +467,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SellerDeliveryOptions", (string)null);
+                    b.ToTable("SellerDeliveryOptions");
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.SellerPaymentMethod", b =>
@@ -487,7 +490,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SellerPaymentMethods", (string)null);
+                    b.ToTable("SellerPaymentMethods");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

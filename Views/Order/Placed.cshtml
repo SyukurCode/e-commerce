@@ -1,0 +1,234 @@
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model E_Commers_Adelia.Models.OrderPlaceView
+@inject ApplicationDbContext db
+@inject UserManager<EUser> userManager
+@{
+    ViewData["Title"] = "Payment";
+    var user = await userManager.GetUserAsync(User);
+
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index" asp-controller="Home">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            Payment for #<a href="#">@Model.OrderNo</a>
+        </li>
+    </ul>
+</div>
+<hr />
+<form asp-action="Placed">
+    <input type="hidden" asp-for="CustomerDeliveryInfo.CustomerId" value="@user.Id"/>
+    <input type="hidden" asp-for="DeliveryTypeId" />
+    <input type="hidden" asp-for="PaymentTypeId" />
+    <input type="hidden" asp-for="CustomerDeliveryInfo.Id" />
+    <input type="hidden" asp-for="SellerId"/>
+    <input type="hidden" asp-for="OrderNo"/>
+    
+    @if (Model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id)
+    {
+        <div class="col-md-12">
+            <div class="card shadow rounded-3 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary">Delivery to</h5>
+                </div>
+                <div class="card-body text-center">
+                    
+                        
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="CustomerDeliveryInfo.CustomerName" class="form-control" />
+                            <label asp-for="CustomerDeliveryInfo.CustomerName" class="control-label"></label>
+                            <span asp-validation-for="CustomerDeliveryInfo.CustomerName" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="CustomerDeliveryInfo.Address" class="form-control" />
+                            <label asp-for="CustomerDeliveryInfo.Address" class="control-label"></label>
+                            <span asp-validation-for="CustomerDeliveryInfo.Address" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="CustomerDeliveryInfo.CustomerEmail" class="form-control" />
+                            <label asp-for="CustomerDeliveryInfo.CustomerEmail" class="control-label"></label>
+                            <span asp-validation-for="CustomerDeliveryInfo.CustomerEmail" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="CustomerDeliveryInfo.CustomerPhone" class="form-control" />
+                            <label asp-for="CustomerDeliveryInfo.CustomerPhone" class="control-label"></label>
+                            <span asp-validation-for="CustomerDeliveryInfo.CustomerPhone" class="text-danger"></span>
+                        </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.DeliveryTypeId == DeliveryOption.SelfPickup.Id)
+    {
+        <div class="col-md-12">
+            @{
+                var selfPickup = db.selfPickupAddresses.FirstOrDefault(a => a.UserId == Model.SellerId);
+            }
+            <div class="card shadow rounded-3 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary">Seller Detail</h5>
+                </div>
+                <div class="card-body text-start">
+                    <div class="card-body">
+                        <p class="fw-bold">Please pickup your order at location below</p>
+                        <br/>
+                        <dl>
+                            <dt>
+                                Address
+                            </dt>
+                            <dd>
+                                @selfPickup.Address
+                            </dd>
+                            <dt>
+                                Phone No.
+                            </dt>
+                            <dd>
+                                @selfPickup.PhoneNo
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.PaymentTypeId == PaymentMethod.QR.Id)
+    {
+        <div class="col-md-12">
+            @{
+                ViewData["QRImage"] = Url.Action("GetQrCode", "QrCode", new { userId = Model.SellerId });
+            }
+            <div class="card shadow rounded-3 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0 position-relative">
+                    <h5 class="card-title mb-0 text-primary text-start">Via QR Code</h5>
+                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+                        @($"Amount: RM{Model.Amount}")
+                    </h3>
+                </div>
+
+                <div class="card-body text-center">
+                    <img src="@ViewData["QRImage"]"
+                    alt="QR Image"
+                    class="rounded card-img-top"
+                    style="width: 500px; height: auto; object-fit: cover;" />
+                    <div class="card-footer">
+                        <div class="position-relative p-3">
+                            <!-- Center: Amount label -->
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <h3 class="mb-0 fw-bold">Amount</h3>
+                            </div>
+
+                            <!-- End: RM and TotalToPay -->
+                            <div class="position-absolute top-50 end-0 translate-middle-y d-flex align-items-end gap-2 me-3">
+                                <span class="mb-0">RM</span>
+                                <h3 class="mb-0 text-decoration-underline">@Model.Amount</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (Model.PaymentTypeId == PaymentMethod.OnlineTransfer.Id)
+    {
+        <div class="col-md-12">
+            @{
+                var bankInfo = db.onlineTransferNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
+            }
+            <div class="card shadow rounded-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary text-start">Account Transfer</h5>
+                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+                        @($"Amount: RM{Model.Amount}")
+                    </h3>
+            </div>
+            <div class="card-body text-start">
+                <div class="card-body">
+                    <dl>
+                        <dt>
+                            Bank Account Number
+                        </dt>
+                        <dd>
+                            @bankInfo.AccountNumber
+                        </dd>
+                        <dt>
+                            Bank Name
+                        </dt>
+                        <dd>
+                            @bankInfo.BankName
+                        </dd>
+                        <dt>
+                            Account Owner
+                        </dt>
+                        <dd>
+                            @bankInfo.AccounOwnerName
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    @if(Model.PaymentTypeId == PaymentMethod.Cash.Id)
+    {
+    <div class="col-md-12">
+        @{
+            var Cash = db.CashNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
+        }
+        <div class="card shadow rounded-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Noter</h5>
+                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+                        @($"Amount: RM{Model.Amount}")
+                    </h3>
+            </div>
+            <div class="card-body text-start">
+                <div class="card-body">
+                    @Cash.Note
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    @if(Model.PaymentTypeId == PaymentMethod.COD.Id)
+    {
+    <div class="col-md-12">
+        @{
+            var COD = db.CodNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
+        }
+        <div class="card shadow rounded-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Noter</h5>
+                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+                        @($"Amount: RM{Model.Amount}")
+                    </h3>
+            </div>
+            <div class="card-body text-start">
+                <div class="card-body">
+                    @COD.Note
+                </div>
+            </div>
+        </div>
+    </div>
+    }
+    <div class="col-md-12">
+        <div class="card shadow rounded-3 mb-4 text-center">
+            <div class="card-body">
+            <button type="submit" class="btn btn-primary w-100">Submit Order</button>
+        </div>
+        </div>
+    </div>
+</form>
+
+

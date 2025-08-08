@@ -1,0 +1,52 @@
+﻿@using E_Commers_Adelia.Common
+@model E_Commers_Adelia.Models.CustomerPayment
+@inject ApplicationDbContext db
+@{
+    ViewData["Title"] = "Completed";
+    
+}
+<div>
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="card shadow-lg border-0 p-4 rounded-4 text-center" style="max-width: 600px;">
+            <div class="card-body">
+                <!-- Success Icon -->
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="green" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07 0l3.992-3.992a.75.75 0 1 0-1.06-1.06L7.5 9.44 6.03 7.97a.75.75 0 1 0-1.06 1.06l2 2z" />
+                    </svg>
+                </div>
+
+                <!-- Main Message -->
+                <h1 class="text-success fw-bold">Thank You!</h1>
+                <p class="lead mt-3">Your order has been placed successfully.</p>
+                <p class="text-muted">We’ve sent your order. You can also track your order status in your profile.</p>
+
+                @{var paymentType = PaymentMethod.All.Where(x => x.Id == Model.PaymentTypeId).FirstOrDefault();}
+
+                <!-- Order Details -->
+                <dl class="row text-start mt-4">
+                    <dt class="col-4">@Html.DisplayNameFor(model => model.OrderNo)</dt>
+                    <dd class="col-8">@Html.DisplayFor(model => model.OrderNo)</dd>
+
+                    <dt class="col-4">Payment Type</dt>
+                    <dd class="col-8">@paymentType?.Name</dd>
+
+                    <dt class="col-4">@Html.DisplayNameFor(model => model.Amount)</dt>
+                    <dd class="col-8">RM @Html.DisplayFor(model => model.Amount)</dd>
+
+                    <dt class="col-4">@Html.DisplayNameFor(model => model.PaymentDate)</dt>
+                    <dd class="col-8">@Model.PaymentDate.ToLocalTime().ToString("dd MMM yyyy, h:mm tt")</dd>
+                </dl>
+
+                <hr>
+
+                <!-- Buttons -->
+                <div class="mt-4 d-grid gap-2">
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-primary btn-lg rounded-pill">Back to Menu</a>
+                    <a asp-action="ViewOrder" asp-route-OrderNo="@Model.OrderNo"  class="btn btn-outline-secondary rounded-pill">View Order</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

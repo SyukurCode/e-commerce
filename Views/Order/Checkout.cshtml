@@ -1,0 +1,185 @@
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model E_Commers_Adelia.Models.OrderView;
+@inject UserManager<EUser> UserManager
+@inject ApplicationDbContext db
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index" asp-controller="Home">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Checkout Items</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Order No @Model.OrderNo</a>
+        </li>
+    </ul>
+</div>
+<hr />
+
+<div class="col-md-12">
+         @{
+        var seller = await UserManager.FindByIdAsync(Model.SellerId);
+         }
+
+        <div class="card shadow rounded-3 mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                <h5 class="card-title mb-0 text-primary"># @seller.StoreName</h5>
+            </div>
+
+            <div class="card-body text-center">
+            @foreach (var item in Model.OrderItem)
+            {
+                var product = await db.Products.FindAsync(item.ProductId);
+                var customer = await UserManager.FindByIdAsync(item.CustomerId);
+
+                <!-- Product Image -->
+                <div class="mb-3">
+                    <img src="@(string.IsNullOrEmpty(@product.ImageUrl) ? Url.Content("~/img/blank.jpg") : Url.Content("~/" + product.ImageUrl))"
+                         alt="Product Image"
+                         class="rounded shadow-sm"
+                         style="width: 200px; height: 200px; object-fit: cover;" />
+                </div>
+
+                <!-- Product Info -->
+                <h6 class="text-dark fw-semibold mb-1">@product.Name</h6>
+                <p class="text-muted small">@product.Description</p>
+
+                <!-- Unit Price -->
+                <div class="text-danger fs-5 mb-2">
+                    <small class="me-1">RM</small>
+                    <span id="@($"price{item.Id}")">@item.UnitPrice</span>
+                </div>
+
+                <!-- Options -->
+                @if (item.SelectedOption != null && item.SelectedOption.Any())
+                {
+                    <div class="mb-3">
+                        <label class="fw-semibold d-block mb-2">Options:</label>
+                        <span class="badge bg-info text-dark text-wrap me-1 mb-1">
+                            @item.SelectedOption
+                        </span>
+                    </div>
+                }
+
+                <!-- Quantity Control -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Quantity:</label>
+                    <strong class="text-dark">@item.Quantity</strong>
+                </div>
+
+                <!-- Total Price -->
+                <div class="bg-light rounded p-3">
+                    <div class="d-flex justify-content-center align-items-center gap-2">
+                        <span class="fw-semibold">Sub Total:</span>
+                        <h4 class="mb-0 text-success">RM<span id="@($"totalPrice{item.Id}")">@item.SubTotalPrice</span></h4>
+                    </div>
+                </div>
+                }
+                <!-- Total To Pay -->
+                <div class="position-relative p-3">
+                    <!-- Center: Total label -->
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <h3 class="mb-0 fw-bold">Total(@Model.OrderItem.Count())</h3>
+                    </div>
+
+                    <!-- End: RM and TotalToPay -->
+                    <div class="position-absolute top-50 end-0 translate-middle-y d-flex align-items-end gap-2 me-3">
+                        <span class="mb-0">RM</span>
+                        <h3 id="totalToPay" class="mb-0 text-decoration-underline">@Model.TotalToPay</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @{
+        // Dapatkan PaymentMethod dari seller seller
+        var paymentOptions = db.SellerPaymentMethods.Where(p => p.UserId == Model.SellerId && p.isEnable == true).ToList();
+
+        // Dapatkan Delivery dari seller
+        var deliveryOption = db.SellerDeliveryOptions.Where(d => d.userId == Model.SellerId && d.isEnable == true).ToList();
+    }
+    <form asp-action="Checkout">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="SellerId"/>
+        <input type="hidden" asp-for="OrderNo" value="@Model.OrderNo" />
+        <input id="TotalToPay" type="hidden" asp-for="TotalToPay" />
+        <div class="card card-round">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                <h5 class="card-title mb-0 text-dark">Payment Option</h5>
+            </div>
+            <div class="form-group">
+            @foreach (var Option in paymentOptions)
+            {
+                var paymentName = PaymentMethod.All.FirstOrDefault(p => p.Id == Option.PaymentMethodId);
+
+                <div class="form-check">
+                        <input class="form-check-input" id=@($"payment{paymentName.Id}") type="radio" asp-for="OrderPlace.PaymentTypeId" value="@paymentName.Id">
+                        <label class="form-check-label" for=@($"payment{paymentName.Id}") asp-for="OrderPlace.PaymentTypeId">
+                        @paymentName.Name
+                    </label>
+                </div>
+            }
+            </div>
+            <span asp-validation-for="OrderPlace.PaymentTypeId" class="text-danger"></span>
+        </div>
+        <div class="card card-round">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                <h5 class="card-title mb-0 text-dark">Delivery Option</h5>
+            </div>
+            <div class="form-group">
+            @foreach (var Option in deliveryOption)
+            {
+                var deliveryName = DeliveryOption.All.FirstOrDefault(p => p.Id == Option.DeliveryId);
+
+                <div class="form-check">
+                        <input class="form-check-input" id=@($"delivery{deliveryName.Id}") type="radio" asp-for="OrderPlace.DeliveryTypeId" value="@deliveryName.Id" onclick="calulateTotal(@Option.AdditionalPrice)" />
+                            <label class="form-check-label" for="@($"delivery{deliveryName.Id}")" asp-for="OrderPlace.DeliveryTypeId">
+                        @deliveryName.Name
+                    </label>
+                </div>
+            }
+            </div>
+            <span asp-validation-for="OrderPlace.DeliveryTypeId" class="text-danger"></span>
+        </div>
+        <div class="card card-round p-3 bg-light shadow-sm">
+            <table class="table table-borderless mb-0">
+                <tbody>
+                    <tr>
+                        <td class="text-end fw-semibold w-75">Subtotal Item</td>
+                        <td class="text-end"><span id="Subtotal">@($"RM{Model.TotalToPay}")</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-end fw-semibold">Delivery Charge</td>
+                        <td class="text-end"><span id="DeliveryCharge">RM0.00</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-end fw-semibold">Total To Pay</td>
+                        <td class="text-end text-danger"><h3 id="Total">@($"RM{Model.TotalToPay}")</h3></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Place Order</button>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_CheckoutScriptPartial" />
+    <partial name="_ValidationScriptsPartial" />
+}

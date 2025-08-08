@@ -143,7 +143,7 @@ namespace E_Commers_Adelia.Controllers
             }
 
             await _db.SaveChangesAsync();
-            return RedirectToAction("index", "Checkout", new { orderNo = orderNo });
+            return RedirectToAction("Checkout", "Order", new { orderNo = orderNo });
         }
     }
 }

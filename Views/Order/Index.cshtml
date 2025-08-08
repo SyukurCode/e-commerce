@@ -3,100 +3,97 @@
 @{
     ViewData["Title"] = "Index";
 }
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-4">
-            <div class="card card-round">
-                <!-- Image Product -->
-                <img src="@(string.IsNullOrEmpty(Model.Product.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.Product.ImageUrl))"
-                     alt="Product Image"
-                     class="rounded card-img-top"
-                     style="width: 100%; height: auto; object-fit: cover;" />
-                <div class="card-body">
-                    <form asp-action="Index" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div>
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="card shadow-lg border-0 p-4 rounded-4" style="max-width: 600px;">
+            <!-- Image Product -->
+            <img src="@(string.IsNullOrEmpty(Model.Product.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.Product.ImageUrl))"
+                 alt="Product Image"
+                 class="rounded card-img-top"
+                 style="width: 100%; height: auto; object-fit: cover;" />
+            <div class="card-body">
+                <form asp-action="Index" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <!-- Hidden fields for Product -->
-                        <input type="hidden" asp-for="Product.userId" />
-                        <input type="hidden" asp-for="Product.Description" />
-                        <input type="hidden" asp-for="Product.Name" />
-                        <input type="hidden" asp-for="Product.Id" />
-                        <input type="hidden" asp-for="Product.Price" />
-                        <input type="hidden" asp-for="Product.ImageUrl" />
-                        <input type="hidden" asp-for="Product.Stock"/>
+                    <!-- Hidden fields for Product -->
+                    <input type="hidden" asp-for="Product.userId" />
+                    <input type="hidden" asp-for="Product.Description" />
+                    <input type="hidden" asp-for="Product.Name" />
+                    <input type="hidden" asp-for="Product.Id" />
+                    <input type="hidden" asp-for="Product.Price" />
+                    <input type="hidden" asp-for="Product.ImageUrl" />
+                    <input type="hidden" asp-for="Product.Stock" />
 
-                        <!-- Product Price -->
-                        <div class="text-danger text-center mb-2">
-                            <span class="fs-4 fw-bold" id="productPrice">
-                                <small class="me-1">RM</small>@Html.DisplayFor(m => m.Product.Price)
-                            </span>
-                        </div>
+                    <!-- Product Price -->
+                    <div class="text-danger text-center mb-2">
+                        <span class="fs-4 fw-bold" id="productPrice">
+                            <small class="me-1">RM</small>@Html.DisplayFor(m => m.Product.Price)
+                        </span>
+                    </div>
 
-                        <!-- Product Name & Description -->
-                        <div class="text-center mb-3">
-                            <h5 class="mb-1">@Html.DisplayFor(m => m.Product.Name)</h5>
-                            <p class="text-muted mb-0">@Html.DisplayFor(m => m.Product.Description)</p>
-                        </div>
-                        <hr />
+                    <!-- Product Name & Description -->
+                    <div class="text-center mb-3">
+                        <h5 class="mb-1">@Html.DisplayFor(m => m.Product.Name)</h5>
+                        <p class="text-muted mb-0">@Html.DisplayFor(m => m.Product.Description)</p>
+                    </div>
+                    <hr />
 
-                        <!-- Options Section -->
-                        @if (Model.Product.Options.Count > 0)
-                        {
-                            <div class="mb-4">
-                                @Html.AntiForgeryToken()
-                                <label class="form-label fw-semibold">Options:</label>
-                                @for (int i = 0; i < Model.Product.Options.Count; i++)
-                                {
-                                    <div class="form-check d-flex justify-content-between align-items-center border-bottom py-2">
-                                        <div>
-                                            <input class="form-check-input me-2"
-                                                   type="checkbox"
-                                                   name="SelectedOptionIds"
-                                                   value="@Model.Product.Options[i].Id"
-                                                   id="option_@Model.Product.Options[i].Id"
-                                                   onchange="chooseOption()" />
-                                            <label class="form-check-label" for="option_@Model.Product.Options[i].Id">
-                                                @Model.Product.Options[i].OptionName
-                                            </label>
-                                        </div>
-                                        <small class="text-muted">+RM @Model.Product.Options[i].AdditionalPrice.ToString("0.00")</small>
-                                    </div>
-                                }
-                            </div>
-                        }
-
-                        <!-- Quantity Selector -->
+                    <!-- Options Section -->
+                    @if (Model.Product.Options.Count > 0)
+                    {
                         <div class="mb-4">
-                            <label asp-for="Quantity" class="form-label fw-semibold">Quantity:</label>
-                            <div class="input-group">
-                                <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">−</button>
-                                <input asp-for="Quantity" type="number" id="quantity" value="1" class="form-control text-center" min="1" />
-                                <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">+</button>
-                            </div>
-                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                            @Html.AntiForgeryToken()
+                            <label class="form-label fw-semibold">Options:</label>
+                            @for (int i = 0; i < Model.Product.Options.Count; i++)
+                            {
+                                <div class="form-check d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div>
+                                        <input class="form-check-input me-2"
+                                               type="checkbox"
+                                               name="SelectedOptionIds"
+                                               value="@Model.Product.Options[i].Id"
+                                               id="option_@Model.Product.Options[i].Id"
+                                               onchange="chooseOption()" />
+                                        <label class="form-check-label" for="option_@Model.Product.Options[i].Id">
+                                            @Model.Product.Options[i].OptionName
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">+RM @Model.Product.Options[i].AdditionalPrice.ToString("0.00")</small>
+                                </div>
+                            }
                         </div>
+                    }
 
-                        <!-- Submit Buttons -->
-                        <div class="text-center justify-content-between mb-3">
-                            <input type="submit" name="action" value="BuyNow" class="btn btn-primary me-2" />
-                            <input type="submit" name="action" value="AddToCart" class="btn btn-outline-secondary" />
+                    <!-- Quantity Selector -->
+                    <div class="mb-4">
+                        <label asp-for="Quantity" class="form-label fw-semibold">Quantity:</label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">−</button>
+                            <input asp-for="Quantity" type="number" id="quantity" value="1" class="form-control text-center" min="1" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">+</button>
                         </div>
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
 
-                        <!-- Back Link -->
-                        <div class="text-center">
-                            <a asp-action="Index" asp-controller="Home" class="text-decoration-none">← Back to menu</a>
-                        </div>
-                        @* </div> *@
+                    <!-- Submit Buttons -->
+                    <div class="text-center justify-content-between mb-3">
+                        <input type="submit" name="action" value="BuyNow" class="btn btn-primary me-2" />
+                        <input type="submit" name="action" value="AddToCart" class="btn btn-outline-secondary" />
+                    </div>
 
-                    </form>
-                </div>
+                    <!-- Back Link -->
+                    <div class="text-center">
+                        <a asp-action="Index" asp-controller="Home" class="text-decoration-none">← Back to menu</a>
+                    </div>
+                    @* </div> *@
+
+                </form>
             </div>
         </div>
     </div>
 </div>
-
 @section Scripts
 {
     <partial name="_NotificationPartial" />
-    <partial name="_OrderScriptsPartial"/>
+    <partial name="_OrderScriptsPartial" />
 }
