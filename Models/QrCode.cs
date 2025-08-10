@@ -14,6 +14,7 @@ namespace E_Commers_Adelia.Models
         public string? ImageContentType { get; set; }
 
         public string UserId { get; set; }
+        public EUser? User { get; set; }
 
     }
 }

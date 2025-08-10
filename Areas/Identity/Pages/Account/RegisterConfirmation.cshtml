@@ -1,13 +1,25 @@
 ﻿@page
 @model RegisterConfirmationModel
+@inject SignInManager<EUser> signInManager
 @{
     ViewData["Title"] = "Register confirmation";
 }
 
-<h1>@ViewData["Title"]</h1>
 @{
-<p>
-        Please check your email to confirm your account.
-</p>
+    @if (signInManager.IsSignedIn(User) || User.IsInRole("Admin"))
+    {
+        <div class="d-flex justify-content-center align-items-center min-vh-100">
+            <div class="text-center">
+                <img src="~/img/Adelia/ms-icon-310x310.png" />
+                <h1>@ViewData["Title"]</h1>
+                <p class="">New user was created and invaitation mail has send.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h1>@ViewData["Title"]</h1>
+        <p> Please check your email to confirm your account.</p>
+    }
 }
 

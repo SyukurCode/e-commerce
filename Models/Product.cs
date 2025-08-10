@@ -9,6 +9,7 @@ namespace E_Commers_Adelia.Models
         public int Id { get; set; }
         [Display(Name="User Id")]
         public required string userId { get; set;  }
+        public EUser? User { get; set; }
         [MaxLength(20)]
         public required string Name { get; set; }
         [MaxLength(50, ErrorMessage = "Description can't exceed 30 character")]

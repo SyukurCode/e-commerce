@@ -18,7 +18,7 @@
     @foreach (var item in Model)
     {
         var user = await UserManager.FindByIdAsync(item.userId);
-        @if(!item.isHide)
+        @if (!item.isHide)
         {
             @if (item.isEnable && item.Stock > 0)
             {
@@ -35,16 +35,16 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0">
                                         <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
-                                        alt="Product Image"
-                                        class="rounded shadow-sm"
-                                        style="width: 80px; height: 80px; object-fit: cover;" />
+                                                alt="Product Image"
+                                                class="rounded shadow-sm"
+                                                style="width: 80px; height: 80px; object-fit: cover;" />
                                     </div>
 
                                     <div class="flex-grow-1">
                                         <h6 class="mb-1 fw-semibold text-wrap">@item.Name</h6>
                                         <small class="text-muted d-block text-wrap">@item.Description</small>
                                         <h5 class="text-success mt-2 mb-0">RM @item.Price</h5>
-                                        @if(item.Stock < 3)
+                                        @if (item.Stock < 3)
                                         {
                                             <span class="text-danger">Last @item.Stock items</span>
                                         }
@@ -69,9 +69,9 @@
                             <div class="d-flex align-items-center mb-3">
                                 <div class="flex-shrink-0 me-3">
                                     <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
-                                    alt="Product Image"
-                                    class="rounded"
-                                    style="width: 80px; height: 80px; object-fit: cover;" />
+                                            alt="Product Image"
+                                            class="rounded"
+                                            style="width: 80px; height: 80px; object-fit: cover;" />
                                 </div>
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1 text-wrap">@item.Name</h6>
@@ -86,12 +86,13 @@
                                         <span class="text-danger">Not available</span>
                                     }
                                 </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         }
-        }
+       
     }
 </div>
 @section Scripts

@@ -26,6 +26,8 @@ namespace E_Commers_Adelia.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<CustomerDeliveryInfo> CustomerDeliveryInfo { get; set; }
         public DbSet<CustomerPayment> CustomerPayments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<UserChat> Chats { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -36,6 +38,62 @@ namespace E_Commers_Adelia.Data
                 .WithOne(o => o.Product)
                 .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Product>()
+                .HasOne(o => o.User)
+                .WithMany() // kalau nak simpan senarai order dalam user, boleh letak navigation property
+                .HasForeignKey(o => o.userId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 🔗 Order
+            builder.Entity<Order>()
+                .HasOne(o => o.Customer)
+                .WithMany()
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<QrCode>()
+                .HasOne(q => q.User)
+                .WithMany()
+                .HasForeignKey(q => q.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<OnlineTransferNote>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CodNote>()
+               .HasOne(o => o.User)
+               .WithMany()
+               .HasForeignKey(o => o.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CashNote>()
+               .HasOne(o => o.User)
+               .WithMany()
+               .HasForeignKey(o => o.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<SellerDeliveryOption>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.userId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<SellerPaymentMethod>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserChat>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

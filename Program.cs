@@ -8,6 +8,7 @@ using E_Commers_Adelia.Service;
 using E_Commers_Adelia.Common;
 using Microsoft.AspNetCore.SignalR;
 using E_Commers_Adelia.Hub;
+using E_Commers_Adelia.Repository;
 
 DotNetEnv.Env.Load(); // ← baca .env file
 
@@ -48,7 +49,7 @@ builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConf
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Add upload qr sevice
-builder.Services.AddScoped<IUploadQRImage, UploadQRImage>();
+builder.Services.AddScoped<INotification, RNotification>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();

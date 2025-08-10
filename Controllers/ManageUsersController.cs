@@ -1,4 +1,5 @@
-﻿using E_Commers_Adelia.Migrations;
+﻿using E_Commers_Adelia.Data;
+using E_Commers_Adelia.Migrations;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,9 +14,11 @@ namespace E_Commers_Adelia.Controllers
     public class ManageUsersController : Controller
     {
         private readonly UserManager<EUser> _userManager;
-        public ManageUsersController(UserManager<EUser> userManager)
+        private readonly ApplicationDbContext _db;
+        public ManageUsersController(UserManager<EUser> userManager, ApplicationDbContext db)
         {
             _userManager = userManager;
+            _db = db;
         }
         public async Task<IActionResult> Index()
         {
@@ -29,6 +32,23 @@ namespace E_Commers_Adelia.Controllers
             var user = await _userManager.FindByIdAsync(Id);
             if (user != null)
             {
+                // Delete user Avatar
+                // Delete Seller SellerPaymentMethode
+                // Delete Seller delivery option
+                // delete Order 
+                // DeleteNotification
+                // Delete Message
+                // Delete QRcode
+                // Delete Online transfernote
+
+                // delete user product
+                //var userProduct = await _db.Products.Where(x => x.userId == user.Id).ToListAsync();
+                //foreach(var product in userProduct)
+                //{
+                //    _db.Products.Remove(product);
+                //    await _db.SaveChangesAsync();
+                //}
+
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {

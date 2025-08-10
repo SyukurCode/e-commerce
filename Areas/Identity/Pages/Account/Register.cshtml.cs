@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging;
 using E_Commers_Adelia.Service;
 using E_Commers_Adelia.Common;
 using Serilog;
+using E_Commers_Adelia.Repository;
 
 namespace E_Commers_Adelia.Areas.Identity.Pages.Account
 {
@@ -33,13 +34,15 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<EUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailService _emailSender;
+        private readonly INotification _notification;
 
         public RegisterModel(
             UserManager<EUser> userManager,
             IUserStore<EUser> userStore,
             SignInManager<EUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailService emailSender)
+            IEmailService emailSender,
+            INotification notification)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -47,6 +50,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _notification = notification;
         }
 
         /// <summary>
@@ -161,6 +165,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
+                    await _notification.Create(new Notification { UserId = _userManager.GetUserId(User), ActionURL = "/ManageUsers", DateCreated = DateTime.UtcNow, IsRead = false, Text= "New user registered", FaIcon= "fa-user-plus" } );
                     await _emailSender.SendEmailAsync(Input.Email, "Congratulation!",
                         $"<p>This is an auto reply message. Please do not reply to this email.</p>" +
                         $"<br/><br/>" +

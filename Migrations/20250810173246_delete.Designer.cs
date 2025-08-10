@@ -3,6 +3,7 @@ using System;
 using E_Commers_Adelia.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace E_Commers_Adelia.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250810173246_delete")]
+    partial class delete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,8 +87,6 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("CodNotes");
                 });
@@ -312,8 +313,6 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("onlineTransferNotes");
                 });
 
@@ -462,8 +461,6 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("QrCodes");
                 });
 
@@ -515,8 +512,6 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("userId");
-
                     b.ToTable("SellerDeliveryOptions");
                 });
 
@@ -539,8 +534,6 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("SellerPaymentMethods");
                 });
@@ -571,8 +564,6 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Chats");
                 });
@@ -724,28 +715,6 @@ namespace E_Commers_Adelia.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("E_Commers_Adelia.Models.CodNote", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.OnlineTransferNote", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("E_Commers_Adelia.Models.Order", b =>
                 {
                     b.HasOne("E_Commers_Adelia.Models.EUser", "Customer")
@@ -785,50 +754,6 @@ namespace E_Commers_Adelia.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.QrCode", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.SellerDeliveryOption", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.SellerPaymentMethod", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.UserChat", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

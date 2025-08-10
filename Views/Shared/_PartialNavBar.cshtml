@@ -1,17 +1,25 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using E_Commers_Adelia.Repository
+@using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Http;
+@using E_Commers_Adelia.Common
 @inject IHttpContextAccessor HttpContextAccessor
 @inject UserManager<EUser> UserManager
 @inject SignInManager<EUser> SignInManager
-
+@inject ApplicationDbContext db
+@inject INotification notify
 @{
-    ViewData["Avatar"] = Url.Action("GetAvatar", "Profile", new { userId = UserManager.GetUserId(User) });
-    ViewData["MessageNoti"] = 0;
-    ViewData["Notification"] = 0;
+    var notiCount = 0;
+    IEnumerable<Notification> noti = new List<Notification>();
+    if (SignInManager.IsSignedIn(User)) {
+        var currentUser = await UserManager.GetUserAsync(User);
+        
+        noti = await notify.GetByUser(currentUser.Id);
+        notiCount = noti.Where(n => n.IsRead == false).Count();
+    }
     var cart = HttpContextAccessor.HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
     ViewData["CartNoti"] = cart.Sum(x => x.Quantity);
+    ViewData["Avatar"] = Url.Action("GetAvatar", "Profile", new { userId = UserManager.GetUserId(User)});
 }
-
 <!-- Navbar Header -->
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
     <div class="container-fluid">
@@ -33,11 +41,11 @@
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
-                   asp-action="Index" asp-controller="Cart"
-                   id="messageDropdown"
-                   role="button"
-                   aria-haspopup="true"
-                   aria-expanded="false">
+                asp-action="Index" asp-controller="Cart"
+                id="messageDropdown"
+                role="button"
+                aria-haspopup="true"
+                aria-expanded="false">
                     <i class="fa fa-shopping-cart"></i>
                     @if ((int?)ViewData["CartNoti"] > 0)
                     {
@@ -47,12 +55,12 @@
             </li>
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
-                   asp-action="Index" asp-controller="Cart"
-                   id="CartDropdown"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-haspopup="true"
-                   aria-expanded="false">
+                asp-action="Index" asp-controller="Cart"
+                id="CartDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
                     <i class="fa fa-envelope"></i>
                     @if ((int?)ViewData["MessageNoti"] > 0)
                     {
@@ -60,7 +68,7 @@
                     }
                 </a>
                 <ul class="dropdown-menu messages-notif-box animated fadeIn"
-                    aria-labelledby="messageDropdown">
+                aria-labelledby="messageDropdown">
                     <li>
                         <div class="dropdown-title d-flex justify-content-between align-items-center">
                             Messages
@@ -128,37 +136,41 @@
             </li>
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
-                   href="#"
-                   id="notifDropdown"
-                   role="button"
-                   data-bs-toggle="dropdown"
-                   aria-haspopup="true"
-                   aria-expanded="false">
+                href="#"
+                id="notifDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false">
                     <i class="fa fa-bell"></i>
-                    @if ((int?)ViewData["Notification"] > 0)
+                    @if ((int?)notiCount > 0)
                     {
-                        <span class="notification">@ViewData["Notification"]</span>
+                        <span class="notification">@notiCount</span>
                     }
                 </a>
                 <ul class="dropdown-menu notif-box animated fadeIn"
-                    aria-labelledby="notifDropdown">
+                aria-labelledby="notifDropdown">
                     <li>
                         <div class="dropdown-title">
-                            You have @ViewData["Notification"] new notification
+                            You have @notiCount new notification
                         </div>
                     </li>
                     <li>
                         <div class="message-notif-scroll scrollbar-outer">
                             <div class="notif-center">
-                                @* <a href="#"> *@
-                                @*     <div class="notif-icon notif-primary"> *@
-                                @*         <i class="fa fa-user-plus"></i> *@
-                                @*     </div> *@
-                                @*     <div class="notif-content"> *@
-                                @*         <span class="block"> New user registered </span> *@
-                                @*         <span class="time">5 minutes ago</span> *@
-                                @*     </div> *@
-                                @* </a> *@
+                                @foreach (var n in noti)
+                                {
+                                    var duration = DurationCalulator.GetTimeAgo(n.DateCreated);
+                                    <a href="@n.ActionURL">
+                                        <div class="notif-icon notif-primary"> 
+                                            <i class="fa @n.FaIcon"></i> 
+                                        </div> 
+                                        <div class="notif-content"> 
+                                            <span class="block"> @n.Text </span> 
+                                            <span class="time">@duration</span> 
+                                        </div> 
+                                    </a>
+                                }
                                 @* <a href="#"> *@
                                 @*     <div class="notif-icon notif-success"> *@
                                 @*         <i class="fa fa-comment"></i> *@

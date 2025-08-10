@@ -100,35 +100,6 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                 throw new InvalidOperationException($"Unexpected error occurred deleting user.");
             }
 
-            // remove user avatar
-            var avatar = await _db.Avatars.FirstOrDefaultAsync(a => a.UserId == userId);
-            if (avatar != null)
-            {
-                _db.Avatars.Remove(avatar);
-                await _db.SaveChangesAsync();
-            }
-            // remove qrCode User
-            var QrCode = await _db.QrCodes.FirstOrDefaultAsync(q => q.UserId == userId);
-            if (QrCode != null)
-            {
-                {
-                    _db.QrCodes.Remove(QrCode);
-                    await _db.SaveChangesAsync();
-                }
-            }
-            // remove user product
-            var product = await _db.Products.Where(p => p.userId == userId).ToListAsync();
-            if (product != null)
-            {
-                {
-                    foreach (var item in product)
-                    {
-                        _db.Products.Remove(item);
-                        await _db.SaveChangesAsync();
-                    }
-                }
-            }
-
             await _signInManager.SignOutAsync();
 
             _logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
