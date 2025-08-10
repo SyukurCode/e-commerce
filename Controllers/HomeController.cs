@@ -20,7 +20,6 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _db.Products.ToListAsync());
-               
         }
 
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace E_Commers_Adelia.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (action == "BuyNow")
+            if (action == "Buy Now")
             {
 
                 // kira additional price
@@ -83,18 +84,32 @@ namespace E_Commers_Adelia.Controllers
 
                 if (orderDetails.SelectedOptionIds != null)
                 {
-                    foreach (var id in orderDetails.SelectedOptionIds)
+                    //foreach (var id in orderDetails.SelectedOptionIds)
+                    //{
+                    //    var option = await _db.ProductOptions.FindAsync(id);
+                    //    if (orderDetails.SelectedOptionIds.Count() > 1)
+                    //    {
+                    //        if (isFirst) { selectedOption = string.Format("+RM{0} {1}\r\n", option.AdditionalPrice, option.OptionName); }
+                    //        else { selectedOption += string.Format("+RM{0} {1}\r\n", option.AdditionalPrice, option.OptionName); }
+                    //    }
+                    //    else
+                    //    {
+                    //        selectedOption = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
+                    //    }
+
+                        
+                    //}
+                    for (int i = 0; i < orderDetails.SelectedOptionIds.Count(); i++)
                     {
+
+                        var id = orderDetails.SelectedOptionIds[i];
                         var option = await _db.ProductOptions.FindAsync(id);
-                        if (orderDetails.SelectedOptionIds.Count() > 1)
-                        {
-                            if (isFirst) { selectedOption = string.Format("+RM{0} {1},", option.AdditionalPrice, option.OptionName); }
-                            else { selectedOption += string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName); }
-                        }
+                        var line = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
+
+                        if (i < orderDetails.SelectedOptionIds.Count() - 1)
+                            selectedOption += line + "\r\n"; // tambah newline kalau bukan last
                         else
-                        {
-                            selectedOption = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
-                        }
+                            selectedOption += line; // last item takde newline
                     }
                 }
 
@@ -117,7 +132,7 @@ namespace E_Commers_Adelia.Controllers
 
                 return RedirectToAction("Checkout", new { orderNo = orderNo });
             }
-            else if (action == "AddToCart")
+            else if (action == "Add Cart")
             {
                 // 🛒 Logik tambah ke cart
                 await AddProductToCart(orderDetails);
@@ -388,35 +403,39 @@ namespace E_Commers_Adelia.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadRecept(CustomerPayment model, IFormFile image) 
         {
-            if (image != null && image.Length > 0)
+            if (!ModelState.IsValid)
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "Upload", "PaymentReceipt");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await image.CopyToAsync(fileStream);
-                }
-
-                model.ResitUrl = Path.Combine("Upload", "PaymentReceipt", uniqueFileName);
-                _db.CustomerPayments.Update(model);
-                await _db.SaveChangesAsync();
+                return View(model);
             }
+            try
+            {
+                model.ResitUrl = await UploadFileHelper.Upload(image, "PaymentReceipt",_webHostEnvironment);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+            }
+
+            _db.CustomerPayments.Update(model);
+            await _db.SaveChangesAsync();
+
             return RedirectToAction("PaidComplete", new { orderNo = model.OrderNo });
         }
 
-        public async Task<IActionResult> ViewOrder(string orderNo = "")
+        public async Task<IActionResult> ViewOrder(string orderNo)
         {
+
             if (orderNo != "")
             {
+                ViewData["OrderNo"] = orderNo;
                 var order = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
                 return View(order);
             }
+            
             var userOrder = await _db.Orders.Where(x => x.CustomerId == _userManager.GetUserId(User)).ToListAsync();
             return View(userOrder);
         }

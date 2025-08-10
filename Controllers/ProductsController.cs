@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.CodeAnalysis.Options;
+using E_Commers_Adelia.Common;
 
 namespace E_Commers_Adelia.Controllers
 {
@@ -72,33 +73,28 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate")] Product product, IFormFile avatarFile)
+        public async Task<IActionResult> Create([Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate")] Product product, IFormFile image)
         {
 
             if (ModelState.IsValid)
             {
-                if (avatarFile != null && avatarFile.Length > 0)
+                var uploadsFolder = Path.Combine("Products", product.userId);
+
+                try
                 {
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath,"Upload","Products", product.userId);
-
-                    if (!Directory.Exists(uploadsFolder))
-                        Directory.CreateDirectory(uploadsFolder);
-
-                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await avatarFile.CopyToAsync(fileStream);
-                    }
-
-                    product.ImageUrl = Path.Combine("Upload","Products", product.userId ,uniqueFileName);
+                    product.ImageUrl = await UploadFileHelper.Upload(image, uploadsFolder, _webHostEnvironment);
                 }
-                else
+                catch (ArgumentException ex) 
                 {
-                    TempData["FailedMessage"] = "Product image is required";
+                    TempData["FailedMessage"] = string.Format("Upload fail,{0}",ex.Message);
                     return View(product);
                 }
+                catch (InvalidOperationException ex)
+                {
+                    TempData["FailedMessage"] = string.Format("Upload fail,{0}", ex.Message);
+                    return View(product);
+                }
+
                 product.isEnable = true;
                 product.isHide = true;
                 product.CreateDate = DateTime.UtcNow;
