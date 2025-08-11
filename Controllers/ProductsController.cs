@@ -82,7 +82,7 @@ namespace E_Commers_Adelia.Controllers
 
                 try
                 {
-                    product.ImageUrl = await UploadFileHelper.Upload(image, uploadsFolder, _webHostEnvironment);
+                    product.ImageUrl = await UploadFileHelper.Upload(image, uploadsFolder, _webHostEnvironment, "5MB");
                 }
                 catch (ArgumentException ex) 
                 {

@@ -3,6 +3,7 @@ using System;
 using E_Commers_Adelia.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace E_Commers_Adelia.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250811001755_remove")]
+    partial class remove
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,12 +40,9 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Avatars");
                 });
@@ -364,6 +364,8 @@ namespace E_Commers_Adelia.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerId");
+
                     b.ToTable("Orders");
                 });
 
@@ -487,8 +489,6 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("selfPickupAddresses");
                 });
@@ -714,17 +714,6 @@ namespace E_Commers_Adelia.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("E_Commers_Adelia.Models.Avatar", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("E_Commers_Adelia.Models.CashNote", b =>
                 {
                     b.HasOne("E_Commers_Adelia.Models.EUser", "User")
@@ -758,6 +747,17 @@ namespace E_Commers_Adelia.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("E_Commers_Adelia.Models.Order", b =>
+                {
+                    b.HasOne("E_Commers_Adelia.Models.EUser", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("E_Commers_Adelia.Models.Product", b =>
                 {
                     b.HasOne("E_Commers_Adelia.Models.EUser", "User")
@@ -781,17 +781,6 @@ namespace E_Commers_Adelia.Migrations
                 });
 
             modelBuilder.Entity("E_Commers_Adelia.Models.QrCode", b =>
-                {
-                    b.HasOne("E_Commers_Adelia.Models.EUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("E_Commers_Adelia.Models.SelfPickupAddress", b =>
                 {
                     b.HasOne("E_Commers_Adelia.Models.EUser", "User")
                         .WithMany()

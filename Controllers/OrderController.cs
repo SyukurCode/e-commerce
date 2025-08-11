@@ -1,10 +1,13 @@
-﻿using E_Commers_Adelia.Common;
+﻿using AspNetCoreGeneratedDocument;
+using E_Commers_Adelia.Common;
 using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
+using E_Commers_Adelia.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -23,14 +26,15 @@ namespace E_Commers_Adelia.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<EUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
-
-        public int OrderSatus { get; private set; }
-
-        public OrderController(ApplicationDbContext db, UserManager<EUser> userManager, IWebHostEnvironment webHostEnvironment)
+        private readonly INotification _noti;
+        private readonly IHubContext<NotificationHub> _hub;
+        public OrderController(ApplicationDbContext db, UserManager<EUser> userManager, IWebHostEnvironment webHostEnvironment, INotification noti, IHubContext<NotificationHub> hub)
         {
             _db = db;
             _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
+            _noti = noti;
+            _hub = hub;
         }
         public async Task<IActionResult> Index(int id)
         {
@@ -84,21 +88,6 @@ namespace E_Commers_Adelia.Controllers
 
                 if (orderDetails.SelectedOptionIds != null)
                 {
-                    //foreach (var id in orderDetails.SelectedOptionIds)
-                    //{
-                    //    var option = await _db.ProductOptions.FindAsync(id);
-                    //    if (orderDetails.SelectedOptionIds.Count() > 1)
-                    //    {
-                    //        if (isFirst) { selectedOption = string.Format("+RM{0} {1}\r\n", option.AdditionalPrice, option.OptionName); }
-                    //        else { selectedOption += string.Format("+RM{0} {1}\r\n", option.AdditionalPrice, option.OptionName); }
-                    //    }
-                    //    else
-                    //    {
-                    //        selectedOption = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
-                    //    }
-
-                        
-                    //}
                     for (int i = 0; i < orderDetails.SelectedOptionIds.Count(); i++)
                     {
 
@@ -380,16 +369,27 @@ namespace E_Commers_Adelia.Controllers
 
             // Update Order Status
             var order = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
+            var SellerId = "";
             if (order != null)
             {
                 foreach (var item in order)
                 {
+                    SellerId = item.SellerId;
                     item.StatusId = OrderStatus.OrderSend.Id;
                     _db.Orders.UpdateRange(item);
                 }
                 await _db.SaveChangesAsync();
-            }
 
+                // Send notification to seller
+                await _noti.Create(new Notification { 
+                    ActionURL = "/ProcessOrder",
+                    DateCreated = DateTime.UtcNow,
+                    FaIcon = "fa-shopping-bag",
+                    Text = "New order receive",
+                    UserId = SellerId 
+                });
+            }
+            
             return View(payment);
         }
 
@@ -409,7 +409,7 @@ namespace E_Commers_Adelia.Controllers
             }
             try
             {
-                model.ResitUrl = await UploadFileHelper.Upload(image, "PaymentReceipt",_webHostEnvironment);
+                model.ResitUrl = await UploadFileHelper.Upload(image, "PaymentReceipt",_webHostEnvironment, "800KB");
             }
             catch (InvalidOperationException ex)
             {

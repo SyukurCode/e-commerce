@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<E_Commers_Adelia.Models.Order>
+@inject UserManager<EUser> userManager
+@inject ApplicationDbContext db
+@{
+    ViewData["Title"] = "Order Request";
+}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index" asp-controller="Home">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+<hr />
+<div class="card shadow rounded-3 mb-4">
+    
+    @foreach (var order in Model)
+    {
+        var product = await db.Products.FindAsync(order.ProductId);
+        var customer = await userManager.FindByIdAsync(order.CustomerId);
+
+        <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+            <h5 class="card-title mb-0 text-primary"># @order.OrderNo</h5>
+        </div>
+        <div class="card-body text-center">
+            
+            <div class="row align-items-center">
+                <!-- Product Image -->
+                <div class="col-3 col-md-2 text-center">
+                    <img src="@(string.IsNullOrEmpty(product.ImageUrl)
+                                        ? Url.Content("~/img/blank.jpg")
+                                        : Url.Content("~/" + product.ImageUrl))"
+                         alt="..."
+                         class="img-fluid fa-caret-square-up "
+                         style="max-width: 60px;height:auto" />
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-6 col-md-5">
+                    <div class="fw-bold">@product.Name</div>
+                    <div class="text-muted small">@product.Description</div>
+                    @if (order.SelectedOption != null && order.SelectedOption.Any())
+                    {
+                        var options = order.SelectedOption.Split("\r\n");
+                        <div class="fw-bold">Options:</div>
+                        foreach (var option in options)
+                        {
+                            <div class="text-muted small">
+                                <span class="badge bg-info text-dark text-wrap me-1 mb-1">
+                                    @option
+                                </span>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Quantity & Price -->
+                <div class="col-12 col-md-12 mt-2 mt-md-0">
+                    <div class="col-12 col-md-2 mt-2 mt-md-0 text-end">
+                    </div>
+                    <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
+                        <span>Subtotal:</span>
+                        <span>x @order.Quantity</span>
+                        <span class="fw-bold">RM<span id="@($"totalPrice{order.Id}")">@order.SubTotalPrice</span></span>
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div>
+    }
+</div>

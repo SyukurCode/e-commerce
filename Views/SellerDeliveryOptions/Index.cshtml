@@ -32,7 +32,6 @@
                             }
                             @if (deliveryOption != null)
                             {
-                                
                                 <div class="info-user ms-3">
                                     <div class="username">@deliveryOption.Name</div>
                                     <div class="status">@deliveryOption.Detail</div>
@@ -40,13 +39,15 @@
                                 <div>
                                     <span class="badge badge-success">+ RM @item.AdditionalPrice.ToString("0.00")</span>
                                 </div>
-                            <a asp-action="Details" asp-route-id="@item.Id"
-                               data-bs-toggle="tooltip"
-                               title="Details"
-                               class="btn btn-link btn-primary btn-lg"
-                               data-original-title="Details">
-                                <i class="fa fa-edit"></i>
-                            </a>
+                                <div class="gap-3">
+                                <a asp-action="Details" asp-route-id="@item.Id"
+                                   data-bs-toggle="tooltip"
+                                   title="Details"
+                                   class="btn-label-info btn-round btn-sm"
+                                   data-original-title="Details">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                </div>
                             }
                         </div>
                     }

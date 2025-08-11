@@ -1,0 +1,52 @@
+﻿@model IEnumerable<E_Commers_Adelia.Models.Notification>
+@using E_Commers_Adelia.Common
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-action="Index" asp-controller="Home">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+<hr />
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FaIcon)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Text)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+            <td width="5%">
+                <div class="notif-icon notif-primary">
+                    <i class="fa @item.FaIcon"></i>
+                </div>
+            </td>
+            <td width="90%">
+                 <a href="@item.ActionURL" class="@(item.IsRead ? "text-muted" : "")">
+                     <h5>@Html.DisplayFor(modelItem => item.Text)</h5>
+                        <span class="text-muted">@DurationCalulator.GetTimeAgo(item.DateCreated)</span>
+                 </a>
+            </td>
+            <td width="5%">
+                <form asp-action="Remove" asp-route-id="@item.Id">
+                        <button type="submit" class="btn btn-link text-danger p-0"><i class="fa fa-trash"></i></button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

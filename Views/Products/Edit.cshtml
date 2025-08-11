@@ -16,27 +16,18 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a href="#">Detail</a>
-        </li>
-        <li class="separator">
-            <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
             <a href="#">Edit</a>
         </li>
     </ul>
 </div>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form asp-action="Edit">
             <div class="card  card-post card-round">
                 <div class="card-header">
                     <div class="card-head-row card-tools-still-right">
                         <div class="card-title">Product</div>
-                        <div class="card-tools">
-                                <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-outline-danger"><i class="fa fa-trash"></i></a>
-                            </div>
                     </div>
                 </div>
                 <img src="@(string.IsNullOrEmpty(Model?.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.ImageUrl))"
@@ -83,21 +74,22 @@
                         <span asp-validation-for="isHide" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="card-footer text-center">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                    
-                    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                <div class="card-footer">
+                    <div class="text-center align-content-between">
+                    <input type="submit" value="Save" class="btn btn-primary m-1" />
+                    <a class="btn btn-outline-secondary m-1" asp-action="Index">Back</a>
+                    </div>
                 </div>
             </div>
         </form>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card card-round">
             <div class="card-header">
                 <div class="card-head-row card-tools-still-right">
                     <div class="card-title">Product Option</div>
                     <div class="card-tools">
-                        <a asp-action="CreateOption" asp-route-id="@Model?.Id" class="btn btn-outline-primary ms-2 d-inline-block float-end">
+                        <a asp-action="CreateOption" asp-route-id="@Model?.Id" class="btn-label-info btn-round btn-sm">
                             <i class="fa fa-plus"></i>
                         </a>
                     </div>
@@ -124,7 +116,7 @@
                                     <td class="text-end">RM @option.AdditionalPrice</td>
                                     <td class="text-end">
                                         <form id="@option.Id" asp-action="DeleteOption" asp-route-id="@option.Id" method="post">
-                                            <button type="button" class="badge badge-danger" data-bs-toggle="tooltip" title="Delete Option" onclick="submitDelete(@option.Id)">
+                                            <button type="button" class="btn-label-danger btn-round btn-sm" data-bs-toggle="tooltip" title="Delete Option" onclick="submitDelete(@option.Id)">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </form>

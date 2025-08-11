@@ -2,14 +2,18 @@
 using static System.Net.Mime.MediaTypeNames;
 using PdfiumViewer;
 using System.Drawing.Imaging;
+using Sprache;
 
 namespace E_Commers_Adelia.Common
 {
     public static class UploadFileHelper
     {
         private static readonly string[] permittedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
-        public static async Task<string> Upload(IFormFile file, string folder, IWebHostEnvironment env)
+        public static async Task<string> Upload(IFormFile file, string folder, IWebHostEnvironment env, string LimitSize)
         {
+
+            long lismitSizeInByte = SizeConverter.ConvertFromString(LimitSize);
+
             // Valication for empty file
             if (file == null && file.Length == 0)
             {

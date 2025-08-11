@@ -8,6 +8,7 @@ namespace E_Commers_Adelia.Models
         [Key]
         public int id { get; set; }
         public string UserId { get; set; }
+        public EUser? User { get; set; }
         public required string Address { get; set; }
         [Display(Name ="Phone No")]
         public string PhoneNo { get; set; }

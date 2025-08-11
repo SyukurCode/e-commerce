@@ -173,3 +173,11 @@ function changeQuantity(amount) {
     if (current < 1) current = 1;
     input.value = current;
 }
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("/notificationHub")
+    .build();
+
+connection.on("NotiReceive", function (count) {
+    document.getElementById("noti-count").innerText = count;
+});

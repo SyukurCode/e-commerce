@@ -41,7 +41,7 @@ try
 catch (Exception ex)
 {
     Log.Fatal(ex, "Failed to connect to the database. Please check your connection string.");
-    throw;
+    return;
 }
 
 builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -49,7 +49,8 @@ builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConf
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Add upload qr sevice
-builder.Services.AddScoped<INotification, RNotification>();
+builder.Services.AddScoped<INotification, RNotification>()
+    .AddScoped<IUploadQRImage, UploadQRImage>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();

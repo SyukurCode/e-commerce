@@ -18,81 +18,84 @@
     @foreach (var item in Model)
     {
         var user = await UserManager.FindByIdAsync(item.userId);
-        @if (!item.isHide)
+        if (user != null)
         {
-            @if (item.isEnable && item.Stock > 0)
+            @if (!item.isHide)
             {
-                <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                    <a asp-action="Index" asp-controller="Order" asp-route-id="@item.Id" class="text-decoration-none text-dark">
+                @if (item.isEnable && item.Stock > 0)
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <a asp-action="Index" asp-controller="Order" asp-route-id="@item.Id" class="text-decoration-none text-dark">
+                            <div class="card h-100 border-0 shadow-lg rounded-4">
+                                <div class="card-header bg-light border-0 rounded-top-4">
+                                    <div class="mb-0 op-7 text-default small">
+                                        #<strong>@user.StoreName</strong>
+                                    </div>
+                                </div>
+
+                                <div class="card-body d-flex flex-column p-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="flex-shrink-0">
+                                            <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
+                                                 alt="Product Image"
+                                                 class="rounded shadow-sm"
+                                                 style="width: 80px; height: 80px; object-fit: cover;" />
+                                        </div>
+
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-semibold text-wrap">@item.Name</h6>
+                                            <small class="text-muted d-block text-wrap">@item.Description</small>
+                                            <h5 class="text-success mt-2 mb-0">RM @item.Price</h5>
+                                            @if (item.Stock < 3)
+                                            {
+                                                <span class="text-danger">Last @item.Stock items</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4 opacity-50">
                         <div class="card h-100 border-0 shadow-lg rounded-4">
                             <div class="card-header bg-light border-0 rounded-top-4">
                                 <div class="mb-0 op-7 text-default small">
                                     #<strong>@user.StoreName</strong>
                                 </div>
                             </div>
-
                             <div class="card-body d-flex flex-column p-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="flex-shrink-0">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0 me-3">
                                         <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
-                                                alt="Product Image"
-                                                class="rounded shadow-sm"
-                                                style="width: 80px; height: 80px; object-fit: cover;" />
+                                             alt="Product Image"
+                                             class="rounded"
+                                             style="width: 80px; height: 80px; object-fit: cover;" />
                                     </div>
-
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-semibold text-wrap">@item.Name</h6>
-                                        <small class="text-muted d-block text-wrap">@item.Description</small>
+                                        <h6 class="mb-1 text-wrap">@item.Name</h6>
+                                        <small class="text-muted text-wrap d-block">@item.Description</small>
                                         <h5 class="text-success mt-2 mb-0">RM @item.Price</h5>
-                                        @if (item.Stock < 3)
+                                        @if (item.Stock == 0)
                                         {
-                                            <span class="text-danger">Last @item.Stock items</span>
+                                            <span class="text-danger">Sold Out</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Not available</span>
                                         }
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                    </a>
-                </div>
-            }
-            else
-            {
-                <div class="col-sm-6 col-md-4 col-lg-3 mb-4 opacity-50">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header bg-light border-0 rounded-top-4">
-                            <div class="mb-0 op-7 text-default small">
-                                #<strong>@user.StoreName</strong>
-                            </div>
-                        </div>
-                        <div class="card-body d-flex flex-column p-3">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="flex-shrink-0 me-3">
-                                    <img src="@(string.IsNullOrEmpty(item.ImageUrl) ? Url.Content("~/img/blank.jpg") : item.ImageUrl)"
-                                            alt="Product Image"
-                                            class="rounded"
-                                            style="width: 80px; height: 80px; object-fit: cover;" />
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 text-wrap">@item.Name</h6>
-                                    <small class="text-muted text-wrap d-block">@item.Description</small>
-                                    <h5 class="text-success mt-2 mb-0">RM @item.Price</h5>
-                                    @if (item.Stock == 0)
-                                    {
-                                        <span class="text-danger">Sold Out</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger">Not available</span>
-                                    }
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                }
             }
         }
-       
+
     }
 </div>
 @section Scripts

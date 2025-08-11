@@ -21,14 +21,15 @@
     </ul>
 </div>
 <hr />
-<div class="col-md-4">
-    <div class="card card-post card-round">
+<div>
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="card shadow-lg border-0 p-4 rounded-4 text-center" style="max-width: 600px;">
         <img src="@(string.IsNullOrEmpty(Model?.ImageUrl) ? Url.Content("~/img/blank.jpg") : @Url.Content("~/" + Model.ImageUrl))"
              alt="Product Image"
              class="rounded card-img-top"
              style="width: 100%; height: auto; object-fit: cover;" />
         <div class="card-body d-flex justify-content-center">
-            <dl class="row ps-5">
+            <dl class="row ps-5 text-start">
                 <dt class="col-sm-4">
                     @Html.DisplayNameFor(model => model.Name)
                 </dt>
@@ -92,9 +93,11 @@
             </dl>
         </div>
         <div class="card-footer text-center">
-            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2 d-inline-block">Edit</a>
-            <a asp-action="Index" class="btn btn-outline-secondary ms-2 d-inline-block">Back</a>
-            @* <a asp-action="Delete" asp-route-id="@Model?.Id" class="btn btn-danger ms-2 d-inline-block">Delete</a> *@
+            <div class="fc-button-group">
+            @* <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2 d-inline-block" style="width:125px">Edit</a> *@
+                <a asp-action="Index" class="btn btn-outline-secondary ms-2 d-inline-block" style="width:125px">Back</a>
+            </div>
         </div>
     </div>
+</div>
 </div>

@@ -6,8 +6,8 @@ namespace E_Commers_Adelia.Repository
     {
         Task<bool> Create(Notification notification);
         Task<IEnumerable<Notification>> GetByUser(string userId);
-        Task<Notification> GetById(int id);
-        Task<bool> Remove(int id);
-        Task<bool> MarkAsRead(int id);
+        Task<Notification> GetById(long id);
+        Task<bool> Remove(long id);
+        Task<bool> MarkAsRead(long id);
     }
 }

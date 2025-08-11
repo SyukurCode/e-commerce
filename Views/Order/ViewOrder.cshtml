@@ -45,8 +45,8 @@
                 </div>
 
                 <!-- Product Info -->
-                <div class="col-9 col-md-5">
-                    <h3 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h3>
+                <div class="col-9 col-md-5 text-start">
+                    <h5 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h5>
                     <div class="fw-bold">@product.Name</div>
                     <div class="text-muted small">@product.Description</div>
                     @if (item.SelectedOption != null && item.SelectedOption.Any())
@@ -63,9 +63,8 @@
                         }
                     }
                 </div>
-
                 <!-- Quantity & Price -->
-                <div class="col-12 col-md-12 mt-2 mt-md-0">
+                <div class="col-12 col-md-12 mt-2 mt-md-0 nav-color-light">
                     <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
                         <span>Subtotal:</span>
                         <span>x @item.Quantity</span>
@@ -75,8 +74,8 @@
             </div>
 
             total += item.SubTotalPrice;
+            <hr/>
         }
-        <hr/>
         <div class="col-12 col-md-12 mt-2 mt-md-0">
             <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
                 <span>Total:</span>

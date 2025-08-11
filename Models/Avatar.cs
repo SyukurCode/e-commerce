@@ -13,7 +13,8 @@ namespace E_Commers_Adelia.Models
         // Optional MIME type
         public string? AvatarContentType { get; set; }
 
-        public string? UserId { get; set; }
+        public string UserId { get; set; }
+        public EUser? User { get; set; }
 
     }
 }

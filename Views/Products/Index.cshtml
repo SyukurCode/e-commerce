@@ -13,8 +13,14 @@
     </div>
 </div>
 
-
 <div class="row">
+        @foreach (var product in Model)
+        {
+            <partial name="_DisplayProductPartial" model="product" />
+        }
+</div>
+
+@* <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
@@ -82,16 +88,6 @@
 
                                         </dl>
                                     </td>
-                                    @* <!-- Status --> *@
-                                    @* <td> *@
-                                    @*     <span class="badge @((item.isEnable && item.Stock>0) ? "badge-success" : "badge-danger")"> *@
-                                    @*         @((item.isEnable && item.Stock > 0) ? "Available" : "Not Available") *@
-                                    @*     </span> *@
-                                    @*     <span class="badge @(item.isHide ? "badge-danger" : "badge-success")"> *@
-                                    @*         @(item.isHide ? "Hide" : "Show") *@
-                                    @*     </span> *@
-                                    @* </td> *@
-                                    <!-- Action -->
                                     <td>
                                         <div class="form-button-action">
                                             <a asp-action="Details" asp-route-id="@item.Id"
@@ -111,7 +107,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@
 @section Scripts {
     <partial name="_NotificationPartial" />
     <partial name="_ProductDataTableScriptPartial" />

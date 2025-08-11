@@ -1,6 +1,7 @@
 ﻿using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 namespace E_Commers_Adelia.Repository
@@ -8,8 +9,10 @@ namespace E_Commers_Adelia.Repository
     public class RNotification : INotification
     {
         private readonly ApplicationDbContext _db;
-        public RNotification(ApplicationDbContext db) { 
+        private readonly IHubContext<NotificationHub> _hub;
+        public RNotification(ApplicationDbContext db, IHubContext<NotificationHub> hub) { 
             _db = db;
+            _hub = hub;
         }
 
         public async Task<bool> Create(Notification notification)
@@ -20,10 +23,14 @@ namespace E_Commers_Adelia.Repository
             }
             _db.Notifications.Add(notification);
             await _db.SaveChangesAsync();
-            return false;
+
+            var notiCount = await _db.Notifications.Where(x => x.UserId == notification.UserId && x.IsRead == false).CountAsync();
+            await _hub.Clients.User(notification.UserId).SendAsync("NotiReceive", notiCount);
+
+            return true;
         }
 
-        public async Task<Notification> GetById(int id)
+        public async Task<Notification> GetById(long id)
         {
             return await _db.Notifications.FindAsync(id);
         }
@@ -33,11 +40,12 @@ namespace E_Commers_Adelia.Repository
             return await _db.Notifications.Where(x => x.UserId == userId).ToListAsync();
         }
 
-        public async Task<bool> MarkAsRead(int id)
+        public async Task<bool> MarkAsRead(long id)
         {
             var noti = await _db.Notifications.FindAsync(id);
             if (noti != null) { 
                 noti.IsRead = true;
+                noti.DateRead = DateTime.UtcNow;
                 _db.Notifications.Update(noti);
                 await _db.SaveChangesAsync();
                 return true;
@@ -45,7 +53,7 @@ namespace E_Commers_Adelia.Repository
             return false;
         }
 
-        public async Task<bool> Remove(int id)
+        public async Task<bool> Remove(long id)
         {
             var noti = await _db.Notifications.FindAsync(id);
             if (noti != null)

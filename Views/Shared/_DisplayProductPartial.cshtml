@@ -1,0 +1,29 @@
+﻿@model Product
+
+@{
+    var productPhoto = $"~/{Model.ImageUrl}" ?? "~/img/blank.jpg";
+}
+<div class="col-sm-3">
+    <div class="card shadow-lg border-0 p-4 rounded-4 text-center">
+        <div class="card-title mb-0 text-primary">
+            <h5>@Model.Name</h5>
+        </div>
+        <div class="flex-shrink-0">
+            <img src="@productPhoto"
+                 alt="Product Image"
+                 class="rounded shadow-sm"
+                 style="width: 200px; height: 200px; object-fit: cover;" asp-append-version="true" />
+        </div>
+
+        <div class="card-footer text-center">
+            <div class="buttonbtn-group-sm">
+                <a asp-action="Details" asp-route-id="@Model.Id"
+                   class="btn btn-primary btn-xs m-1" style="width:50px;">View</a>
+                <a asp-action="Edit" asp-route-id="@Model?.Id"
+                   class="btn btn-secondary btn-xs m-1" style="width:50px;">Edit</a>
+                <a asp-action="Delete" asp-route-id="@Model?.Id"
+                   class="btn btn-outline-danger btn-xs m-1" style="width:50px;">Del</a>
+            </div>
+        </div>
+    </div>
+</div>
