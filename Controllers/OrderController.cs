@@ -93,7 +93,8 @@ namespace E_Commers_Adelia.Controllers
 
                         var id = orderDetails.SelectedOptionIds[i];
                         var option = await _db.ProductOptions.FindAsync(id);
-                        var line = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
+                        //var line = string.Format("+RM{0} {1}", option.AdditionalPrice, option.OptionName);
+                        var line = string.Format("- {0}", option.OptionName);
 
                         if (i < orderDetails.SelectedOptionIds.Count() - 1)
                             selectedOption += line + "\r\n"; // tambah newline kalau bukan last
@@ -382,7 +383,7 @@ namespace E_Commers_Adelia.Controllers
 
                 // Send notification to seller
                 await _noti.Create(new Notification { 
-                    ActionURL = "/ProcessOrder",
+                    ActionURL = $"/ProcessOrder/View/{orderNo}",
                     DateCreated = DateTime.UtcNow,
                     FaIcon = "fa-shopping-bag",
                     Text = "New order receive",

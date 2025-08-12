@@ -1,4 +1,5 @@
-﻿using E_Commers_Adelia.Data;
+﻿using E_Commers_Adelia.Common;
+using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Migrations;
 using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -23,8 +24,24 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var orders = await _db.Orders.Where(x => x.SellerId == currentUser.Id).ToListAsync();
+            var orders = await _db.Orders.Where(x => x.SellerId == currentUser.Id && x.StatusId == OrderStatus.OrderSend.Id).OrderBy(x => x.PlaceDateTime).ToListAsync();
             return View(orders);
+        }
+
+        public async Task<IActionResult> View(string id)
+        {
+            var order = await _db.Orders.Where(x=>x.OrderNo == id).ToListAsync();
+            if(order != null)
+            {
+                // update status order to pickup
+                foreach(var item in order)
+                {
+                    item.StatusId = OrderStatus.PickupBySeller.Id;
+                    _db.Orders.UpdateRange(item);
+                }
+                await _db.SaveChangesAsync();
+            }
+            return View(order);
         }
     }
 }

@@ -98,7 +98,6 @@ namespace E_Commers_Adelia.Data
                 .WithMany()
                 .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

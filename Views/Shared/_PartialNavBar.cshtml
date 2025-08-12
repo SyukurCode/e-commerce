@@ -12,7 +12,7 @@
     IEnumerable<Notification> noti = new List<Notification>();
     if (SignInManager.IsSignedIn(User)) {
         var currentUser = await UserManager.GetUserAsync(User);
-        
+        var currentUserId = currentUser.Id;
         noti = await notify.GetByUser(currentUser.Id);
         notiCount = noti.Where(n => n.IsRead == false).Count();
     }
@@ -67,76 +67,37 @@
                         <span class="notification">@notiCount</span>
                     }
                 </a>
-                <ul class="dropdown-menu notif-box animated fadeIn"
+                <ul class="dropdown-menu messages-notif-box animated fadeIn"
                 aria-labelledby="notifDropdown">
                     <li>
-                        <div class="dropdown-title">
-                            You have <span id="noti-count">@notiCount</span> new notification
+                        <div class="dropdown-title d-flex justify-content-between align-items-center">
+                            @($"{notiCount} New notification")
+                            <a id="btnMarkAll" class="small">Dismiss all</a>
                         </div>
                     </li>
                     <li>
                         <div class="message-notif-scroll scrollbar-outer">
                             <div class="notif-center">
-                                @foreach (var n in noti.Where(x => x.IsRead == false).ToList())
+                                @foreach (var n in noti)
                                 {
                                     var duration = DurationCalulator.GetTimeAgo(n.DateCreated);
-                                    <a asp-action="Index" asp-controller="Notifications" asp-route-id="@n.Id">
+                                    <a asp-action="Index" asp-controller="Notification" asp-route-id="@n.Id" class="">
                                         <div class="notif-icon notif-primary"> 
                                             <i class="fa @n.FaIcon"></i> 
                                         </div> 
-                                        <div class="notif-content"> 
-                                            <span class="block"> @n.Text </span> 
+                                        <div class="notif-content">
+                                            <span class="block @(n.IsRead ? "":"fw-bold text-black")"> @n.Text </span>
                                             <span class="time">@duration</span> 
                                         </div> 
                                     </a>
                                 }
-                                @* <a href="#"> *@
-                                @*     <div class="notif-icon notif-success"> *@
-                                @*         <i class="fa fa-comment"></i> *@
-                                @*     </div> *@
-                                @*     <div class="notif-content"> *@
-                                @*         <span class="block"> *@
-                                @*             Rahmad commented on Admin *@
-                                @*         </span> *@
-                                @*         <span class="time">12 minutes ago</span> *@
-                                @*     </div> *@
-                                @* </a> *@
-                                @* <a href="#"> *@
-                                @*     <div class="notif-img"> *@
-                                @*         <img src="assets/img/profile2.jpg" *@
-                                @*              alt="Img Profile" /> *@
-                                @*     </div> *@
-                                @*     <div class="notif-content"> *@
-                                @*         <span class="block"> *@
-                                @*             Reza send messages to you *@
-                                @*         </span> *@
-                                @*         <span class="time">12 minutes ago</span> *@
-                                @*     </div> *@
-                                @* </a> *@
-                                @* <a href="#"> *@
-                                @*     <div class="notif-icon notif-danger"> *@
-                                @*         <i class="fa fa-heart"></i> *@
-                                @*     </div> *@
-                                @*     <div class="notif-content"> *@
-                                @*         <span class="block"> Farrah liked Admin </span> *@
-                                @*         <span class="time">17 minutes ago</span> *@
-                                @*     </div> *@
-                                @* </a> *@
-                                @* <a href="#"> *@
-                                @*     <div class="notif-icon notif-danger"> *@
-                                @*         <i class="fa fa-heart"></i> *@
-                                @*     </div> *@
-                                @*     <div class="notif-content"> *@
-                                @*         <span class="block"> Farrah liked Admin </span> *@
-                                @*         <span class="time">17 minutes ago</span> *@
-                                @*     </div> *@
-                                @* </a> *@
                             </div>
                         </div>
                     </li>
                     <li>
-                        <a class="see-all" href="/Notifications">
-                            See all notifications<i class="fa fa-angle-right"></i>
+                        
+                        <a class="see-all" id="btnRemoveAll">
+                            Clear all notifications<i class="fa fa-angle-right"></i>
                         </a>
                     </li>
                 </ul>
@@ -189,7 +150,7 @@
                             <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Manage Your Account</a>
                             <div class="dropdown-divider"></div>
                             <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                                <button type="submit" class="dropdown-item" style="background:none; border:none; padding:4px; margin:0; width:100%; text-align:left;">
+                                <button type="submit" class="dropdown-item">
                                     Logout
                                 </button>
                             </form>
@@ -211,4 +172,7 @@
         </ul>
     </div>
 </nav>
+@section Scripts {
+    <partial name="_NavbarScriptsPartial" />
+    }
 <!-- End Navbar -->

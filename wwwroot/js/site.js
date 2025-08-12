@@ -174,10 +174,37 @@ function changeQuantity(amount) {
     input.value = current;
 }
 
+document.addEventListener("click", function (e) {
+    if (e.target.id === "btnRemoveAll") {
+        e.preventDefault();
+        return fetch('/Notification/RemoveAll')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbarContainer").innerHTML = html;
+            });
+    }
+    if (e.target.id === "btnMarkAll") {
+        e.preventDefault();
+        return fetch('/Notification/MarkAllRead')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("navbarContainer").innerHTML = html;
+            });
+    }
+
+});
+
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("/notificationHub")
     .build();
 
-connection.on("NotiReceive", function (count) {
-    document.getElementById("noti-count").innerText = count;
+connection.on("Noti-Receive", function (count) {
+    fetch('/PartialView/NavbarLoad')
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("navbarContainer").innerHTML = html;
+        });
 });
+connection.start().then(function () {
+    console.log("Connected to NotificationHub");
+}).catch(err => console.error("❌ Connection failed: ", err));

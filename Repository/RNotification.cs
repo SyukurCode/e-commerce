@@ -25,7 +25,7 @@ namespace E_Commers_Adelia.Repository
             await _db.SaveChangesAsync();
 
             var notiCount = await _db.Notifications.Where(x => x.UserId == notification.UserId && x.IsRead == false).CountAsync();
-            await _hub.Clients.User(notification.UserId).SendAsync("NotiReceive", notiCount);
+            await _hub.Clients.User(notification.UserId).SendAsync("Noti-Receive", notiCount);
 
             return true;
         }

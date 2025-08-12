@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using E_Commers_Adelia.Common
 @model IEnumerable<E_Commers_Adelia.Models.Order>
 @inject UserManager<EUser> userManager
 @inject ApplicationDbContext db
@@ -16,60 +17,43 @@
     </ul>
 </div>
 <hr />
-<div class="card shadow rounded-3 mb-4">
-    
-    @foreach (var order in Model)
-    {
-        var product = await db.Products.FindAsync(order.ProductId);
-        var customer = await userManager.FindByIdAsync(order.CustomerId);
 
-        <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-            <h5 class="card-title mb-0 text-primary"># @order.OrderNo</h5>
-        </div>
-        <div class="card-body text-center">
-            
-            <div class="row align-items-center">
-                <!-- Product Image -->
-                <div class="col-3 col-md-2 text-center">
-                    <img src="@(string.IsNullOrEmpty(product.ImageUrl)
-                                        ? Url.Content("~/img/blank.jpg")
-                                        : Url.Content("~/" + product.ImageUrl))"
-                         alt="..."
-                         class="img-fluid fa-caret-square-up "
-                         style="max-width: 60px;height:auto" />
-                </div>
-
-                <!-- Product Info -->
-                <div class="col-6 col-md-5">
-                    <div class="fw-bold">@product.Name</div>
-                    <div class="text-muted small">@product.Description</div>
-                    @if (order.SelectedOption != null && order.SelectedOption.Any())
-                    {
-                        var options = order.SelectedOption.Split("\r\n");
-                        <div class="fw-bold">Options:</div>
-                        foreach (var option in options)
+<div class="row">
+    <div class="col-md-6">
+        <ul class="nav nav-pills nav-secondary" id="pills-tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="pills-neworder-tab" data-bs-toggle="pill" href="#pills-neworder" role="tab" aria-controls="pills-neworder" aria-selected="true">New Order</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-Cancel-tab" data-bs-toggle="pill" href="#pills-Cancel" role="tab" aria-controls="pills-Cancel" aria-selected="false">Cancel</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="pills-complete-tab" data-bs-toggle="pill" href="#pills-complete" role="tab" aria-controls="pills-complete" aria-selected="false">Complete</a>
+            </li>
+        </ul>
+        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-neworder" role="tabpanel" aria-labelledby="pills-neworder-tab">
+                <div class="card shadow rounded-3 mb-4">
+                    <div class="list-group">
+                        @foreach (var order in Model.Select(x => x.OrderNo).Distinct().ToList())
                         {
-                            <div class="text-muted small">
-                                <span class="badge bg-info text-dark text-wrap me-1 mb-1">
-                                    @option
-                                </span>
-                            </div>
-                        }
+                            <a 
+                                asp-action="View" 
+                                asp-controller="ProcessOrder" 
+                                asp-route-id="@order" 
+                                class="list-group-item list-group-item-action @(Model.FirstOrDefault(x=> x.OrderNo == order).StatusId < 3 ? "active":"") ">
+                                <div class="d-flex justify-content-between align-items-center px-3">
+                                    <div><i class="fa fa-shopping-bag"></i>  @order</div>
+                                </div>
+                            </a>
                     }
-                </div>
-
-                <!-- Quantity & Price -->
-                <div class="col-12 col-md-12 mt-2 mt-md-0">
-                    <div class="col-12 col-md-2 mt-2 mt-md-0 text-end">
-                    </div>
-                    <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
-                        <span>Subtotal:</span>
-                        <span>x @order.Quantity</span>
-                        <span class="fw-bold">RM<span id="@($"totalPrice{order.Id}")">@order.SubTotalPrice</span></span>
                     </div>
                 </div>
             </div>
-            <hr />
+            <div class="tab-pane fade" id="pills-Cancel" role="tabpanel" aria-labelledby="pills-Cancel-tab">
+            </div>
+            <div class="tab-pane fade" id="pills-complete" role="tabpanel" aria-labelledby="pills-complete-tab">
+            </div>
         </div>
-    }
+    </div>
 </div>
