@@ -50,7 +50,8 @@ builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConf
 
 // Add upload qr sevice
 builder.Services.AddScoped<INotification, RNotification>()
-    .AddScoped<IUploadQRImage, UploadQRImage>();
+    .AddScoped<IUploadQRImage, UploadQRImage>()
+    .AddScoped<ICustomerPayment, RCustomerPayment>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();

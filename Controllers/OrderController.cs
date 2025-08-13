@@ -371,12 +371,14 @@ namespace E_Commers_Adelia.Controllers
             // Update Order Status
             var order = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
             var SellerId = "";
+            var totalPrice = order.Select(x=>x.SubTotalPrice).Sum();
             if (order != null)
             {
                 foreach (var item in order)
                 {
                     SellerId = item.SellerId;
                     item.StatusId = OrderStatus.OrderSend.Id;
+                    item.UpdateDateTime = DateTime.UtcNow;
                     _db.Orders.UpdateRange(item);
                 }
                 await _db.SaveChangesAsync();
@@ -389,6 +391,8 @@ namespace E_Commers_Adelia.Controllers
                     Text = "New order receive",
                     UserId = SellerId 
                 });
+
+                await _hub.Clients.Users(SellerId).SendAsync("Order-Receive", orderNo, totalPrice);
             }
             
             return View(payment);

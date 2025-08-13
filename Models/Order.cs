@@ -18,6 +18,7 @@ namespace E_Commers_Adelia.Models
         public decimal UnitPrice { get; set; }
         public decimal SubTotalPrice { get; set; }
         public DateTime PlaceDateTime { get; set; }
+        public DateTime UpdateDateTime { get; set; }
         public int StatusId { get; set; }
 
     }

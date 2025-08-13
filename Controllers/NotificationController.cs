@@ -52,7 +52,10 @@ namespace E_Commers_Adelia.Controllers
             {
                 foreach (var noti in notiList)
                 {
-                    await _noti.Remove(noti.Id);
+                    if (noti.IsRead)
+                    {
+                        await _noti.Remove(noti.Id);
+                    }
                 }
             }
             

@@ -23,19 +23,33 @@
     </ul>
 </div>
 <div class="card shadow rounded-3 mb-4">
-    
+    @{
+        var thisOrder = Model.First();
+        var duration = DurationCalulator.GetTimeAgo(thisOrder.PlaceDateTime);
+        var payment = db.CustomerPayments.FirstOrDefault(x => x.OrderNo == thisOrder.OrderNo);
+    }
+    <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+        <h5 class="card-title mb-0 text-primary"># @thisOrder.OrderNo</h5>
+        <div class="card-tool">
+            @duration
+            @if (payment.PaymentComfirmation == false)
+            {
+                <a class="btn btn-label-info btn-round btn-sm" data-bs-toggle="modal"
+                   data-bs-target="#ConfirmPayment">
+                    <span class="btn-label">
+                        <i class="fa fa-credit-card"></i>
+                    </span>
+                    Comfirm Payment
+                </a>
+            }
+        </div>
+    </div>
     @foreach (var order in Model)
     {
         var product = await db.Products.FindAsync(order.ProductId);
         var customer = await userManager.FindByIdAsync(order.CustomerId);
-        var duration = DurationCalulator.GetTimeAgo(order.PlaceDateTime);
 
-        <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-            <h5 class="card-title mb-0 text-primary"># @order.OrderNo</h5>
-            <div class="card-tool">
-                @duration
-            </div>
-        </div>
+
         <div class="card-body">
             <div class="row align-items-center">
 
@@ -47,10 +61,12 @@
                          alt="..."
                          class="img-fluid fa-caret-square-up "
                          style="max-width: 60px;height:auto" />
+                    <h5>X @order.Quantity</h5>
                 </div>
 
                 <!-- Product Info -->
                 <div class="col-6 col-md-5">
+
                     <div class="fw-bold">@product.Name</div>
                     @if (order.SelectedOption != null && order.SelectedOption.Any())
                     {
@@ -68,21 +84,104 @@
                 </div>
                 <!-- Product Info -->
                 <div class="col-3 col-md-5 text-end">
-                    <div class="card-tools" style="">
+                    <div class="card-tools">
+                        @if (order.StatusId == OrderStatus.Completed.Id)
+                        {
+                            <span class="badge badge-success">Completed</span>
+                        }
+                        @if (order.StatusId == OrderStatus.Cancelled.Id)
+                        {
+                            <span class="badge badge-danger">Cancelled</span>
+                        }
                         <div class="dropdown dropup">
-                            <button class="btn btn-icon btn-clean me-0"
-                                    type="button"
-                                    id="dropdownMenuButton"
-                                    data-bs-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="dropdown-menu"
-                                 aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#">Accept</a>
-                                <a class="dropdown-item" href="#">Reject</a>
-                                <a class="dropdown-item" href="#">Comfirm Payment</a>
+                            @if (order.StatusId != OrderStatus.Completed.Id)
+                            {
+                                <button class="btn btn-icon btn-clean me-0"
+                                        type="button"
+                                        id="dropdownMenuButton"
+                                        data-bs-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu"
+                                     aria-labelledby="dropdownMenuButton">
+
+                                    <form asp-action="FinishOrder" asp-route-id="@order.Id" method="post">
+                                        <button type="submit" class="dropdown-item">Finish</button>
+                                    </form>
+                                    <form asp-action="CancelOrder" asp-route-id="@order.Id" method="post">
+                                        <button type="submit"  class="dropdown-item">Cancel</button>
+                                    </form>
+                                </div>
+                            }
+                            <!-- Modal -->
+                            <div class="modal fade"
+                                 id="ConfirmPayment"
+                                 tabindex="-1"
+                                 role="dialog"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content text-center">
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title">
+                                                <span class="fw-mediumbold">Payment for</span>
+                                                <span class="fw-light">#@($"#{order.OrderNo}")</span>
+                                            </h5>
+                                            <button type="button"
+                                                    class="close"
+                                                    data-bs-dismiss="modal"
+                                                    aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                            @if (payment.PaymentTypeId == PaymentMethod.OnlineTransfer.Id || payment.PaymentTypeId == PaymentMethod.QR.Id)
+                                            {
+                                                <div class="d-flex justify-content-center">
+                                                    <img src="@(string.IsNullOrEmpty(payment.ResitUrl)
+                                                ? Url.Content("~/img/blank.jpg")
+                                                : Url.Content("~/" + payment.ResitUrl))"
+                                                         alt="..."
+                                                         class="img-fluid fa-caret-square-up "
+                                                         style="max-width: 300px;height:auto" />
+                                                </div>
+                                            }
+                                            <div class="table-responsive d-flex justify-content-center">
+                                                <table width="80%" class="mx-auto">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th class="text-start">Date and Time</th>
+                                                            <td>@payment.PaymentDate.ToLocalTime()</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-start">Amount</th>
+                                                            <td class="text-end">@($"RM{payment.Amount}")</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th class="text-start">Type</th>
+                                                            <td class="text-end">@PaymentMethod.All.FirstOrDefault(x => x.Id == payment.PaymentTypeId).Name</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0 justify-content-center">
+                                            <form asp-action="ComfirmPayment" asp-route-id="@order.OrderNo" method="post">
+                                                <button type="submit"
+                                                        id="btnComfirm"
+                                                        class="btn btn-primary"
+                                                        style="width:125px;">
+                                                    Confirm
+                                                </button>
+                                            </form>
+                                            <a class="btn btn-outline-danger"
+                                               data-bs-dismiss="modal" style="width:125px;">
+                                                Cancel
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -109,7 +208,7 @@
                 Total (<span class="text-primary">@Model.Count()</span> item@((Model.Count() > 1) ? "s" : "")):
             </h5>
             <h3 class="mb-0 text-black fw-bold text-decoration-underline">
-                @($"RM{Model.Select(x=>x.SubTotalPrice).Sum()}")
+                @($"RM{Model.Select(x => x.SubTotalPrice).Sum()}")
             </h3>
         </div>
     </div>

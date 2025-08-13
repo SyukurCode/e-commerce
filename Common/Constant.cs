@@ -100,59 +100,18 @@ namespace E_Commers_Adelia.Common
             Detail = "Seller is preparing the order"
         };
 
-        public static readonly OrderStatus Shipped = new OrderStatus
-        {
-            Id = 5,
-            Name = "Shipped",
-            Detail = "Order has been shipped to customer"
-        };
-
-        public static readonly OrderStatus Delivered = new OrderStatus
-        {
-            Id = 6,
-            Name = "Delivered",
-            Detail = "Customer has received the order"
-        };
-
         public static readonly OrderStatus Completed = new OrderStatus
         {
-            Id = 7,
+            Id = 5,
             Name = "Completed",
             Detail = "Order has been completed successfully"
         };
 
         public static readonly OrderStatus Cancelled = new OrderStatus
         {
-            Id = 8,
+            Id = 6,
             Name = "Cancelled",
             Detail = "Order has been cancelled by buyer or seller"
-        };
-
-        public static readonly OrderStatus Refunded = new OrderStatus
-        {
-            Id = 9,
-            Name = "Refunded",
-            Detail = "Payment was refunded to the customer"
-        };
-        public static readonly OrderStatus FailedPayment = new OrderStatus
-        {
-            Id = 10,
-            Name = "Payment Failed",
-            Detail = "Payment could not be processed"
-        };
-
-        public static readonly OrderStatus ReturnRequested = new OrderStatus
-        {
-            Id = 11,
-            Name = "Return Requested",
-            Detail = "Customer has requested a return"
-        };
-
-        public static readonly OrderStatus Returned = new OrderStatus
-        {
-            Id = 12,
-            Name = "Returned",
-            Detail = "Item has been returned by customer"
         };
 
         public static IEnumerable<OrderStatus> All =>
@@ -162,14 +121,8 @@ namespace E_Commers_Adelia.Common
             OrderSend,
             PickupBySeller,
             Processing,
-            Shipped,
-            Delivered,
             Completed,
-            Cancelled,
-            Refunded,
-            FailedPayment,
-            ReturnRequested,
-            Returned
+            Cancelled
         };
     }
     public class AccountType

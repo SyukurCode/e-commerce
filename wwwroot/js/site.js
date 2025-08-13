@@ -173,6 +173,26 @@ function changeQuantity(amount) {
     if (current < 1) current = 1;
     input.value = current;
 }
+function appendTableOrder(orderNo,totalPrice) {
+    $("#tableOrder tbody").append(
+        `<tr>
+            <th scope="row">
+
+                <a asp-action="View"
+                    asp-controller="ProcessOrder"
+                    asp-route-id="${orderNo}"
+                    class="list-group-item list-group-item-action @(Model.FirstOrDefault(x=> x.OrderNo == order).StatusId < 3 ? "active":"") ">
+                    <label class="btn btn-icon btn-round btn-sm me-2">
+                        <i class="fa fa-shopping-bag"></i>
+                    </label>
+                    #${orderNo}
+                </a>
+            </th>
+            <td class="text-end">0%</td>
+            <td class="text-end">RM${totalPrice}</td>
+            </tr >`
+    )
+};
 
 document.addEventListener("click", function (e) {
     if (e.target.id === "btnRemoveAll") {
@@ -204,6 +224,9 @@ connection.on("Noti-Receive", function (count) {
         .then(html => {
             document.getElementById("navbarContainer").innerHTML = html;
         });
+});
+connection.on("Order-Receive", function (orderNo, totalPrice) {
+    appendTableOrder(orderNo, totalPrice)
 });
 connection.start().then(function () {
     console.log("Connected to NotificationHub");
