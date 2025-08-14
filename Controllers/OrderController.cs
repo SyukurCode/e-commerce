@@ -3,6 +3,7 @@ using E_Commers_Adelia.Common;
 using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
 using E_Commers_Adelia.Repository;
+using E_Commers_Adelia.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -28,13 +29,20 @@ namespace E_Commers_Adelia.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly INotification _noti;
         private readonly IHubContext<NotificationHub> _hub;
-        public OrderController(ApplicationDbContext db, UserManager<EUser> userManager, IWebHostEnvironment webHostEnvironment, INotification noti, IHubContext<NotificationHub> hub)
+        private readonly IReceiptVerificationService _receiptVerificationService;
+        public OrderController(ApplicationDbContext db,
+            UserManager<EUser> userManager, 
+            IWebHostEnvironment webHostEnvironment, 
+            INotification noti, 
+            IHubContext<NotificationHub> hub,
+            IReceiptVerificationService receiptVerificationService)
         {
             _db = db;
             _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
             _noti = noti;
             _hub = hub;
+            _receiptVerificationService = receiptVerificationService;
         }
         public async Task<IActionResult> Index(int id)
         {
@@ -111,10 +119,13 @@ namespace E_Commers_Adelia.Controllers
                     UnitPrice = productPrice + additionalPrice,
                     SubTotalPrice = (productPrice + additionalPrice) * orderDetails.Quantity,
                     PlaceDateTime = DateTime.UtcNow,
-                    ProductId = orderDetails.Product.Id,
+                    ProductImageUrl = orderDetails.Product.ImageUrl ?? "/img/blank.jpg",
+                    ProductName = orderDetails.Product.Name,
                     Quantity = orderDetails.Quantity,
                     SelectedOption = selectedOption,
                     StatusId = OrderStatus.ToPay.Id,
+                    DeliveryId = 0,
+                    ExtraCharges = 0
                 };
 
                 _db.Orders.Add(order);
@@ -237,6 +248,13 @@ namespace E_Commers_Adelia.Controllers
             {
                 return View(model);
             }
+            var order = await _db.Orders.FirstOrDefaultAsync(x => x.OrderNo == model.OrderNo);
+            var Extrcharge = _db.SellerDeliveryOptions.FirstOrDefault(x => x.DeliveryId == model.OrderPlace.DeliveryTypeId).AdditionalPrice;
+            order.DeliveryId = model.OrderPlace.DeliveryTypeId;
+            order.ExtraCharges = Extrcharge;
+            _db.Orders.Update(order);
+            await _db.SaveChangesAsync();
+
             HttpContext.Session.SetString("OrderView", JsonConvert.SerializeObject(model));
             return RedirectToAction("Placed", new { OrderNo = model.OrderNo });
         }
@@ -354,7 +372,7 @@ namespace E_Commers_Adelia.Controllers
             var payment = await _db.CustomerPayments.FirstOrDefaultAsync(p => p.OrderNo == model.OrderNo);
             if (payment.PaymentTypeId == PaymentMethod.QR.Id || payment.PaymentTypeId == PaymentMethod.OnlineTransfer.Id)
             {
-                return RedirectToAction("UploadRecept", new { id = payment.Id });
+                return RedirectToAction("UploadReceipt", new { id = payment.Id });
             }
             return RedirectToAction("PaidComplete", new { orderNo = model.OrderNo });
 
@@ -398,7 +416,7 @@ namespace E_Commers_Adelia.Controllers
             return View(payment);
         }
 
-        public async Task<IActionResult> UploadRecept(int id)
+        public async Task<IActionResult> UploadReceipt(int id)
         {
             var payment = await _db.CustomerPayments.FindAsync(id);
             return View(payment);
@@ -406,15 +424,23 @@ namespace E_Commers_Adelia.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadRecept(CustomerPayment model, IFormFile image) 
+        public async Task<IActionResult> UploadReceipt(CustomerPayment model, IFormFile image) 
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
+
             try
             {
                 model.ResitUrl = await UploadFileHelper.Upload(image, "PaymentReceipt",_webHostEnvironment, "800KB");
+                var result = await _receiptVerificationService.VerifyReceiptAsync(model.ResitUrl,model.Amount, DateTime.UtcNow);
+                if(!result.Status)
+                {
+                    TempData["DialogWarning"] = $"{result.Message}";
+                    return View(model);
+                }
+
             }
             catch (InvalidOperationException ex)
             {

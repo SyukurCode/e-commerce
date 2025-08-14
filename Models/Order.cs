@@ -11,8 +11,11 @@ namespace E_Commers_Adelia.Models
         [Display(Name ="Order No")]
         public string OrderNo { get; set; }
         public string CustomerId { get; set; }
-        public string SellerId { get; set; }    
-        public int ProductId { get; set; }
+        public string SellerId { get; set; }
+        //public int ProductId { get; set; }
+        public string ProductName { get; set; }
+        public string ProductImageUrl { get; set; }
+        public string ProductDescription { get; set; }
         public string SelectedOption { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
@@ -20,7 +23,8 @@ namespace E_Commers_Adelia.Models
         public DateTime PlaceDateTime { get; set; }
         public DateTime UpdateDateTime { get; set; }
         public int StatusId { get; set; }
-
+        public int DeliveryId { get; set; }
+        public decimal ExtraCharges { get; set; } // read onlyone time
     }
 
 }

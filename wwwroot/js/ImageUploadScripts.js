@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
         let accountUserImage = document.getElementById('UploadedImage');
         const fileInput = document.querySelector('.account-file-input');
 
-
         if (accountUserImage) {
             const resetImage = accountUserImage.src;
             fileInput.onchange = () => {

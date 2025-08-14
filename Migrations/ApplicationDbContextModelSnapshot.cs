@@ -332,6 +332,12 @@ namespace E_Commers_Adelia.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("DeliveryId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ExtraCharges")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("OrderNo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -339,8 +345,17 @@ namespace E_Commers_Adelia.Migrations
                     b.Property<DateTime>("PlaceDateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
+                    b.Property<string>("ProductDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");

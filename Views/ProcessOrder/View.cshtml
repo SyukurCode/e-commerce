@@ -46,7 +46,7 @@
     </div>
     @foreach (var order in Model)
     {
-        var product = await db.Products.FindAsync(order.ProductId);
+
         var customer = await userManager.FindByIdAsync(order.CustomerId);
 
 
@@ -55,9 +55,9 @@
 
                 <!-- Product Image -->
                 <div class="col-3 col-md-2 text-center">
-                    <img src="@(string.IsNullOrEmpty(product.ImageUrl)
+                    <img src="@(string.IsNullOrEmpty(order.ProductImageUrl)
                                                 ? Url.Content("~/img/blank.jpg")
-                                                : Url.Content("~/" + product.ImageUrl))"
+                                                : Url.Content("~/" + order.ProductImageUrl))"
                          alt="..."
                          class="img-fluid fa-caret-square-up "
                          style="max-width: 60px;height:auto" />
@@ -67,7 +67,7 @@
                 <!-- Product Info -->
                 <div class="col-6 col-md-5">
 
-                    <div class="fw-bold">@product.Name</div>
+                    <div class="fw-bold">@order.ProductName</div>
                     @if (order.SelectedOption != null && order.SelectedOption.Any())
                     {
                         var options = order.SelectedOption.Split("\r\n");
@@ -204,12 +204,18 @@
     }
     <div class="card-footer">
         <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
+            <div>
+                <p>Delivery Charge:</p>
             <h5 class="mb-0 fw-bold">
                 Total (<span class="text-primary">@Model.Count()</span> item@((Model.Count() > 1) ? "s" : "")):
             </h5>
+            </div>
+            <div>
+                <p class="text-end">RM0.00</p>
             <h3 class="mb-0 text-black fw-bold text-decoration-underline">
                 @($"RM{Model.Select(x => x.SubTotalPrice).Sum()}")
             </h3>
+            </div>
         </div>
     </div>
 </div>

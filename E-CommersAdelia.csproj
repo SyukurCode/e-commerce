@@ -34,9 +34,11 @@
     <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2018.4.8.256" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.8" />
+    <PackageReference Include="Tesseract" Version="4.1.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\Upload\PaymentReceipt\" />
     <Folder Include="wwwroot\Upload\Products\" />
   </ItemGroup>
 

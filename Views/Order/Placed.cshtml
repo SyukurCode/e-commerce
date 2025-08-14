@@ -112,7 +112,7 @@
             <div class="card shadow rounded-3 mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light border-0 position-relative">
                     <h5 class="card-title mb-0 text-start">QR Code</h5>
-                    <h3 class="mb-0 fw-bold text-danger">
+                    <h3 class="mb-0 fw-bold text-primary">
                         @($"Amount: RM{Model.Amount}")
                     </h3>
                 </div>
@@ -120,6 +120,7 @@
                     <img src="@ViewData["QRImage"]"
                          alt="QR Image"
                          class="img-fluid rounded qr-image" />
+                    <p class="text-danger mr-2"><i class="fa fa-info-circle"></i><strong>Note:</strong>  Please save a screenshot of your payment receipt after completing the payment.</p>
                 </div>
             </div>
         </div>

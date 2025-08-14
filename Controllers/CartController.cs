@@ -118,10 +118,13 @@ namespace E_Commers_Adelia.Controllers
                         UnitPrice = item.UnitPrice,
                         SubTotalPrice = item.TotalPrice,
                         PlaceDateTime = DateTime.UtcNow,
-                        ProductId = item.Product.Id,
+                        ProductImageUrl = item.Product.ImageUrl ?? "/img/blank.jpg",
+                        ProductName = item.Product.Name,
                         Quantity = item.Quantity,
                         SelectedOption = selectedOption,
                         StatusId = OrderStatus.ToPay.Id,
+                        DeliveryId = 0,
+                        ExtraCharges = 0,
                     };
 
                     orders.Add(order);

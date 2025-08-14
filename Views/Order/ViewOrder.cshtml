@@ -31,14 +31,12 @@
     <div class="card-body text-center">
         @foreach (var item in Model)
         {
-            
-            var product = await db.Products.FindAsync(item.ProductId);
             <div class="row align-items-center">
                 <!-- Product Image -->
                 <div class="col-3 col-md-2 text-center">
-                    <img src="@(string.IsNullOrEmpty(product.ImageUrl)
+                    <img src="@(string.IsNullOrEmpty(item.ProductImageUrl)
                                         ? Url.Content("~/img/blank.jpg")
-                                        : Url.Content("~/" + product.ImageUrl))"
+                                        : Url.Content("~/" + item.ProductImageUrl))"
                     alt="..."
                     class="img-fluid fa-behance-square"
                     style="max-width: 60px;height:auto" />
@@ -47,8 +45,8 @@
                 <!-- Product Info -->
                 <div class="col-9 col-md-5 text-start">
                     <h5 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h5>
-                    <div class="fw-bold">@product.Name</div>
-                    <div class="text-muted small">@product.Description</div>
+                    <div class="fw-bold">@item.ProductName</div>
+                    <div class="text-muted small">@item.ProductDescription</div>
                     @if (item.SelectedOption != null && item.SelectedOption.Any())
                     {
                         var options = item.SelectedOption.Split("\r\n");

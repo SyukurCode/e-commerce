@@ -51,7 +51,7 @@ namespace E_Commers_Adelia.Common
 
                     using (var pdfDocument = PdfiumViewer.PdfDocument.Load(ms))
                     {
-                        var image = pdfDocument.Render(0, 300, 300, true); // page pertama, 300dpi
+                        var image = pdfDocument.Render(0, 600, 600, true); //
                         image.Save(filePath, ImageFormat.Png);
                     }
                 }
