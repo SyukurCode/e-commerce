@@ -27,10 +27,11 @@
 </div>
 <hr />
 <form asp-action="Placed">
-    <input type="hidden" asp-for="CustomerDeliveryInfo.CustomerId" value="@user.Id"/>
+    <input type="hidden" asp-for="CustomerDeliveryInfo.CustomerId" value="@user?.Id"/>
     <input type="hidden" asp-for="DeliveryTypeId" />
     <input type="hidden" asp-for="PaymentTypeId" />
     <input type="hidden" asp-for="CustomerDeliveryInfo.Id" />
+    <input type="hidden" asp-for="CustomerDeliveryInfo.OrderNo"/>
     <input type="hidden" asp-for="SellerId"/>
     <input type="hidden" asp-for="OrderNo"/>
     

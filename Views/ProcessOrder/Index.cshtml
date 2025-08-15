@@ -14,6 +14,12 @@
                 <i class="icon-home"></i>
             </a>
         </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-action="Index">Order Request</a>
+        </li>
     </ul>
 </div>
 <hr />
@@ -49,102 +55,99 @@
                         </ul>
                         <div class="tab-content mt-2 mb-3" id="pills-tabContent">
                             <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-                                <div class="table-responsive">
-                                    <!-- Projects table -->
-                                    <table id="tableOrder" class="table align-items-center mb-0">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th scope="col">Order Number</th>
-                                                <th scope="col" class="text-end">status</th>
-                                                <th scope="col" class="text-end">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var order in Model.Select(x => x.OrderNo).Distinct().ToList())
-                                            {
-                                                var totalOrder = Model.Where(x => x.OrderNo == order).Count();
-                                                var totalComplete = Model.Where(x => x.OrderNo == order && x.StatusId == OrderStatus.Completed.Id).Count();
-                                                var totalCancel = Model.Where(x => x.OrderNo == order && x.StatusId == OrderStatus.Cancelled.Id).Count();
-                                                var price = Model.Where(x => x.OrderNo == order).Select(x => x.SubTotalPrice).Sum();
-                                                float percentCancel = ((float)totalCancel / totalOrder) * 100f;
-                                                float percentComplete = ((float)totalComplete / totalOrder) * 100f;
-                                                if ((percentComplete + percentCancel) < 100)
-                                                {
-                                                    <tr>
-                                                        <th scope="row">
+                                <div class="card-list py-4">
 
-                                                            <a asp-action="View"
-                                                               asp-controller="ProcessOrder"
-                                                               asp-route-id="@order"
-                                                               class="list-group-item list-group-item-action @(Model.FirstOrDefault(x=> x.OrderNo == order).StatusId < 3 ? "active":"") ">
-                                                                <label class="btn btn-icon btn-round btn-sm me-2">
-                                                                    <i class="fa fa-shopping-bag"></i>
-                                                                </label>
-                                                                @($"#{order}")
-                                                            </a>
-                                                        </th>
-                                                        <td class="text-end">@($"{percentComplete}%")</td>
-                                                        <td class="text-end">@($"RM{price}")</td>
-                                                    </tr>
-                                                }
-                                            }
-                                        </tbody>
-                                    </table>
+                                    @foreach (var order in Model.DistinctBy(x => x.OrderNo).OrderBy(x => x.UpdateDateTime).ToList())
+                                    {
+
+                                        var totalOrder = Model.Where(x => x.OrderNo == order.OrderNo).Count();
+                                        var totalComplete = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Completed.Id).Count();
+                                        var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Cancelled.Id).Count();
+                                        var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
+                                        float percentCancel = ((float)totalCancel / totalOrder) * 100f;
+                                        float percentComplete = ((float)totalComplete / totalOrder) * 100f;
+                                        var customerName = db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName;
+                                            
+                                    if ((percentComplete + percentCancel) < 100)
+                                        {
+                                            <div class="item-list">
+                                                <div class="avatar">
+                                                    <img src="@(User.Identity.IsAuthenticated
+                                                    ? Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })
+                                                    : Url.Content("~/img/Avatar.png"))"
+                                                        alt="..."
+                                                        class="avatar-img rounded-circle" />
+                                        </div>
+                                        <div class="info-user ms-3">
+                                            <a asp-action="View"
+                                               asp-controller="ProcessOrder"
+                                               asp-route-id="@order.OrderNo"
+                                               class="@(Model.FirstOrDefault(x=> x.OrderNo == order.OrderNo)?.StatusId < 3 ? "active":"") ">
+
+
+                                                        <div class="username">@customerName</div>
+                                                        <div class="status">@($"#{order.OrderNo}")</div>
+                                                    </a>
+                                                </div>
+                                                <p class="">@($"{percentComplete}%")</p>
+                                            </div>
+
+                                                                        }
+                                    }
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                                <div class="table-responsive">
-                                    <!-- Projects table -->
-                                    <table class="table align-items-center mb-0">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th scope="col">Order Number</th>
-                                                <th scope="col" class="text-end">status</th>
-                                                <th scope="col" class="text-end">Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var order in Model.Select(x => x.OrderNo).Distinct().ToList())
-                                            {
-                                                var totalOrder = Model.Where(x => x.OrderNo == order).Count();
-                                                var totalComplete = Model.Where(x => x.OrderNo == order && x.StatusId == OrderStatus.Completed.Id).Count();
-                                                var totalCancel = Model.Where(x => x.OrderNo == order && x.StatusId == OrderStatus.Cancelled.Id).Count();
-                                                var price = Model.Where(x => x.OrderNo == order).Select(x => x.SubTotalPrice).Sum();
-                                                float percentComplete = ((float)totalComplete / totalOrder) * 100f;
-                                                float percentCancel = ((float)totalCancel / totalOrder) * 100f;
-                                                if ((percentComplete + percentCancel) == 100)
-                                                {
-                                                    <tr>
-                                                        <th scope="row">
+                        </div>
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <!-- Projects table -->
+                            <div class="card-list py-4">
 
-                                                            <a asp-action="View"
-                                                               asp-controller="ProcessOrder"
-                                                               asp-route-id="@order"
-                                                               class="list-group-item list-group-item-action @(Model.FirstOrDefault(x=> x.OrderNo == order).StatusId < 3 ? "text-primary":"text-muted")">
-                                                                <label class="btn btn-icon btn-round btn-sm me-2">
-                                                                    <i class="fa fa-shopping-bag"></i>
-                                                                </label>
-                                                                @($"#{order}")
-                                                            </a>
-                                                        </th>
-                                                        <td class="text-end">
-                                                            @if (percentComplete == 100)
-                                                            {
-                                                                <span class="badge badge-success">Completed</span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span class="badge badge-success">@($"Completed ({totalComplete})")</span>
-                                                                <span class="badge badge-danger">@($"Canceled ({totalCancel})")</span>
-                                                            }
-                                                        </td>
-                                                        <td class="text-end">@($"RM{price}")</td>
-                                                    </tr>
+                                @foreach (var order in Model.DistinctBy(x => x.OrderNo).OrderBy(x => x.UpdateDateTime).ToList())
+                                {
+                                    var totalOrder = Model.Where(x => x.OrderNo == order.OrderNo).Count();
+                                    var totalComplete = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Completed.Id).Count();
+                                    var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Cancelled.Id).Count();
+                                    var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
+                                    float percentComplete = ((float)totalComplete / totalOrder) * 100f;
+                                    float percentCancel = ((float)totalCancel / totalOrder) * 100f;
+                                    var customerName = User.Identity.IsAuthenticated ? userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName : db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo).CustomerName;
+                                    if ((percentComplete + percentCancel) == 100)
+                                    {
+                                        <div class="item-list">
+                                            <div class="avatar">
+                                                <img src="@(User.Identity.IsAuthenticated
+                                                    ? Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })
+                                                    : Url.Content("~/img/Avatar.png"))"
+                                                    alt="..."
+                                                    class="avatar-img rounded-circle" />
+                                            </div>
+                                            <div class="info-user ms-3">
+                                                <a asp-action="View"
+                                                   asp-controller="ProcessOrder"
+                                                   asp-route-id="@order.OrderNo"
+                                                   class="@(Model.FirstOrDefault(x=> x.OrderNo == order.OrderNo).StatusId < 3 ? "text-primary":"text-muted")">
+
+
+                                                    <div class="username">@customerName</div>
+                                                    <div class="status">@($"#{order.OrderNo}")</div>
+
+                                                </a>
+                                            </div>
+                                            <div class="text-end">
+
+                                                @if (percentComplete == 100)
+                                                {
+                                                    <span class="badge badge-success">Completed</span>
                                                 }
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                else
+                                                {
+                                                    <span class="badge badge-success">@($"Completed ({totalComplete})")</span>
+                                                    <span class="badge badge-danger">@($"Canceled ({totalCancel})")</span>
+                                                }
+                                            </div>
+                                        </div>
+
+                                    }
+                                }
                             </div>
                         </div>
                     </div>
@@ -153,7 +156,3 @@
         </div>
     </div>
 </div>
-@section Scripts
-{
-    <script src="~/js/test.js"></script>
-}

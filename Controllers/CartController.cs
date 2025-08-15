@@ -8,7 +8,6 @@ using NuGet.Protocol;
 
 namespace E_Commers_Adelia.Controllers
 {
-    [Authorize]
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _db;

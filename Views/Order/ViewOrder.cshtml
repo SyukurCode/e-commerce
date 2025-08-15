@@ -35,19 +35,19 @@
                 <!-- Product Image -->
                 <div class="col-3 col-md-2 text-center">
                     <img src="@(string.IsNullOrEmpty(item.ProductImageUrl)
-                                        ? Url.Content("~/img/blank.jpg")
-                                        : Url.Content("~/" + item.ProductImageUrl))"
-                    alt="..."
-                    class="img-fluid fa-behance-square"
-                    style="max-width: 60px;height:auto" />
-                </div>
+                                                                 ? Url.Content("~/img/blank.jpg")
+                                                                 : Url.Content("~/" + item.ProductImageUrl))"
+                     alt="..."
+                     class="img-fluid fa-behance-square"
+                     style="max-width: 60px;height:auto" />
+            </div>
 
                 <!-- Product Info -->
                 <div class="col-9 col-md-5 text-start">
                     <h5 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h5>
                     <div class="fw-bold">@item.ProductName</div>
                     <div class="text-muted small">@item.ProductDescription</div>
-                    @if (item.SelectedOption != null && item.SelectedOption.Any())
+                @if (item.SelectedOption != null && item.SelectedOption.Any())
                     {
                         var options = item.SelectedOption.Split("\r\n");
                         <div class="fw-bold">Options:</div>
@@ -72,86 +72,23 @@
             </div>
 
             total += item.SubTotalPrice;
-            <hr/>
+            <hr />
+        }
+        @{
+            var DeliveryCharge = Model.First().ExtraCharges;
+            total = total + DeliveryCharge;
         }
         <div class="col-12 col-md-12 mt-2 mt-md-0">
             <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
-                <span>Total:</span>
-                <span class="fw-bold">RM<span>@total</span></span>
+                <div>
+                    <p>Delivery Charge:</p>
+                    <h5 class="text-end fw-bold">Total:</h5>
+                </div>
+                <div>
+                    <p class="text-end">@($"RM{DeliveryCharge}")</p>
+                    <h5 class="fw-bold">RM<span>@total</span></h5>
+                </div>
             </div>
         </div>
-        <!-- Total To Pay -->
-        @* <div class="position-relative p-3"> *@
-        @*     <!-- Center: Total label --> *@
-        @*     <div class="position-absolute top-50 start-50 translate-middle"> *@
-        @*         <h3 class="mb-0 fw-bold">Total(@Model.Count())</h3> *@
-        @*     </div> *@
-
-        @*     <!-- End: RM and TotalToPay --> *@
-        @*     <div class="position-absolute top-50 end-0 translate-middle-y d-flex align-items-end gap-2 me-3"> *@
-        @*         <span class="mb-0">RM</span> *@
-        @*         <h3 id="totalToPay" class="mb-0 text-decoration-underline">0.00</h3> *@
-        @*     </div> *@
-        @* </div> *@
     </div>
 </div>
-@*<p>
-    <a asp-action="Create">Create New</a>
-</p>
- <table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderNo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PlaceDateTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StatusId)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderNo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CustomerId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SellerId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SelectedOption)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UnitPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SubTotalPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PlaceDateTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StatusId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table> *@

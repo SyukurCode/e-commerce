@@ -1,14 +1,14 @@
 ﻿@model E_Commers_Adelia.Models.Product
 
 @{
-    ViewData["Title"] = "Product";
+    ViewData["Title"] = "View Product";
 }
 
 <div class="page-header">
-    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+    <h3 class="fw-bold mb-3">Products</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
-            <a asp-action="Index">
+            <a asp-action="Index" asp-controller="Home">
                 <i class="icon-home"></i>
             </a>
         </li>
@@ -16,7 +16,13 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a href="#">Detail</a>
+            <a asp-action="Index">Products</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">@ViewData["Title"]</a>
         </li>
     </ul>
 </div>

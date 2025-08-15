@@ -21,7 +21,6 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace E_Commers_Adelia.Controllers
 {
-    [Authorize]
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -58,6 +57,11 @@ namespace E_Commers_Adelia.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(OrderDetails orderDetails, string action)
         {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(Index), new { id = orderDetails.Product.Id });
+            }
+
             var orderNo = OrderNumber.Generate();
 
             if (orderDetails.Quantity > orderDetails.Product.Stock)
@@ -114,13 +118,14 @@ namespace E_Commers_Adelia.Controllers
                 var order = new Models.Order
                 {
                     OrderNo = orderNo,
-                    SellerId = orderDetails.Product.userId,
-                    CustomerId = _userManager.GetUserId(User) ?? "Guest",
+                    SellerId = orderDetails.Product?.userId ?? "",
+                    CustomerId = User.Identity.IsAuthenticated ? _userManager.GetUserId(User): null,
                     UnitPrice = productPrice + additionalPrice,
                     SubTotalPrice = (productPrice + additionalPrice) * orderDetails.Quantity,
                     PlaceDateTime = DateTime.UtcNow,
-                    ProductImageUrl = orderDetails.Product.ImageUrl ?? "/img/blank.jpg",
-                    ProductName = orderDetails.Product.Name,
+                    ProductImageUrl = orderDetails.Product?.ImageUrl ?? "/img/blank.jpg",
+                    ProductName = orderDetails.Product?.Name ?? "",
+                    ProductDescription = orderDetails.Product?.Description ?? "",
                     Quantity = orderDetails.Quantity,
                     SelectedOption = selectedOption,
                     StatusId = OrderStatus.ToPay.Id,
@@ -262,38 +267,46 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Placed(string OrderNo)
         {
             // for selfpickup get self pickup address
-            var cutomer = await _userManager.GetUserAsync(User);
-            var customerDeliveryInfo = await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == cutomer.Id);
-            if (customerDeliveryInfo == null)
+            var customer = User.Identity.IsAuthenticated ? await _userManager.GetUserAsync(User): null;
+            var customerDeliveryInfo = customer != null ? await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == customer.Id): null
+    ;
+            if (customerDeliveryInfo == null || customer == null)
             {
                 customerDeliveryInfo = new CustomerDeliveryInfo();
             }
 
-            // Sentiasa update jika `cutomer.Address` ada
-            if (!string.IsNullOrWhiteSpace(cutomer.Address))
+            if (customer != null)
             {
-                customerDeliveryInfo.Address = cutomer.Address;
-            }
+                // Sentiasa update jika `cutomer.Address` ada
+                if (!string.IsNullOrWhiteSpace(customer.Address))
+                {
+                    customerDeliveryInfo.Address = customer.Address;
+                }
 
-            // Hanya update jika tiada phone dan `cutomer.PhoneNumber` ada
-            if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerPhone) &&
-                !string.IsNullOrWhiteSpace(cutomer.PhoneNumber))
-            {
-                customerDeliveryInfo.CustomerPhone = cutomer.PhoneNumber;
-            }
+                // Hanya update jika tiada phone dan `cutomer.PhoneNumber` ada
+                if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerPhone) &&
+                    !string.IsNullOrWhiteSpace(customer.PhoneNumber))
+                {
+                    customerDeliveryInfo.CustomerPhone = customer.PhoneNumber;
+                }
 
-            // Nama
-            if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerName) &&
-                !string.IsNullOrWhiteSpace(cutomer.DisplayName))
-            {
-                customerDeliveryInfo.CustomerName = cutomer.DisplayName;
-            }
+                // Nama
+                if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerName) &&
+                    !string.IsNullOrWhiteSpace(customer.DisplayName))
+                {
+                    customerDeliveryInfo.CustomerName = customer.DisplayName;
+                }
 
-            // Email
-            if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerEmail) &&
-                !string.IsNullOrWhiteSpace(cutomer.Email))
+                // Email
+                if (string.IsNullOrWhiteSpace(customerDeliveryInfo.CustomerEmail) &&
+                    !string.IsNullOrWhiteSpace(customer.Email))
+                {
+                    customerDeliveryInfo.CustomerEmail = customer.Email;
+                }
+            }
+            else
             {
-                customerDeliveryInfo.CustomerEmail = cutomer.Email;
+                customerDeliveryInfo.OrderNo = OrderNo;
             }
 
             var json = HttpContext.Session.GetString("OrderView");
@@ -345,6 +358,7 @@ namespace E_Commers_Adelia.Controllers
                 ModelState.Remove("CustomerDeliveryInfo.CustomerName");
                 ModelState.Remove("CustomerDeliveryInfo.CustomerEmail");
                 ModelState.Remove("CustomerDeliveryInfo.CustomerPhone");
+                ModelState.Remove("CustomerDeliveryInfo.OrderNo");
 
             }
 
