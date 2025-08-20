@@ -5,24 +5,14 @@
 @inject ApplicationDbContext db
 @{
     ViewData["Title"] = "Order Request";
+    ViewData["OrderCount"] = Model.Count();
 }
-<div class="page-header">
-    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
-    <ul class="breadcrumbs mb-3">
-        <li class="nav-home">
-            <a asp-action="Index" asp-controller="Home">
-                <i class="icon-home"></i>
-            </a>
-        </li>
-        <li class="separator">
-            <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-            <a asp-action="Index">Order Request</a>
-        </li>
-    </ul>
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">You have currently @ViewData["OrderCount"] orders</h6>
+    </div>
 </div>
-<hr />
 
 <div class="row">
     <div class="col-md-12">
@@ -66,7 +56,7 @@
                                         var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
                                         float percentCancel = ((float)totalCancel / totalOrder) * 100f;
                                         float percentComplete = ((float)totalComplete / totalOrder) * 100f;
-                                        var customerName = db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName;
+                                        var customerName = User.Identity.IsAuthenticated ? userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName : db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo).CustomerName;
                                             
                                     if ((percentComplete + percentCancel) < 100)
                                         {
@@ -140,8 +130,15 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-success">@($"Completed ({totalComplete})")</span>
-                                                    <span class="badge badge-danger">@($"Canceled ({totalCancel})")</span>
+                                                    if (totalOrder > 1)
+                                                    {
+                                                        <span class="badge badge-success">@($"Completed ({totalComplete})")</span>
+                                                        <span class="badge badge-danger">@($"Canceled ({totalCancel})")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-danger">@($"Canceled")</span>
+                                                    }
                                                 }
                                             </div>
                                         </div>

@@ -37,17 +37,22 @@
         var deliveryCharge = thisOrder.ExtraCharges;
     
     <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+            <div class="card-title mb-0">
+                <span class="badge bg-light text-primary px-2 py-1">
+                    @($"#{thisOrder.OrderNo}")
+                </span>
+                <small class="text-muted text-small ms-1 d-block">@duration</small>
+            </div>
 
-        <div class="card-title mb-0">
-                <h4 class="text-primary">@($"#{thisOrder.OrderNo}")</h4>
-                <p class="small text-muted">@duration</p>
-           </div>
+
         
         <div class="card-tool">
             
             @if (payment.PaymentComfirmation == false)
             {
                 <a class="btn btn-label-info btn-round btn-sm" data-bs-toggle="modal"
+                       data-original-title="Comfirm Payment"
+                       title="Comfirm Payment"
                    data-bs-target="#ConfirmPayment">
                     <span class="btn-label">
                         <i class="fa fa-credit-card"></i>
@@ -162,15 +167,15 @@
                                                     <tbody>
                                                         <tr>
                                                             <th class="text-start">Date and Time</th>
-                                                            <td>@payment.PaymentDate.ToLocalTime()</td>
+                                                                <td class ="text-start">@payment.PaymentDate.ToLocalTime()</td>
                                                         </tr>
                                                         <tr>
                                                             <th class="text-start">Amount</th>
-                                                            <td class="text-end">@($"RM{payment.Amount}")</td>
+                                                            <td class="text-start">@($"RM{payment.Amount}")</td>
                                                         </tr>
                                                         <tr>
                                                             <th class="text-start">Type</th>
-                                                            <td class="text-end">@PaymentMethod.All.FirstOrDefault(x => x.Id == payment.PaymentTypeId).Name</td>
+                                                            <td class="text-start">@PaymentMethod.All.FirstOrDefault(x => x.Id == payment.PaymentTypeId).Name</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -229,3 +234,6 @@
     </div>
     }
 </div>
+@section Scripts {
+    <partial name="_NotificationPartial" />
+}

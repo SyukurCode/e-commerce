@@ -26,6 +26,11 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
+            var user = await _signInManager.UserManager.GetUserAsync(User);
+            if(user.IsOpen)
+            {
+                TempData["DialogWarning"] = "Your store currently open, you still recieve order when you sign out.";
+            }
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)

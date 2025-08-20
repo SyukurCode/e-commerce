@@ -3,26 +3,37 @@
 @{
     var productPhoto = $"~/{Model.ImageUrl}" ?? "~/img/blank.jpg";
 }
-<div class="col-sm-3">
-    <div class="card shadow-lg border-0 p-4 rounded-4 text-center">
+<div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+    <div class="card shadow-lg border-0 p-4 rounded-4 h-100">
+        @* <div class="card-head-row">
         <div class="card-title mb-0 text-primary">
-            <h5>@Model.Name</h5>
+                <div class="small text-muted">
+            @Model.Name
+            </div>
         </div>
-        <div class="flex-shrink-0">
-            <img src="@productPhoto"
-                 alt="Product Image"
-                 class="rounded shadow-sm"
-                 style="width: 200px; height: 200px; object-fit: cover;" asp-append-version="true" />
+        </div> *@
+        <!-- Header -->
+        <div class="card-header bg-light border-0 rounded-top-4 py-2">
+            <div class="small text-muted">
+                <strong>@Model.Name</strong>
+            </div>
         </div>
-
+        <div class="flex-shrink-0 d-flex justify-content-center">
+            <div class="ratio ratio-16x9 rounded shadow-sm bg-light mx-auto">
+                <img src="@productPhoto"
+                     alt="Product Image"
+                     class="rounded shadow-sm w-100 h-100"
+                     style="object-fit:cover;" asp-append-version="true" />
+            </div>
+        </div>
         <div class="card-footer text-center">
-            <div class="buttonbtn-group-sm">
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-2">
                 <a asp-action="Details" asp-route-id="@Model.Id"
-                   class="btn btn-primary btn-xs m-1" style="width:50px;">View</a>
+                   class="btn btn-primary btn-sm flex-fill">View</a>
                 <a asp-action="Edit" asp-route-id="@Model?.Id"
-                   class="btn btn-secondary btn-xs m-1" style="width:50px;">Edit</a>
+                   class="btn btn-secondary btn-sm flex-fill">Edit</a>
                 <a asp-action="Delete" asp-route-id="@Model?.Id"
-                   class="btn btn-outline-danger btn-xs m-1" style="width:50px;">Del</a>
+                   class="btn btn-outline-danger btn-sm flex-fill">Del</a>
             </div>
         </div>
     </div>

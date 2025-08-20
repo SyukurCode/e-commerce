@@ -130,7 +130,6 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.DisplayName = Input.DisplayName;
                 user.IsActive = true; // Set default status to active
-                user.StoreName = Input.DisplayName;
                 user.AccountTypeId = AccountType.Real.Id;
                 user.CreatedAt = DateTime.UtcNow; // Set creation date to now
                 user.UpdateAt = DateTime.UtcNow;

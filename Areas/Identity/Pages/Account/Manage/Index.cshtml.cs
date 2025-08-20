@@ -62,7 +62,9 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Display Name")]
             public string DisplayName { get; set; }
+
             [Display(Name = "Store Name")]
+            [MaxLength(50)]
             public string StoreName { get; set; }
             public string Address { get; set; }
         }
@@ -74,6 +76,7 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
             var dbUser = await _userManager.GetUserAsync(User);
 
             var displayName = dbUser.DisplayName; 
+            var storeName = dbUser.StoreName;
 
             Username = userName;
 
@@ -81,8 +84,8 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
             {
                 PhoneNumber = phoneNumber,
                 DisplayName = displayName,
-                StoreName = dbUser.StoreName,
-                Address = dbUser.Address
+                Address = dbUser.Address,
+                StoreName = storeName,
             };
         }
 
@@ -137,21 +140,6 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
-            if (User.IsInRole("Admin") || User.IsInRole("Seller"))
-            {
-                var StoreName = Input.StoreName;
-                if (StoreName != dbuser.StoreName)
-                {
-                    dbuser.StoreName = StoreName;
-                    dbuser.UpdateAt = DateTime.UtcNow;
-                    var setStoreName = await _userManager.UpdateAsync(dbuser);
-                    if (!setStoreName.Succeeded)
-                    {
-                        StatusMessage = "Unexpected error when trying to set store name.";
-                        return RedirectToPage();
-                    }
-                }
-            }
             var Address = Input.Address;
             if (Address != dbuser.Address)
             {
@@ -164,7 +152,18 @@ namespace E_Commers_Adelia.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
-            
+            var StoreName = Input.StoreName;
+            if (StoreName != dbuser.StoreName)
+            {
+                dbuser.StoreName = StoreName;
+                dbuser.UpdateAt = DateTime.UtcNow;
+                var setStoreName = await _userManager.UpdateAsync(dbuser);
+                if (!setStoreName.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to set store name.";
+                    return RedirectToPage();
+                }
+            }
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

@@ -17,7 +17,7 @@ namespace E_Commers_Adelia.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -201,6 +201,9 @@ namespace E_Commers_Adelia.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -228,9 +231,8 @@ namespace E_Commers_Adelia.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("StoreName")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
@@ -350,6 +352,9 @@ namespace E_Commers_Adelia.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("ProductImageUrl")
                         .IsRequired()
                         .HasColumnType("text");
@@ -386,6 +391,33 @@ namespace E_Commers_Adelia.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("E_Commers_Adelia.Models.OrderHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OrderNo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OrderHistory");
+                });
+
             modelBuilder.Entity("E_Commers_Adelia.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -406,8 +438,7 @@ namespace E_Commers_Adelia.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");

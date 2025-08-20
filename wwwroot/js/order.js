@@ -18,8 +18,6 @@ function chooseOption() {
             ids: selectedIds
         },
         success: function (response) {
-            console.log("Update berjaya!", response);
-            console.log("Price", basePrice);
             setProductPrice(response + basePrice)
         },
         error: function (xhr, status, error) {

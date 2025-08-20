@@ -28,6 +28,7 @@ namespace E_Commers_Adelia.Data
         public DbSet<CustomerPayment> CustomerPayments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserChat> Chats { get; set; }
+        public DbSet<OrderHistory> OrderHistory { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

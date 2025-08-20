@@ -117,14 +117,51 @@ namespace E_Commers_Adelia.Controllers
                         UnitPrice = item.UnitPrice,
                         SubTotalPrice = item.TotalPrice,
                         PlaceDateTime = DateTime.UtcNow,
+                        ProductId = item.Product.Id,
                         ProductImageUrl = item.Product.ImageUrl ?? "/img/blank.jpg",
                         ProductName = item.Product.Name,
+                        ProductDescription = item.Product.Description,
                         Quantity = item.Quantity,
                         SelectedOption = selectedOption,
                         StatusId = OrderStatus.ToPay.Id,
                         DeliveryId = 0,
                         ExtraCharges = 0,
                     };
+
+                    // validate product 
+                    var product = await _db.Products.FindAsync(order.ProductId);
+                    if (product != null || product.isEnable || !product.isHide)
+                    {
+                        if (product.Stock >= order.Quantity)
+                        {
+                            product.Stock = product.Stock - order.Quantity;
+                            _db.Products.Update(product);
+                            await _db.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            if (product.Stock > 0)
+                            {
+                                TempData["DialogWarning"] = $"{order.ProductName} in low stock, please remove this order";
+                                continue;
+                            }
+                            TempData["DialogWarning"] = $"Sorry, {order.ProductName} has been soldout";
+                            continue ;
+                        }
+                    }
+                    else
+                    {
+                        TempData["DialogWarning"] = $"Sorry,  {order.ProductName}  is soldout";
+                        continue;
+                    }
+
+                    //validate if store close
+                    var isOpen = _userManager.FindByIdAsync(order.SellerId).Result?.IsOpen ?? false;
+                    if(!isOpen)
+                    {
+                        TempData["DialogError"] = $"Store for {order.ProductName} was closed";
+                        continue;
+                    }
 
                     orders.Add(order);
                 }
@@ -147,5 +184,6 @@ namespace E_Commers_Adelia.Controllers
             await _db.SaveChangesAsync();
             return RedirectToAction("Checkout", "Order", new { orderNo = orderNo });
         }
+
     }
 }

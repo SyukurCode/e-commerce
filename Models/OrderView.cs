@@ -7,7 +7,5 @@
         public string SellerId {  get; set; }
         public decimal TotalToPay { get; set; }
         public OrderPlace OrderPlace { get; set; }
-
-
     }
 }

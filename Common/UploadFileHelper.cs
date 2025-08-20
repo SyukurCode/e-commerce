@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using static System.Net.Mime.MediaTypeNames;
 using PdfiumViewer;
-using System.Drawing.Imaging;
 using Sprache;
+using System.Drawing.Imaging;
+using System.IO.Pipelines;
+using System.Net.NetworkInformation;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace E_Commers_Adelia.Common
 {
     public static class UploadFileHelper
     {
-        private static readonly string[] permittedExtensions = { ".jpg", ".jpeg", ".png", ".pdf" };
+        private static readonly string[] permittedExtensions = { ".jpg", ".jpeg", ".png", ".pdf", ".pjp", ".pjpeg", ".jfif" };
         public static async Task<string> Upload(IFormFile file, string folder, IWebHostEnvironment env, string LimitSize)
         {
 

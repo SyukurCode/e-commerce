@@ -101,7 +101,7 @@
         <div class="card-footer text-center">
             <div class="fc-button-group">
             @* <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary ms-2 d-inline-block" style="width:125px">Edit</a> *@
-                <a asp-action="Index" class="btn btn-outline-secondary ms-2 d-inline-block" style="width:125px">Back</a>
+                    <a onclick="history.back()" class="btn btn-outline-secondary ms-2 d-inline-block" style="width:125px">Back</a>
             </div>
         </div>
     </div>

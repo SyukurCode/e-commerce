@@ -1,14 +1,17 @@
 
+using E_Commers_Adelia.Common;
 using E_Commers_Adelia.Data;
+using E_Commers_Adelia.Hub;
+using E_Commers_Adelia.Models;
+using E_Commers_Adelia.Repository;
+using E_Commers_Adelia.Service;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Microsoft.AspNetCore.Identity;
-using E_Commers_Adelia.Models;
-using E_Commers_Adelia.Service;
-using E_Commers_Adelia.Common;
-using Microsoft.AspNetCore.SignalR;
-using E_Commers_Adelia.Hub;
-using E_Commers_Adelia.Repository;
+using Serilog.Events;
 
 DotNetEnv.Env.Load(); // ← baca .env file
 
@@ -18,7 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
-    .WriteTo.File("Logs/app-.log", rollingInterval: RollingInterval.Day)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning) // ✅ reduce EF SQL logs
+    .Enrich.FromLogContext()
+    .WriteTo.File("Logs/app-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
     .Enrich.FromLogContext()
     .CreateLogger();
 
@@ -44,6 +50,16 @@ catch (Exception ex)
     return;
 }
 
+// 1. Register Hangfire service dengan PostgreSQL
+builder.Services.AddHangfire(config =>
+{
+    config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(option => option.UseNpgsqlConnection(connectionString));
+});
+
 builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -52,7 +68,8 @@ builder.Services.AddDefaultIdentity<EUser>(options => options.SignIn.RequireConf
 builder.Services.AddScoped<INotification, RNotification>()
     .AddScoped<IUploadQRImage, UploadQRImage>()
     .AddScoped<ICustomerPayment, RCustomerPayment>()
-    .AddScoped<IReceiptVerificationService, ReceiptVerificationService>();
+    .AddScoped<IReceiptVerificationService, ReceiptVerificationService>()
+    .AddScoped<IOrderHistory, ROrderHistory>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();
@@ -139,7 +156,6 @@ using (var scope = app.Services.CreateScope())
         var user = new EUser
         {
             Email = email,
-            StoreName = "Kedai Admin",
             UserName = email,
             DisplayName = "SystemAdmin",
             EmailConfirmed = true,
@@ -175,8 +191,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.UseHangfireDashboard("/hangfire");
+
 app.MapRazorPages(); // ✅ WAJIB untuk Identity Razor Pages
 
 app.MapHub<NotificationHub>("/notificationHub"); // Map SignalR hub
 
 app.Run();
+public partial class Program { }

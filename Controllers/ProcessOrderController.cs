@@ -64,11 +64,11 @@ namespace E_Commers_Adelia.Controllers
                 // update status order to process
                 foreach (var item in order)
                 {
-                    if (item.StatusId == OrderStatus.OrderSend.Id)
+                    if (item.StatusId == OrderStatus.PickupBySeller.Id)
                     {
                         item.StatusId = OrderStatus.Processing.Id;
-                        item.UpdateDateTime = DateTime.Now;
-                        _db.Orders.UpdateRange(item);
+                        item.UpdateDateTime = DateTime.UtcNow;
+                        _db.Orders.Update(item);
                     }
                 }
                 await _db.SaveChangesAsync();
@@ -81,11 +81,19 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> FinishOrder(int id)
         {
             var order = await _db.Orders.FindAsync(id);
-            order.StatusId = OrderStatus.Completed.Id;
-            order.UpdateDateTime = DateTime.UtcNow;
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("View", new { id = order.OrderNo });
+            if (order != null)
+            {
+                if (order.StatusId < 4)
+                {
+                    TempData["DialogWarning"] = "Please comfirm payment first";
+                    return RedirectToAction("View", new { id = order.OrderNo });
+                }
+                order.StatusId = OrderStatus.Completed.Id;
+                order.UpdateDateTime = DateTime.UtcNow;
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+            }
+            return RedirectToAction("View", new { id = order?.OrderNo });
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

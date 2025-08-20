@@ -23,14 +23,17 @@ namespace E_Commers_Adelia.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<EUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly SignInManager<EUser> _signInManager;
 
         public ProductsController(ApplicationDbContext context,
             UserManager<EUser> userManager,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            SignInManager<EUser> signInManager)
         {
             _db = context;
             _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
+            _signInManager = signInManager;
         }
 
         // GET: Products
@@ -52,8 +55,7 @@ namespace E_Commers_Adelia.Controllers
                 return NotFound();
             }
 
-            var product = await _db.Products.Include(o => o.Options)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = await _db.Products.FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -63,8 +65,20 @@ namespace E_Commers_Adelia.Controllers
         }
 
         // GET: Products/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser != null)
+                {
+                    var storeName = currentUser.StoreName;
+                    if (string.IsNullOrEmpty(storeName)) {
+                        TempData["DialogWarning"] = "Please setup your shop first";
+                        return RedirectToAction("Edit", "Store");
+                    }
+                }
+            }
             return View();
         }
 
@@ -73,7 +87,7 @@ namespace E_Commers_Adelia.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate")] Product product, IFormFile image)
+        public async Task<IActionResult> Create([Bind("Id,userId,Name,Description,ImageUrl,Price,Stock,CreateDate,UpdateDate,shopId")] Product product, IFormFile image)
         {
 
             if (ModelState.IsValid)
@@ -86,12 +100,12 @@ namespace E_Commers_Adelia.Controllers
                 }
                 catch (ArgumentException ex) 
                 {
-                    TempData["FailedMessage"] = string.Format("Upload fail,{0}",ex.Message);
+                    TempData["DialogWarning"] = string.Format("Upload fail,{0}",ex.Message);
                     return View(product);
                 }
                 catch (InvalidOperationException ex)
                 {
-                    TempData["FailedMessage"] = string.Format("Upload fail,{0}", ex.Message);
+                    TempData["DialogWarning"] = string.Format("Upload fail,{0}", ex.Message);
                     return View(product);
                 }
 

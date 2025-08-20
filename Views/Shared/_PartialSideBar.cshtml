@@ -5,13 +5,13 @@
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
         <!-- Logo Header -->
-        <div class="logo-header" data-background-color="light-blue">
+        <div class="logo-header" data-background-color="dark">
             <a asp-action="Index" asp-controller="Home" class="logo">
-                @* <img src="~/img/Adelia/apple-icon-180x180.png"
+                <img src="~/img/Logo.png"
                      alt="navbar brand" 
-                      class="navbar-brand m-3" 
-                      height="90" />  *@
-                E-Commerce App
+                      class="navbar-brand m-3 text-white-50" 
+                      height="50" /> 
+                <span class="text-white">StoreKeeper</span>
             </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar">
@@ -75,12 +75,18 @@
                         <span class="sidebar-mini-icon">
                             <i class="fa fa-ellipsis-h"></i>
                         </span>
-                        <h4 class="text-section">Saller</h4>
+                        <h4 class="text-section">Seller</h4>
                     </li>
-
+                    <li class="nav-item">
+                        <a asp-action="Index" asp-controller="Store">
+                            <i class="fa fa-store"></i>
+                            <p>Store</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a asp-action="Index" asp-controller="ProcessOrder">
-                            <i class="fas fa-list"></i>
+                            <i class="fa fa-tasks"></i>
                             <p>Order Request</p>
                             @* <span class="badge badge-success">4</span> *@
                         </a>
@@ -117,7 +123,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="#">
-                            <i class="fas fa-list"></i>
+                            <i class="fa fa-shopping-cart"></i>
                             <p>Orders</p>
                             @* <span class="badge badge-success">4</span> *@
                         </a>

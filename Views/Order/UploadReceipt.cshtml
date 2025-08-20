@@ -58,12 +58,13 @@
 
                 <div class="btn-group w-100 justify-content-center mb-3 text-center gap-4">
                     <label for="upload" class="btn btn-primary d-flex justify-content-center align-items-center" style="max-width: 125px;">
-                        <span class="d-sm-inline">Upload</span>
+                        <span class="d-sm-inline text-white">Upload</span>
                         <i class="bx bx-upload d-inline d-sm-none fs-4"></i>
                     </label>
                 <button type="submit" class="btn btn-success" style="max-width: 125px;" onclick="showLoadingModal()">
                         Send
                     </button>
+                <a asp-action="Cancel" asp-route-orderNo="@Model.OrderNo" class="btn btn-outline-secondary" style="max-width: 125px;">Cancel</a>
                 </div>
                 <input type="file"
                        name="image"

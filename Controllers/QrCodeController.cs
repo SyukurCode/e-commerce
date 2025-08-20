@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace E_Commers_Adelia.Controllers
 {
-    [Authorize()]
     public class QrCodeController : Controller
     {
         private readonly UserManager<EUser> _userManager;
@@ -18,7 +17,7 @@ namespace E_Commers_Adelia.Controllers
             _userManager = userManager;
             _db = db;
         }
-
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<bool> UploadQrCode(IFormFile qrCodeFile)
@@ -71,7 +70,7 @@ namespace E_Commers_Adelia.Controllers
             }
             return NotFound();
         }
-
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<bool> DeleteQrCode()

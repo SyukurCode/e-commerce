@@ -10,42 +10,44 @@
 @{
     var notiCount = 0;
     IEnumerable<Notification> noti = new List<Notification>();
-    if (SignInManager.IsSignedIn(User)) {
+    if (SignInManager.IsSignedIn(User))
+    {
         var currentUser = await UserManager.GetUserAsync(User);
-        var currentUserId = currentUser.Id;
-        noti = await notify.GetByUser(currentUser.Id);
+        var currentUserId = currentUser?.Id;
+        noti = await notify.GetByUser(currentUser?.Id ?? "");
         notiCount = noti.Where(n => n.IsRead == false).Count();
     }
-    var cart = HttpContextAccessor.HttpContext.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
+    var cart = HttpContextAccessor.HttpContext?.Session.GetObjectFromJson<List<CartItem>>("Cart") ?? new List<CartItem>();
     ViewData["CartNoti"] = cart.Sum(x => x.Quantity);
-    ViewData["Avatar"] = Url.Action("GetAvatar", "Profile", new { userId = UserManager.GetUserId(User)});
+    ViewData["Avatar"] = Url.Action("GetAvatar", "Profile", new { userId = UserManager.GetUserId(User) });
 }
 <!-- Navbar Header -->
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
     <div class="container-fluid">
-        @* <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+        <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+            <form asp-action="Index" asp-controller="OrderTracking">
             <div class="input-group">
-                <form asp-action="Index">
                 <div class="input-group-prepend">
                     <button type="submit" class="btn btn-search pe-1">
                         <i class="fa fa-search search-icon"></i>
                     </button>
                 </div>
                 <input type="text"
-                       name="search"
-                       placeholder="Search product..."
+                       name="orderNo"
+                       placeholder="Trace order..."
                        class="form-control" />
-                </form>
             </div>
-        </nav> *@
+            </form>
+        </nav>
+
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
-                asp-action="Index" asp-controller="Cart"
-                id="messageDropdown"
-                role="button"
-                aria-haspopup="true"
-                aria-expanded="false">
+                   asp-action="Index" asp-controller="Cart"
+                   id="messageDropdown"
+                   role="button"
+                   aria-haspopup="true"
+                   aria-expanded="false">
                     <i class="fa fa-shopping-cart"></i>
                     @if ((int?)ViewData["CartNoti"] > 0)
                     {
@@ -55,12 +57,12 @@
             </li>
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
-                href="#"
-                id="notifDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false">
+                   href="#"
+                   id="notifDropdown"
+                   role="button"
+                   data-bs-toggle="dropdown"
+                   aria-haspopup="true"
+                   aria-expanded="false">
                     <i class="fa fa-bell"></i>
                     @if ((int?)notiCount > 0)
                     {
@@ -68,7 +70,7 @@
                     }
                 </a>
                 <ul class="dropdown-menu messages-notif-box animated fadeIn"
-                aria-labelledby="notifDropdown">
+                    aria-labelledby="notifDropdown">
                     <li>
                         <div class="dropdown-title d-flex justify-content-between align-items-center">
                             @($"{notiCount} New notification")
@@ -82,20 +84,20 @@
                                 {
                                     var duration = DurationCalulator.GetTimeAgo(n.DateCreated);
                                     <a asp-action="Index" asp-controller="Notification" asp-route-id="@n.Id" class="">
-                                        <div class="notif-icon notif-primary"> 
-                                            <i class="fa @n.FaIcon"></i> 
-                                        </div> 
+                                        <div class="notif-icon notif-primary">
+                                            <i class="fa @n.FaIcon"></i>
+                                        </div>
                                         <div class="notif-content">
-                                            <span class="block @(n.IsRead ? "":"fw-bold text-black")"> @n.Text </span>
-                                            <span class="time">@duration</span> 
-                                        </div> 
+                                            <span class="block @(n.IsRead ? "" : "fw-bold text-black")"> @n.Text </span>
+                                            <span class="time">@duration</span>
+                                        </div>
                                     </a>
                                 }
                             </div>
                         </div>
                     </li>
                     <li>
-                        
+
                         <a class="see-all" id="btnRemoveAll">
                             Clear all notifications<i class="fa fa-angle-right"></i>
                         </a>
@@ -144,10 +146,9 @@
                             </div>
                         </li>
                         <li>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Inbox</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Manage Your Account</a>
+                            @{
+                                var currentUser = await UserManager.GetUserAsync(User);
+                            }
                             <div class="dropdown-divider"></div>
                             <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
                                 <button type="submit" class="dropdown-item">
@@ -173,6 +174,6 @@
     </div>
 </nav>
 @section Scripts {
-    <partial name="_NavbarScriptsPartial" />
-    }
+    @* <partial name="_NavbarScriptsPartial" /> *@
+}
 <!-- End Navbar -->

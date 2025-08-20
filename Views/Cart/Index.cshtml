@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @model E_Commers_Adelia.Models.CartView
 @inject UserManager<EUser> userManager
-
+@inject ApplicationDbContext db
 @{
     ViewData["Title"] = "Cart Items";
 
@@ -39,77 +39,81 @@
             <div class="card card-round">
                 <div class="card-body">
                     <div class="card-head-row card-tools-still-right">
-                        <div class="card-title"># @shopOwnwer.StoreName</div>
+                        <div class="card-title"><i class="fa fa-store"></i> @shopOwnwer.StoreName</div>
                     </div>
                     <hr />
-                    <!-- Item List -->
 
                     <div class="card-list py-4">
-
-                        @foreach (var item in Model.ItemCart)
+                        @if(Model.ItemCart != null)
                         {
-                            @if (shopOwnwer.Id == item.Product.userId)
+                            @foreach (var item in Model.ItemCart)
                             {
-                                <input id="@($"price{item.Id}")" asp-for="@item.UnitPrice" type="hidden" />
-                                <input asp-for="@item.Quantity" type="hidden" />
-                                <div class="row align-items-center">
-                                    <!-- Product Image -->
-                                    <div class="col-3 col-md-2 text-center">
-                                        <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl)
-                                        ? Url.Content("~/img/blank.jpg")
-                                        : Url.Content("~/" + item.Product.ImageUrl))"
-                                             alt="..."
-                                             class="img-fluid fa-caret-square-up"
-                                             style="max-width: 60px;height:auto" />
-                                    </div>
 
-                                    <!-- Product Info -->
-                                    <div class="col-6 col-md-5">
-                                        <h5 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h5>
-                                        <div class="fw-bold">@item.Product.Name</div>
-                                        <div class="text-muted small">@item.Product.Description</div>
-                                        @if (item.SelectedOptions.Count() > 0)
-                                        {
-                                            <div class="fw-bold">Options:</div>
-                                        }
-                                        @if (item.SelectedOptions.Any())
-                                        {
-                                            <div class="text-muted small">
-                                                @foreach (var option in item.SelectedOptions)
-                                                {
-                                                    <div>@($"+RM{option.AdditionalPrice} {option.OptionName}")</div>
-                                                }
+                                
+                                <!-- Item List -->
+                                @if (shopOwnwer?.Id == item.Product.userId)
+                                {
+                                    <input id="@($"price{item.Id}")" asp-for="@item.UnitPrice" type="hidden" />
+                                    <input asp-for="@item.Quantity" type="hidden" />
+                                    <div class="row align-items-center">
+                                        <!-- Product Image -->
+                                        <div class="col-3 col-md-2 text-center">
+                                            <img src="@(string.IsNullOrEmpty(item.Product.ImageUrl)
+                                            ? Url.Content("~/img/blank.jpg")
+                                            : Url.Content("~/" + item.Product.ImageUrl))"
+                                                 alt="..."
+                                                 class="img-fluid fa-caret-square-up"
+                                                 style="max-width: 60px;height:auto" />
+                                        </div>
 
+                                        <!-- Product Info -->
+                                        <div class="col-6 col-md-5">
+                                            <h5 class="fw-bold text-danger">@($"RM{item.UnitPrice}")</h5>
+                                            <div class="fw-bold">@item.Product.Name</div>
+                                            <div class="text-muted small">@item.Product.Description</div>
+                                            @if (item.SelectedOptions.Count() > 0)
+                                            {
+                                                <div class="fw-bold">Options:</div>
+                                            }
+                                            @if (item.SelectedOptions.Any())
+                                            {
+                                                <div class="text-muted small">
+                                                    @foreach (var option in item.SelectedOptions)
+                                                    {
+                                                        <div>@($"+RM{option.AdditionalPrice} {option.OptionName}")</div>
+                                                    }
+
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-3 col-md-5 text-end position-relative">
+                                            <form asp-action="RemoveCartItem" asp-route-id="@item.Id" method="post" class="m-0">
+                                                @Html.AntiForgeryToken()
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- Quantity & Price -->
+                                        <div class="col-12 col-md-12 mt-2 mt-md-0">
+                                            <div class="col-12 col-md-2 mt-2 mt-md-0 text-end">
                                             </div>
-                                        }
-                                    </div>
-                                    <div class="col-3 col-md-5 text-end position-relative">
-                                        <form asp-action="RemoveCartItem" asp-route-id="@item.Id" method="post" class="m-0">
-                                            @Html.AntiForgeryToken()
-                                            <button class="btn btn-sm btn-outline-danger" type="submit">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-
-                                    <!-- Quantity & Price -->
-                                    <div class="col-12 col-md-12 mt-2 mt-md-0">
-                                        <div class="col-12 col-md-2 mt-2 mt-md-0 text-end">
-                                        </div>
-                                        <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
-                                            <span>Subtotal:</span>
-                                            <span>x @item.Quantity</span>
-                                            <span class="fw-bold">RM @item.TotalPrice.ToString("0.00")</span>
+                                            <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
+                                                <span>Subtotal:</span>
+                                                <span>x @item.Quantity</span>
+                                                <span class="fw-bold">RM @item.TotalPrice.ToString("0.00")</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <hr />
+                                    <hr />
+                                }
                             }
                         }
                         <div class="col-12 col-md-12 mt-2 mt-md-0">
                             <div class="d-flex justify-content-between justify-content-md-end gap-md-3">
                                 <h5 class="mb-0 fw-bold">
-                                    Total (<span class="text-primary">@Model.ItemCart.Where(i => i.Product.userId == shopOwnwer.Id).Count()</span> item@((Model.ItemCart.Where(i => i.Product.userId == shopOwnwer.Id).Count() > 1) ? "s" : "")):
+                                    Total (<span class="text-primary">@Model.ItemCart?.Where(i => i.Product.userId == shopOwnwer?.Id).Count()</span> item@((Model.ItemCart.Where(i => i.Product.userId == shopOwnwer.Id).Count() > 1) ? "s" : "")):
                                 </h5>
                                 <h3 id="@($"totalToPay{@shopOwnwer.Id}") class="mb-0 text-danger fw-bold text-decoration-underline">
                                     @($"RM{ViewData[shopOwnwer.Id]}")
@@ -136,5 +140,6 @@
 
 @section Scripts
 {
+    <partial name="_NotificationPartial" />
     <partial name="_CartScriptsPartial" />
 }

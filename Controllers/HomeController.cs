@@ -1,12 +1,14 @@
-using System.Diagnostics;
-using System.Linq.Expressions;
 using E_Commers_Adelia.Data;
 using E_Commers_Adelia.Models;
+using E_Commers_Adelia.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace E_Commers_Adelia.Controllers
 {
@@ -16,24 +18,38 @@ namespace E_Commers_Adelia.Controllers
         private readonly IHubContext<NotificationHub> _hub;
         private readonly UserManager<EUser> _userManager;
         private readonly SignInManager<EUser> _signInManager;
+        private readonly INotification _noti;
 
-        public HomeController(ApplicationDbContext db, IHubContext<NotificationHub> hub, UserManager<EUser> userManager, SignInManager<EUser> signInManager)
+        public HomeController(ApplicationDbContext db, 
+            IHubContext<NotificationHub> hub, 
+            UserManager<EUser> userManager, 
+            SignInManager<EUser> signInManager, 
+            INotification noti)
         {
             _db = db;
             _hub = hub;
             _userManager = userManager;
             _signInManager = signInManager;
+            _noti = noti;
         }
 
         public async Task<IActionResult> Index()
         {
-            if (_signInManager.IsSignedIn(User))
+            var products = await _db.Products.ToListAsync();
+            List<Product> whiteListProducts = new List<Product>();
+            foreach (var item in products)
             {
-                var user = await _userManager.GetUserAsync(User);
-                await _hub.Clients.User(user.Id).SendAsync("Receive", "Test Hello");
+                var owner = await _userManager.FindByIdAsync(item.userId);
+                if (owner != null)
+                {
+                    if (owner.IsOpen)
+                    {
+                        whiteListProducts.Add(item);
+                    }
+                }
+                
             }
-            return View(await _db.Products.ToListAsync());
-
+            return View(whiteListProducts);
         }
 
 
@@ -43,6 +59,5 @@ namespace E_Commers_Adelia.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        
     }
 }

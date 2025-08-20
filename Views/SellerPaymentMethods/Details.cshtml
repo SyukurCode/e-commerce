@@ -62,7 +62,7 @@
         </dl>
         <div class="card-footer text-center">
             <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
-            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+                <a class="btn btn-outline-secondary" onclick="history.back()">Back</a>
         </div>
     </div>
 </div>

@@ -1,0 +1,70 @@
+﻿@model StoreConfig
+
+@{
+    ViewData["Title"] = "Your Store";
+}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">You store currently @(Model.IsOpen ? "Opened" : "Closed")</h6>
+    </div>
+</div>
+<div class="row">
+        <div class="card shadow-lg border-0 p-4 rounded-4 text-start" style="max-width: 600px;">
+            <div class="card-body">
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">Detail</div>
+                    <div class="card-tools">
+                        <a asp-action="Edit" class="btn btn-label-info btn-round btn-sm">
+                          <span class="btn-label">
+                            <i class="fa fa-pencil-alt"></i>
+                          </span>
+                          Edit
+                        </a>
+                </div>
+                </div>
+                    <div class="card-list py-4">
+                        <dl class="row">
+                            <dt class="col-sm-4">
+                            @Html.DisplayNameFor(Model => Model.OwnerName)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(Model => Model.OwnerName)
+                        </dd>
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(Model => Model.StoreName)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(Model => Model.StoreName)
+                        </dd>
+                        <dt class="col-sm-4">
+                            @Html.DisplayNameFor(Model => Model.IsOpen)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @if(Model.IsOpen) {
+                                <a href="#" class="btn btn-label-success btn-round btn-sm">
+                            <span class="btn-label">
+                                <i class="fa fa-door-open"></i>
+                            </span>
+                            Open
+                        </a>
+                            }else
+                            {
+                            <a href="#" class="btn btn-label-danger btn-round btn-sm">
+                                <span class="btn-label">
+                                    <i class="fa fa-door-closed"></i>
+                                </span>
+                                Close
+                            </a>
+                            }
+                        </dd>
+                        </dl>
+                    </div>
+               
+            </div>
+        </div>
+    </div>
+@section Scripts {
+    <partial name="_NotificationPartial" />
+    <partial name="_ProductDataTableScriptPartial" />
+}

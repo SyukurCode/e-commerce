@@ -115,14 +115,23 @@ namespace E_Commers_Adelia.Controllers
                     }
                 }
 
+                //check seller still open
+                var isOpen = _userManager.FindByIdAsync(orderDetails.Product?.userId ?? "").Result?.IsOpen ?? false;
+                if (!isOpen) 
+                {
+                    TempData["DialogError"] = "Store was close";
+                    return RedirectToAction("Index","Home");
+                }
+
                 var order = new Models.Order
                 {
                     OrderNo = orderNo,
                     SellerId = orderDetails.Product?.userId ?? "",
-                    CustomerId = User.Identity.IsAuthenticated ? _userManager.GetUserId(User): null,
+                    CustomerId = (User?.Identity != null && User.Identity.IsAuthenticated) ? _userManager.GetUserId(User) : null,
                     UnitPrice = productPrice + additionalPrice,
                     SubTotalPrice = (productPrice + additionalPrice) * orderDetails.Quantity,
                     PlaceDateTime = DateTime.UtcNow,
+                    ProductId = orderDetails.Product?.Id ?? 0,
                     ProductImageUrl = orderDetails.Product?.ImageUrl ?? "/img/blank.jpg",
                     ProductName = orderDetails.Product?.Name ?? "",
                     ProductDescription = orderDetails.Product?.Description ?? "",
@@ -132,6 +141,32 @@ namespace E_Commers_Adelia.Controllers
                     DeliveryId = 0,
                     ExtraCharges = 0
                 };
+
+                // validate product 
+                var product = await _db.Products.FindAsync(order.ProductId);
+                if (product != null || product.isEnable || !product.isHide)
+                {
+                    if(product.Stock >= order.Quantity)
+                    {
+                        product.Stock = product.Stock - order.Quantity;
+                        _db.Products.Update(product);
+                        await _db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        if(product.Stock > 0)
+                        {
+                            TempData["DialogWarning"] = "Product in low stock, please reduce quantity";
+                            return RedirectToAction("Index");
+                        }
+                        TempData["DialogWarning"] = "Sorry, Product is soldout";
+                        return RedirectToAction("Index");
+                    }
+                }
+                else {
+                    TempData["DialogWarning"] = $"This product currently not available";
+                    return RedirectToAction(nameof(Index), new { id = orderDetails.Product.Id });
+                }
 
                 _db.Orders.Add(order);
                 await _db.SaveChangesAsync();
@@ -253,11 +288,14 @@ namespace E_Commers_Adelia.Controllers
             {
                 return View(model);
             }
-            var order = await _db.Orders.FirstOrDefaultAsync(x => x.OrderNo == model.OrderNo);
+            var orders = await _db.Orders.Where(x => x.OrderNo == model.OrderNo).ToListAsync();
             var Extrcharge = _db.SellerDeliveryOptions.FirstOrDefault(x => x.DeliveryId == model.OrderPlace.DeliveryTypeId).AdditionalPrice;
-            order.DeliveryId = model.OrderPlace.DeliveryTypeId;
-            order.ExtraCharges = Extrcharge;
-            _db.Orders.Update(order);
+            foreach (var order in orders)
+            {
+                order.DeliveryId = model.OrderPlace.DeliveryTypeId;
+                order.ExtraCharges = Extrcharge;
+                _db.Orders.UpdateRange(order);
+            }
             await _db.SaveChangesAsync();
 
             HttpContext.Session.SetString("OrderView", JsonConvert.SerializeObject(model));
@@ -423,12 +461,16 @@ namespace E_Commers_Adelia.Controllers
                     Text = "New order receive",
                     UserId = SellerId 
                 });
+                
+                // Tolak quantity Product
+                //var product = await _db.Products.FindAsync()
 
                 await _hub.Clients.Users(SellerId).SendAsync("Order-Receive", orderNo, totalPrice);
             }
             
             return View(payment);
         }
+
 
         public async Task<IActionResult> UploadReceipt(int id)
         {
@@ -483,6 +525,23 @@ namespace E_Commers_Adelia.Controllers
             
             var userOrder = await _db.Orders.Where(x => x.CustomerId == _userManager.GetUserId(User)).ToListAsync();
             return View(userOrder);
+        }
+
+        public async Task<IActionResult> Cancel(string orderNo)
+        {
+            var orders = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
+            foreach(var order in orders)
+            {
+                var product = await _db.Products.FindAsync(order.ProductId);
+                product.Stock = product.Stock + order.Quantity;
+                order.StatusId = OrderStatus.Cancelled.Id;
+                _db.Orders.Update(order);
+                _db.Products.Update(product);
+                await _db.SaveChangesAsync();
+            }
+            
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }
