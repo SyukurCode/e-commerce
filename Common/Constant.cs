@@ -111,7 +111,14 @@ namespace E_Commers_Adelia.Common
         {
             Id = 6,
             Name = "Cancelled",
-            Detail = "Order has been cancelled by buyer or seller"
+            Detail = "Order has been cancelled by seller"
+        };
+
+        public static readonly OrderStatus Shiped = new OrderStatus
+        {
+            Id = 7,
+            Name = "Delivered",
+            Detail = "Order has been deliverd to customer"
         };
 
         public static IEnumerable<OrderStatus> All =>

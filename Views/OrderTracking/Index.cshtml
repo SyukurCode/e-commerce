@@ -1,61 +1,101 @@
-﻿@model OrderHistory
+﻿@using E_Commers_Adelia.Common
+@model IEnumerable<OrderHistory>
 
 @{
     ViewData["Title"] = "Order History";
+    var currentState = new OrderHistory();
+    if (Model.Count() > 0)
+    {
+        currentState = Model.LastOrDefault();
+    }
 }
-
-<div class="page-header">
-    <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
-    <ul class="breadcrumbs mb-3">
-        <li class="nav-home">
-            <a asp-action="Index" asp-controller="Home">
-                <i class="icon-home"></i>
-            </a>
-        </li>
-        <li class="separator">
-            <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-            <a href="#">Cart</a>
-        </li>
-        <li class="separator">
-            <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-            <a href="#">Cart Items</a>
-        </li>
-    </ul>
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"] @($"#{currentState?.OrderNo ?? ""}")</h3>
+        <h6 class="op-7 mb-2">@OrderStatus.All.FirstOrDefault(x => x.Id == currentState?.StatusId)?.Detail</h6>
+    </div>
+    <div class="ms-md-auto py-2 py-md-0">
+        <!--=-->
+        <a asp-action="Index" asp-controller="OrderTracking" asp-route-orderNo="@currentState?.OrderNo" class="btn btn-primary btn-round" onclick="addTimelineStatus(2,'test','now')">
+            <span class="btn-label">
+                <i class="fa fa-sync-alt"></i>
+            </span>
+            Refresh
+        </a>
+    </div>
 </div>
-<hr />
 <!-- TimeLine -->
-<h3 class="fw-bold mb-3">Timeline</h3>
-<div class="row">
-    <div class="col-md-12">
-        <ul class="timeline">
-            <li>
-                <div class="timeline-badge">
-                    <i class="far fa-paper-plane"></i>
-                </div>
-                <div class="timeline-panel">
-                    <div class="timeline-heading">
-                        <h4 class="timeline-title">Mussum ipsum cacilds</h4>
-                        <p>
-                            <small class="text-muted">
-                                <i class="far fa-paper-plane"></i> 11 hours ago via
-                                Twitter
-                            </small>
-                        </p>
-                    </div>
-                    <div class="timeline-body">
-                        <p>
-                            Far far away, behind the word mountains, far from the
-                            countries Vokalia and Consonantia, there live the
-                            blind texts.
-                        </p>
-                    </div>
-                </div>
-            </li>
-            <li class="timeline-inverted">
+@if (Model?.Count() > 0)
+{
+    var isInvert = true;
+    <h3 class="fw-bold mb-3">Timeline</h3>
+    <div class="row">
+        <div class="col-md-12">
+            <ul id="order-timeline" class="timeline">
+                @foreach (var item in Model)
+                {
+
+                    <li class="@(isInvert ? "" : "timeline-inverted")">
+
+                        @switch (item.StatusId)
+                        {
+                            case 2:
+                                <div class="timeline-badge">
+                                    <i class="far fa-paper-plane"></i>
+                                </div>
+                                break;
+                            case 3:
+                                <div class="timeline-badge warning">
+                                    <i class="far fa-bell"></i>
+                                </div>
+                                break;
+                            case 4:
+                                <div class="timeline-badge info">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                break;
+                            case 5:
+                                <div class="timeline-badge success">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                break;
+                            case 6:
+                                <div class="timeline-badge danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </div>
+                                break;
+                            case 7:
+                                <div class="timeline-badge success">
+                                    <i class="fas fa-people-carry"></i>
+                                </div>
+                                break;
+                            default:
+                                <div class="timeline-badge">
+                                    <i class="fas fa-question"></i>
+                                </div>
+                                break;
+                        }
+
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4 class="timeline-title">@item.Created.ToLocalTime().ToString("d/M/yyyy h:mm:ss tt")</h4>
+                                <p>
+                                    <small class="text-muted">
+                                        @DurationCalulator.GetTimeAgo(item.Created)
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="timeline-body">
+                                <p>
+                                    @item.Text
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+
+                    isInvert = !isInvert;
+                }
+                @*  <li class="timeline-inverted">
                 <div class="timeline-badge warning">
                     <i class="far fa-bell"></i>
                 </div>
@@ -168,7 +208,12 @@
                         </p>
                     </div>
                 </div>
-            </li>
-        </ul>
+            </li> *@
+            </ul>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="col-md-12 text-center">Order No not found</div>
+}

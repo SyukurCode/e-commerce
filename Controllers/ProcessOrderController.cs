@@ -19,12 +19,17 @@ namespace E_Commers_Adelia.Controllers
         private readonly UserManager<EUser> _userManager;
         private readonly ApplicationDbContext _db;
         private readonly ICustomerPayment _payment;
+        private readonly IOrderHistory _orderHistory;
 
-        public ProcessOrderController(UserManager<EUser> userManager, ApplicationDbContext db, ICustomerPayment payment) 
+        public ProcessOrderController(UserManager<EUser> userManager, 
+            ApplicationDbContext db, 
+            ICustomerPayment payment,
+            IOrderHistory orderHistory) 
         {
             _userManager = userManager;
             _db = db;
             _payment = payment;
+            _orderHistory = orderHistory;
         }
         public async Task<IActionResult> Index()
         {
@@ -45,6 +50,7 @@ namespace E_Commers_Adelia.Controllers
                     {
                         item.StatusId = OrderStatus.PickupBySeller.Id;
                         item.UpdateDateTime = DateTime.UtcNow;
+                        await _orderHistory.CreateAsync(item.OrderNo, "Your order has been picked up by the seller.", item.StatusId);
                         _db.Orders.Update(item);
                         await _db.SaveChangesAsync();
                     }
@@ -69,6 +75,7 @@ namespace E_Commers_Adelia.Controllers
                         item.StatusId = OrderStatus.Processing.Id;
                         item.UpdateDateTime = DateTime.UtcNow;
                         _db.Orders.Update(item);
+                        await _orderHistory.CreateAsync(orderNo: item.OrderNo, text: "Seller has confirmed and processed your order.", item.StatusId);
                     }
                 }
                 await _db.SaveChangesAsync();
@@ -80,6 +87,7 @@ namespace E_Commers_Adelia.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> FinishOrder(int id)
         {
+            // Update finish order
             var order = await _db.Orders.FindAsync(id);
             if (order != null)
             {
@@ -92,7 +100,18 @@ namespace E_Commers_Adelia.Controllers
                 order.UpdateDateTime = DateTime.UtcNow;
                 _db.Orders.Update(order);
                 await _db.SaveChangesAsync();
+
+                // Send update to user
+                var totalOrder = await _db.Orders.Where(x => x.OrderNo == order.OrderNo).CountAsync();
+                var totalComplete = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Processing.Id).CountAsync();
+                var totalCancel = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Cancelled.Id).CountAsync();
+
+                if (totalOrder == totalComplete)
+                {
+                    await _orderHistory.CreateAsync(orderNo: order.OrderNo, text: "Your order has been completed and is ready for delivery/pickup.", (totalCancel == totalOrder ? OrderStatus.Cancelled.Id : order.StatusId));
+                }
             }
+            
             return RedirectToAction("View", new { id = order?.OrderNo });
         }
         [HttpPost]
@@ -102,6 +121,7 @@ namespace E_Commers_Adelia.Controllers
             var order = await _db.Orders.FindAsync(id);
             order.StatusId = OrderStatus.Cancelled.Id;
             order.UpdateDateTime = DateTime.UtcNow;
+            await _orderHistory.CreateAsync(orderNo: order.OrderNo, text: "Your order has been cancelled by the seller.", order.StatusId);
             _db.Orders.Update(order);
             await _db.SaveChangesAsync();
 

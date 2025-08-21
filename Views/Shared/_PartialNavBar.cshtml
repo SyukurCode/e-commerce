@@ -25,22 +25,43 @@
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
     <div class="container-fluid">
         <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-            <form asp-action="Index" asp-controller="OrderTracking">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <button type="submit" class="btn btn-search pe-1">
-                        <i class="fa fa-search search-icon"></i>
-                    </button>
+              <form asp-action="Index" asp-controller="OrderTracking"> 
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button type="submit" class="btn btn-search pe-1">
+                            <i class="fa fa-search search-icon"></i>
+                        </button>
+                    </div>
+                    <input id="orderNoInput" type="text"
+                           name="orderNo"
+                           placeholder="Trace order ..."
+                           value="@ViewData["search"]"
+                           class="form-control" />
                 </div>
-                <input type="text"
-                       name="orderNo"
-                       placeholder="Trace order..."
-                       class="form-control" />
-            </div>
-            </form>
+             </form>  
         </nav>
 
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+            <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+                <a class="nav-link dropdown-toggle"
+                   data-bs-toggle="dropdown"
+                   role="button"
+                   aria-expanded="false"
+                   aria-haspopup="true">
+                    <i class="fa fa-search"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-search animated fadeIn">
+                    <form asp-action="Index" asp-controller="OrderTracking" class="navbar-left navbar-form nav-search">
+                        <div class="input-group">
+                            <input id="orderNoInput" type="text"
+                                   name="orderNo"
+                                   placeholder="Trace order ..."
+                                   value="@ViewData["search"]"
+                                   class="form-control" />
+                        </div>
+                    </form>
+                </ul>
+            </li>
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle"
                    asp-action="Index" asp-controller="Cart"
@@ -74,7 +95,7 @@
                     <li>
                         <div class="dropdown-title d-flex justify-content-between align-items-center">
                             @($"{notiCount} New notification")
-                            <a id="btnMarkAll" class="small">Dismiss all</a>
+                            @* <a id="btnMarkAll" class="small">Dismiss all</a> *@
                         </div>
                     </li>
                     <li>

@@ -173,26 +173,53 @@ function changeQuantity(amount) {
     if (current < 1) current = 1;
     input.value = current;
 }
-function appendTableOrder(orderNo,totalPrice) {
-    $("#tableOrder tbody").append(
-        `<tr>
-            <th scope="row">
 
-                <a asp-action="View"
-                    asp-controller="ProcessOrder"
-                    asp-route-id="${orderNo}"
-                    class="list-group-item list-group-item-action @(Model.FirstOrDefault(x=> x.OrderNo == order).StatusId < 3 ? "active":"") ">
-                    <label class="btn btn-icon btn-round btn-sm me-2">
-                        <i class="fa fa-shopping-bag"></i>
-                    </label>
-                    #${orderNo}
-                </a>
-            </th>
-            <td class="text-end">0%</td>
-            <td class="text-end">RM${totalPrice}</td>
-            </tr >`
-    )
-};
+// text,date,icon,mode,duration
+function addTimelineStatus(model)
+{
+    const timeline = document.getElementById("order-timeline");
+    if (!timeline) {
+        aler("Timeline element not found!");
+        return;
+    }
+    if (model.length > 0)
+    {
+        
+        document.getElementById("order-timeline").innerHTML = "";
+
+        model.forEach(m => {
+            // Create new <li>
+            const li = document.createElement("li");
+            if (m.mode != "") {
+                li.classList.add(m.mode);
+            }
+
+            // Add inner HTML (icon + message)
+            li.innerHTML = `
+            <div class="timeline-badge ${m.state}">
+                <i class="${m.icon}"></i>
+            </div>
+            <div class="timeline-panel">
+                <div class="timeline-heading">
+                    <h4 class="timeline-title">${m.date}</h4>
+                    <p>
+                        <small class="text-muted">
+                            ${m.duration}
+                        </small>
+                    </p>
+                </div>
+                <div class="timeline-body">
+                    <p>
+                        ${m.text}
+                    </p>
+                </div>
+            </div>`;
+
+            // Append ke timeline
+            document.getElementById("order-timeline").appendChild(li);
+        });
+    }
+}
 
 document.addEventListener("click", function (e) {
     if (e.target.id === "btnRemoveAll") {
@@ -225,9 +252,20 @@ connection.on("Noti-Receive", function (count) {
             document.getElementById("navbarContainer").innerHTML = html;
         });
 });
-connection.on("Order-Receive", function (orderNo, totalPrice) {
-    appendTableOrder(orderNo, totalPrice)
+//connection.on("Order-Receive", function (orderNo, totalPrice) {
+//    appendTableOrder(orderNo, totalPrice)
+//});
+
+connection.on("Order-Tracking", function (no, model) {
+    let orderNo = document.getElementById("orderNoInput")?.value;
+    if (orderNo) {
+        if (orderNo == no) {
+            
+            addTimelineStatus(model);
+        }
+    }
 });
+
 connection.start().then(function () {
     console.log("Connected to NotificationHub");
 }).catch(err => console.error("❌ Connection failed: ", err));

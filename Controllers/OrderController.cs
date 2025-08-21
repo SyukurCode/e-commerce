@@ -29,12 +29,14 @@ namespace E_Commers_Adelia.Controllers
         private readonly INotification _noti;
         private readonly IHubContext<NotificationHub> _hub;
         private readonly IReceiptVerificationService _receiptVerificationService;
+        private readonly IOrderHistory _orderHistory;
         public OrderController(ApplicationDbContext db,
             UserManager<EUser> userManager, 
             IWebHostEnvironment webHostEnvironment, 
             INotification noti, 
             IHubContext<NotificationHub> hub,
-            IReceiptVerificationService receiptVerificationService)
+            IReceiptVerificationService receiptVerificationService,
+            IOrderHistory orderHistory)
         {
             _db = db;
             _userManager = userManager;
@@ -42,6 +44,7 @@ namespace E_Commers_Adelia.Controllers
             _noti = noti;
             _hub = hub;
             _receiptVerificationService = receiptVerificationService;
+            _orderHistory = orderHistory;
         }
         public async Task<IActionResult> Index(int id)
         {
@@ -167,8 +170,8 @@ namespace E_Commers_Adelia.Controllers
                     TempData["DialogWarning"] = $"This product currently not available";
                     return RedirectToAction(nameof(Index), new { id = orderDetails.Product.Id });
                 }
-
-                _db.Orders.Add(order);
+                
+                await _db.Orders.AddAsync(order);
                 await _db.SaveChangesAsync();
 
                 return RedirectToAction("Checkout", new { orderNo = orderNo });
@@ -289,11 +292,11 @@ namespace E_Commers_Adelia.Controllers
                 return View(model);
             }
             var orders = await _db.Orders.Where(x => x.OrderNo == model.OrderNo).ToListAsync();
-            var Extrcharge = _db.SellerDeliveryOptions.FirstOrDefault(x => x.DeliveryId == model.OrderPlace.DeliveryTypeId).AdditionalPrice;
+            var Extrcharge = _db.SellerDeliveryOptions.FirstOrDefault(x => x.DeliveryId == model.OrderPlace.DeliveryTypeId)?.AdditionalPrice;
             foreach (var order in orders)
             {
                 order.DeliveryId = model.OrderPlace.DeliveryTypeId;
-                order.ExtraCharges = Extrcharge;
+                order.ExtraCharges = Extrcharge ?? 0;
                 _db.Orders.UpdateRange(order);
             }
             await _db.SaveChangesAsync();
@@ -362,7 +365,7 @@ namespace E_Commers_Adelia.Controllers
                 customerPayment.PaymentTypeId = model.OrderPlace.PaymentTypeId;
                 if (customerPayment == null)
                 {
-                    _db.CustomerPayments.Add(customerPayment);
+                    await _db.CustomerPayments.AddAsync(customerPayment);
                 }
                 else
                 {
@@ -410,12 +413,12 @@ namespace E_Commers_Adelia.Controllers
             if (model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id)
             {
                 // Jika maklumat dilivery tiada trus tambah baru
-                var customerDeliveryInfo = await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == model.CustomerDeliveryInfo.CustomerId);
-                if (customerDeliveryInfo == null)
+                var customerDeliveryInfo = await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == (string.IsNullOrEmpty(model.CustomerDeliveryInfo.CustomerId) ? model.CustomerDeliveryInfo.CustomerId: "x"));
+                if (customerDeliveryInfo == null || string.IsNullOrEmpty(model.CustomerDeliveryInfo.CustomerId))
                 {
                     customerDeliveryInfo = new CustomerDeliveryInfo();
                     customerDeliveryInfo = model.CustomerDeliveryInfo;
-                    _db.CustomerDeliveryInfo.Add(customerDeliveryInfo);
+                    await _db.CustomerDeliveryInfo.AddAsync(customerDeliveryInfo);
                     await _db.SaveChangesAsync();
                 }
             }
@@ -449,7 +452,8 @@ namespace E_Commers_Adelia.Controllers
                     SellerId = item.SellerId;
                     item.StatusId = OrderStatus.OrderSend.Id;
                     item.UpdateDateTime = DateTime.UtcNow;
-                    _db.Orders.UpdateRange(item);
+                    _db.Orders.Update(item);
+                    await _orderHistory.CreateAsync(orderNo: item.OrderNo, text: "Your order was send to seller",item.StatusId);
                 }
                 await _db.SaveChangesAsync();
 

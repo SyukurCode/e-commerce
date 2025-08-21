@@ -56,8 +56,8 @@
                                         var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
                                         float percentCancel = ((float)totalCancel / totalOrder) * 100f;
                                         float percentComplete = ((float)totalComplete / totalOrder) * 100f;
-                                        var customerName = User.Identity.IsAuthenticated ? userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName : db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo).CustomerName;
-                                            
+                                        var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
+
                                     if ((percentComplete + percentCancel) < 100)
                                         {
                                             <div class="item-list">
@@ -99,7 +99,7 @@
                                     var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
                                     float percentComplete = ((float)totalComplete / totalOrder) * 100f;
                                     float percentCancel = ((float)totalCancel / totalOrder) * 100f;
-                                    var customerName = User.Identity.IsAuthenticated ? userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName : db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo).CustomerName;
+                                    var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
                                     if ((percentComplete + percentCancel) == 100)
                                     {
                                         <div class="item-list">

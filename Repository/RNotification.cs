@@ -21,7 +21,7 @@ namespace E_Commers_Adelia.Repository
             {
                 return false;
             }
-            _db.Notifications.Add(notification);
+            await _db.Notifications.AddAsync(notification);
             await _db.SaveChangesAsync();
 
             var notiCount = await _db.Notifications.Where(x => x.UserId == notification.UserId && x.IsRead == false).CountAsync();
@@ -37,7 +37,7 @@ namespace E_Commers_Adelia.Repository
 
         public async Task<IEnumerable<Notification>> GetByUser(string userId)
         {
-            return await _db.Notifications.Where(x => x.UserId == userId).ToListAsync();
+            return await _db.Notifications.Where(x => x.UserId == userId).OrderByDescending(x=>x.DateCreated).ToListAsync();
         }
 
         public async Task<bool> MarkAsRead(long id)
