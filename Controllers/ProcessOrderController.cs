@@ -34,13 +34,13 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Index()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            var orders = await _db.Orders.Where(x => x.SellerId == currentUser.Id && x.StatusId > OrderStatus.ToPay.Id).OrderBy(x => x.PlaceDateTime).ToListAsync();
+            var orders = await _db.Orders.Where(x => x.SellerId == currentUser.Id && x.StatusId > OrderStatus.ToPay.Id && x.StatusId != OrderStatus.UserCanceled.Id).OrderBy(x => x.PlaceDateTime).ToListAsync();
             return View(orders);
         }
 
         public async Task<IActionResult> View(string id)
         {
-            var order = await _db.Orders.Where(x=>x.OrderNo == id).ToListAsync();
+            var order = await _db.Orders.Where(x=>x.OrderNo == id && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
             if(order != null)
             {
                 // update status order to pickup
@@ -64,7 +64,7 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> ComfirmPayment(string id)
         {
             await _payment.Comfirm(id);
-            var order = await _db.Orders.Where(x => x.OrderNo == id).ToListAsync();
+            var order = await _db.Orders.Where(x => x.OrderNo == id && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
             if (order != null)
             {
                 // update status order to process
@@ -102,9 +102,9 @@ namespace E_Commers_Adelia.Controllers
                 await _db.SaveChangesAsync();
 
                 // Send update to user
-                var totalOrder = await _db.Orders.Where(x => x.OrderNo == order.OrderNo).CountAsync();
-                var totalComplete = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Processing.Id).CountAsync();
-                var totalCancel = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Cancelled.Id).CountAsync();
+                var totalOrder = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId != OrderStatus.UserCanceled.Id).CountAsync();
+                var totalComplete = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Processing.Id && x.StatusId != OrderStatus.UserCanceled.Id).CountAsync();
+                var totalCancel = await _db.Orders.Where(x => x.OrderNo == order.OrderNo && x.StatusId > OrderStatus.Cancelled.Id && x.StatusId != OrderStatus.UserCanceled.Id).CountAsync();
 
                 if (totalOrder == totalComplete)
                 {
@@ -119,13 +119,17 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> CancelOrder(int id)
         {
             var order = await _db.Orders.FindAsync(id);
-            order.StatusId = OrderStatus.Cancelled.Id;
-            order.UpdateDateTime = DateTime.UtcNow;
-            await _orderHistory.CreateAsync(orderNo: order.OrderNo, text: "Your order has been cancelled by the seller.", order.StatusId);
-            _db.Orders.Update(order);
-            await _db.SaveChangesAsync();
+            if (order != null)
+            {
+                order.StatusId = OrderStatus.Cancelled.Id;
+                order.UpdateDateTime = DateTime.UtcNow;
+                await _orderHistory.CreateAsync(orderNo: order.OrderNo, text: "Your order has been cancelled by the seller.", order.StatusId);
+                _db.Orders.Update(order);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("View", new { id = order.OrderNo });
+            }
 
-            return RedirectToAction("View", new { id = order.OrderNo });
+            return RedirectToAction("View", new { id = "" });
         }
     }
 }

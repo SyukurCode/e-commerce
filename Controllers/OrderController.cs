@@ -62,12 +62,12 @@ namespace E_Commers_Adelia.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index), new { id = orderDetails.Product.Id });
+                return RedirectToAction(nameof(Index), new { id = orderDetails.Product?.Id });
             }
 
             var orderNo = OrderNumber.Generate();
 
-            if (orderDetails.Quantity > orderDetails.Product.Stock)
+            if (orderDetails.Quantity > orderDetails.Product?.Stock)
             {
                 TempData["DialogWarning"] = "Product in low stock, please reduce quantity";
                 return RedirectToAction("Index");
@@ -263,7 +263,7 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Checkout(string orderNo)
         {
             decimal totalPrice = 0;
-            var orders = await _db.Orders.Where(o => o.OrderNo == orderNo).ToListAsync();
+            var orders = await _db.Orders.Where(x => x.OrderNo == orderNo && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
             var sellerId = string.Empty;
             foreach (var order in orders)
             {
@@ -291,7 +291,7 @@ namespace E_Commers_Adelia.Controllers
             {
                 return View(model);
             }
-            var orders = await _db.Orders.Where(x => x.OrderNo == model.OrderNo).ToListAsync();
+            var orders = await _db.Orders.Where(x => x.OrderNo == model.OrderNo && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
             var Extrcharge = _db.SellerDeliveryOptions.FirstOrDefault(x => x.DeliveryId == model.OrderPlace.DeliveryTypeId)?.AdditionalPrice;
             foreach (var order in orders)
             {
@@ -307,7 +307,7 @@ namespace E_Commers_Adelia.Controllers
 
         public async Task<IActionResult> Placed(string OrderNo)
         {
-            // for selfpickup get self pickup address
+            // for selfpickup get self pickup address 
             var customer = User.Identity.IsAuthenticated ? await _userManager.GetUserAsync(User): null;
             var customerDeliveryInfo = customer != null ? await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == customer.Id): null
     ;
@@ -344,10 +344,6 @@ namespace E_Commers_Adelia.Controllers
                 {
                     customerDeliveryInfo.CustomerEmail = customer.Email;
                 }
-            }
-            else
-            {
-                customerDeliveryInfo.OrderNo = OrderNo;
             }
 
             var json = HttpContext.Session.GetString("OrderView");
@@ -393,27 +389,26 @@ namespace E_Commers_Adelia.Controllers
         public async Task<IActionResult> Placed(OrderPlaceView model)
         {
             // remove model state jika selfpickup
-            if (model.DeliveryTypeId == DeliveryOption.SelfPickup.Id)
-            {
-                ModelState.Remove("CustomerDeliveryInfo.Address");
-                ModelState.Remove("CustomerDeliveryInfo.CustomerName");
-                ModelState.Remove("CustomerDeliveryInfo.CustomerEmail");
-                ModelState.Remove("CustomerDeliveryInfo.CustomerPhone");
-                ModelState.Remove("CustomerDeliveryInfo.OrderNo");
-
-            }
+            //if (model.DeliveryTypeId == DeliveryOption.SelfPickup.Id)
+            //{
+            //    ModelState.Remove("CustomerDeliveryInfo.Address");
+            //    ModelState.Remove("CustomerDeliveryInfo.CustomerName");
+            //    ModelState.Remove("CustomerDeliveryInfo.CustomerEmail");
+            //    ModelState.Remove("CustomerDeliveryInfo.CustomerPhone");
+            //    ModelState.Remove("CustomerDeliveryInfo.OrderNo");
+            //}
 
             // Validate Model
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return RedirectToAction("Placed", new { OrderNo =  model.OrderNo});
             }
 
             // Jika Delivery adalah Standard Delivery tambah maklumat customer
-            if (model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id)
+            if (model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id || model.DeliveryTypeId == DeliveryOption.SelfPickup.Id)
             {
                 // Jika maklumat dilivery tiada trus tambah baru
-                var customerDeliveryInfo = await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == (string.IsNullOrEmpty(model.CustomerDeliveryInfo.CustomerId) ? model.CustomerDeliveryInfo.CustomerId: "x"));
+                var customerDeliveryInfo = await _db.CustomerDeliveryInfo.FirstOrDefaultAsync(c => c.CustomerId == model.CustomerDeliveryInfo.CustomerId);
                 if (customerDeliveryInfo == null || string.IsNullOrEmpty(model.CustomerDeliveryInfo.CustomerId))
                 {
                     customerDeliveryInfo = new CustomerDeliveryInfo();
@@ -442,7 +437,7 @@ namespace E_Commers_Adelia.Controllers
             await _db.SaveChangesAsync();
 
             // Update Order Status
-            var order = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
+            var order = await _db.Orders.Where(x => x.OrderNo == orderNo && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
             var SellerId = "";
             var totalPrice = order.Select(x=>x.SubTotalPrice).Sum();
             if (order != null)
@@ -523,7 +518,7 @@ namespace E_Commers_Adelia.Controllers
             if (orderNo != "")
             {
                 ViewData["OrderNo"] = orderNo;
-                var order = await _db.Orders.Where(x => x.OrderNo == orderNo).ToListAsync();
+                var order = await _db.Orders.Where(x => x.OrderNo == orderNo && x.StatusId != OrderStatus.UserCanceled.Id).ToListAsync();
                 return View(order);
             }
             
@@ -537,15 +532,34 @@ namespace E_Commers_Adelia.Controllers
             foreach(var order in orders)
             {
                 var product = await _db.Products.FindAsync(order.ProductId);
-                product.Stock = product.Stock + order.Quantity;
-                order.StatusId = OrderStatus.Cancelled.Id;
-                _db.Orders.Update(order);
-                _db.Products.Update(product);
-                await _db.SaveChangesAsync();
+                if (product != null)
+                {
+                    product.Stock = product.Stock + order.Quantity;
+                    order.StatusId = OrderStatus.Cancelled.Id;
+                    _db.Orders.Update(order);
+                    _db.Products.Update(product);
+                    await _db.SaveChangesAsync();
+                }
             }
-            
-
             return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> CancelSingle(int id)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order != null)
+            {
+                var product = await _db.Products.FindAsync(order.ProductId);
+                if (product != null)
+                {
+                    product.Stock = product.Stock + order.Quantity;
+                    order.StatusId = OrderStatus.UserCanceled.Id;
+                    _db.Orders.Update(order);
+                    _db.Products.Update(product);
+                    await _db.SaveChangesAsync();
+                }
+            }
+            return RedirectToAction("Index", "CustomerOrder");
         }
     }
 }

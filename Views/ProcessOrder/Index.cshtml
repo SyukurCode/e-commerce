@@ -5,12 +5,12 @@
 @inject ApplicationDbContext db
 @{
     ViewData["Title"] = "Order Request";
-    ViewData["OrderCount"] = Model.Count();
+    ViewData["OrderCount"] = Model.Where(x=>x.StatusId < OrderStatus.Completed.Id).Count();
 }
 <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
     <div>
         <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
-        <h6 class="op-7 mb-2">You have currently @ViewData["OrderCount"] orders</h6>
+        <h6 class="op-7 mb-2">You have @ViewData["OrderCount"] pending orders</h6>
     </div>
 </div>
 
@@ -24,14 +24,6 @@
                             <div class="card-title">
                                 Order Transaction History
                             </div>
-                            @* <div class="card-tools">
-                                <a class="btn btn-label-info btn-round btn-sm" onclick="appendTable()">
-                                    <span class="btn-label">
-                                        <i class="fa fa-print"></i>
-                                    </span>
-                                    Print
-                                </a>
-                            </div> *@
                         </div>
                     </div>
                     <div class="card-body">
@@ -52,7 +44,7 @@
 
                                         var totalOrder = Model.Where(x => x.OrderNo == order.OrderNo).Count();
                                         var totalComplete = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Completed.Id).Count();
-                                        var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Cancelled.Id).Count();
+                                        var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && (x.StatusId == OrderStatus.Cancelled.Id || x.StatusId == OrderStatus.UserCanceled.Id)).Count();
                                         var price = Model.Where(x => x.OrderNo == order.OrderNo).Select(x => x.SubTotalPrice).Sum();
                                         float percentCancel = ((float)totalCancel / totalOrder) * 100f;
                                         float percentComplete = ((float)totalComplete / totalOrder) * 100f;
@@ -81,14 +73,13 @@
                                                 </div>
                                                 <p class="">@($"{percentComplete}%")</p>
                                             </div>
-
-                                                                        }
+                                            <hr/>
+                                        }
                                     }
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-                            <!-- Projects table -->
                             <div class="card-list py-4">
 
                                 @foreach (var order in Model.DistinctBy(x => x.OrderNo).OrderBy(x => x.UpdateDateTime).ToList())

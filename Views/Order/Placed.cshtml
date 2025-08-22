@@ -27,15 +27,15 @@
 </div>
 <hr />
 <form asp-action="Placed">
-    <input type="hidden" asp-for="CustomerDeliveryInfo.CustomerId" value="@user?.Id"/>
+    <input type="hidden" asp-for="CustomerDeliveryInfo.CustomerId" value="@user?.Id" />
     <input type="hidden" asp-for="DeliveryTypeId" />
     <input type="hidden" asp-for="PaymentTypeId" />
     <input type="hidden" asp-for="CustomerDeliveryInfo.Id" />
-    <input type="hidden" asp-for="CustomerDeliveryInfo.OrderNo"/>
-    <input type="hidden" asp-for="SellerId"/>
-    <input type="hidden" asp-for="OrderNo"/>
-    
-    @if (Model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id)
+    <input type="hidden" asp-for="CustomerDeliveryInfo.OrderNo" value="@Model.OrderNo" />
+    <input type="hidden" asp-for="SellerId" />
+    <input type="hidden" asp-for="OrderNo" />
+
+    @if (Model.DeliveryTypeId == DeliveryOption.StandardDelivery.Id || Model.DeliveryTypeId == DeliveryOption.SelfPickup.Id)
     {
         <div class="col">
             <div class="card shadow rounded-3 mb-4">
@@ -43,30 +43,30 @@
                     <h5 class="card-title mb-0">Delivery to</h5>
                 </div>
                 <div class="card-body text-center">
-                    
-                        
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="form-floating mb-3">
-                            <input asp-for="CustomerDeliveryInfo.CustomerName" class="form-control" />
-                            <label asp-for="CustomerDeliveryInfo.CustomerName" class="control-label"></label>
-                            <span asp-validation-for="CustomerDeliveryInfo.CustomerName" class="text-danger"></span>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input asp-for="CustomerDeliveryInfo.Address" class="form-control" />
-                            <label asp-for="CustomerDeliveryInfo.Address" class="control-label"></label>
-                            <span asp-validation-for="CustomerDeliveryInfo.Address" class="text-danger"></span>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input asp-for="CustomerDeliveryInfo.CustomerEmail" class="form-control" />
-                            <label asp-for="CustomerDeliveryInfo.CustomerEmail" class="control-label"></label>
-                            <span asp-validation-for="CustomerDeliveryInfo.CustomerEmail" class="text-danger"></span>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input asp-for="CustomerDeliveryInfo.CustomerPhone" class="form-control" />
-                            <label asp-for="CustomerDeliveryInfo.CustomerPhone" class="control-label"></label>
-                            <span asp-validation-for="CustomerDeliveryInfo.CustomerPhone" class="text-danger"></span>
-                        </div>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="CustomerDeliveryInfo.CustomerName" class="form-control" />
+                        <label asp-for="CustomerDeliveryInfo.CustomerName" class="control-label"></label>
+                        <span asp-validation-for="CustomerDeliveryInfo.CustomerName" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="CustomerDeliveryInfo.Address" class="form-control" />
+                        <label asp-for="CustomerDeliveryInfo.Address" class="control-label"></label>
+                        <span asp-validation-for="CustomerDeliveryInfo.Address" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="CustomerDeliveryInfo.CustomerPhone" class="form-control" />
+                        <label asp-for="CustomerDeliveryInfo.CustomerPhone" class="control-label"></label>
+                        <span asp-validation-for="CustomerDeliveryInfo.CustomerPhone" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="CustomerDeliveryInfo.CustomerEmail" class="form-control" />
+                        <label asp-for="CustomerDeliveryInfo.CustomerEmail" class="control-label"></label>
+                        <span asp-validation-for="CustomerDeliveryInfo.CustomerEmail" class="text-danger"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
                 <div class="card-body text-start">
                     <div class="card-body">
                         <p class="fw-bold">Please pickup your order at location below</p>
-                        <br/>
+                        <br />
                         <dl>
                             <dt>
                                 Address
@@ -113,9 +113,9 @@
             <div class="card shadow rounded-3 mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light border-0 position-relative">
                     <h5 class="card-title mb-0 text-start">QR Code</h5>
-                    <h3 class="mb-0 fw-bold text-primary">
+                    <div class="mb-0 fw-bold text-primary">
                         @($"Amount: RM{Model.Amount}")
-                    </h3>
+                    </div>
                 </div>
                 <div class="card-body text-center">
                     <img src="@ViewData["QRImage"]"
@@ -133,86 +133,86 @@
                 var bankInfo = db.onlineTransferNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
             }
             <div class="card shadow rounded-3 mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
                     <h5 class="card-title mb-0 text-primary text-start">Account Transfer</h5>
-                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+                    <div class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
                         @($"Amount: RM{Model.Amount}")
-                    </h3>
-            </div>
-            <div class="card-body text-start">
-                <div class="card-body">
-                    <dl>
-                        <dt>
-                            Bank Account Number
-                        </dt>
-                        <dd>
-                            @bankInfo.AccountNumber
-                        </dd>
-                        <dt>
-                            Bank Name
-                        </dt>
-                        <dd>
-                            @bankInfo.BankName
-                        </dd>
-                        <dt>
-                            Account Owner
-                        </dt>
-                        <dd>
-                            @bankInfo.AccounOwnerName
-                        </dd>
-                    </dl>
+                    </div>
+                </div>
+                <div class="card-body text-start">
+                    <div class="card-body">
+                        <dl>
+                            <dt>
+                                Bank Account Number
+                            </dt>
+                            <dd>
+                                @bankInfo.AccountNumber
+                            </dd>
+                            <dt>
+                                Bank Name
+                            </dt>
+                            <dd>
+                                @bankInfo.BankName
+                            </dd>
+                            <dt>
+                                Account Owner
+                            </dt>
+                            <dd>
+                                @bankInfo.AccounOwnerName
+                            </dd>
+                        </dl>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     }
-    @if(Model.PaymentTypeId == PaymentMethod.Cash.Id)
+    @if (Model.PaymentTypeId == PaymentMethod.Cash.Id)
     {
-    <div class="col">
-        @{
-            var Cash = db.CashNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
-        }
-        <div class="card shadow rounded-3 mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Noter</h5>
-                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+        <div class="col">
+            @{
+                var Cash = db.CashNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
+            }
+            <div class="card shadow rounded-3 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Note</h5>
+                    <div class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
                         @($"Amount: RM{Model.Amount}")
-                    </h3>
-            </div>
-            <div class="card-body text-start">
-                <div class="card-body">
-                    @Cash.Note
+                    </div>
+                </div>
+                <div class="card-body text-start">
+                    <div class="card-body">
+                        @Cash.Note
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     }
-    @if(Model.PaymentTypeId == PaymentMethod.COD.Id)
+    @if (Model.PaymentTypeId == PaymentMethod.COD.Id)
     {
-    <div class="col">
-        @{
-            var COD = db.CodNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
-        }
-        <div class="card shadow rounded-3 mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Noter</h5>
-                    <h3 class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
+        <div class="col">
+            @{
+                var COD = db.CodNotes.FirstOrDefault(a => a.UserId == Model.SellerId);
+            }
+            <div class="card shadow rounded-3 mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
+                    <h5 class="card-title mb-0 text-primary text-start"><i class="fa fa-info-circle"></i> Note</h5>
+                    <div class="mb-0 fw-bold position-absolute start-50 translate-middle-x text-danger">
                         @($"Amount: RM{Model.Amount}")
-                    </h3>
-            </div>
-            <div class="card-body text-start">
-                <div class="card-body">
-                    @COD.Note
+                    </div>
+                </div>
+                <div class="card-body text-start">
+                    <div class="card-body">
+                        @COD.Note
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     }
     <div class="col">
         <div class="card shadow rounded-3 mb-4 text-center">
             <div class="card-body">
-            <button type="submit" class="btn btn-primary w-100">Submit Order</button>
-        </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Order</button>
+            </div>
         </div>
     </div>
 </form>

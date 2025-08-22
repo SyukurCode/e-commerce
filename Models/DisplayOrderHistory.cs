@@ -7,6 +7,7 @@
         public string Date { get; set; }
         public string Mode { get; set; }
         public string State { get; set; }
+        public string Detail { get; set; }
         public string Duration { get; set; }
 
     }

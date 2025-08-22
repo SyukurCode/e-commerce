@@ -114,9 +114,16 @@ namespace E_Commers_Adelia.Common
             Detail = "Order has been cancelled by seller"
         };
 
-        public static readonly OrderStatus Shiped = new OrderStatus
+        public static readonly OrderStatus UserCanceled = new OrderStatus
         {
             Id = 7,
+            Name = "Cancelled",
+            Detail = "Order has been cancelled by seller"
+        };
+
+        public static readonly OrderStatus Shiped = new OrderStatus
+        {
+            Id = 8,
             Name = "Delivered",
             Detail = "Order has been deliverd to customer"
         };

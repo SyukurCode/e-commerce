@@ -177,14 +177,11 @@ function changeQuantity(amount) {
 // text,date,icon,mode,duration
 function addTimelineStatus(model)
 {
-    const timeline = document.getElementById("order-timeline");
-    if (!timeline) {
-        aler("Timeline element not found!");
-        return;
-    }
     if (model.length > 0)
     {
-        
+
+        //document.getElementById("details").innerHTML = m.detail;
+
         document.getElementById("order-timeline").innerHTML = "";
 
         model.forEach(m => {
@@ -215,6 +212,9 @@ function addTimelineStatus(model)
                 </div>
             </div>`;
 
+            if (m.detail != "") {
+                document.getElementById("details").innerHTML = m.detail;
+            }
             // Append ke timeline
             document.getElementById("order-timeline").appendChild(li);
         });

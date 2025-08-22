@@ -24,9 +24,18 @@
 </div>
 <hr />
 <div class="card shadow rounded-3 mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center bg-light border-0">
-        <h5 class="card-title mb-0 text-primary"># @ViewData["OrderNo"]</h5>
-        <span></span>
+    <div class="card-header">
+        <div class="card-head-row">
+            <div class="card-title mb-0 text-primary"># @ViewData["OrderNo"]</div>
+            <div class="card-tools">
+                <a asp-action="Index" asp-controller="OrderTracking" asp-route-orderNo="@ViewData["OrderNo"]" class="btn btn-label-info btn-round btn-sm">
+                    <span class="btn-label">
+                        <i class="fas fa-map-marker"></i>
+                    </span>
+                    Track
+                </a>
+            </div>
+        </div>
     </div>
     <div class="card-body text-center">
         @foreach (var item in Model)
@@ -35,8 +44,8 @@
                 <!-- Product Image -->
                 <div class="col-3 col-md-2 text-center">
                     <img src="@(string.IsNullOrEmpty(item.ProductImageUrl)
-                                                                 ? Url.Content("~/img/blank.jpg")
-                                                                 : Url.Content("~/" + item.ProductImageUrl))"
+                                                                                          ? Url.Content("~/img/blank.jpg")
+                                                                                          : Url.Content("~/" + item.ProductImageUrl))"
                      alt="..."
                      class="img-fluid fa-behance-square"
                      style="max-width: 60px;height:auto" />

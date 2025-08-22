@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
+using NuGet.Versioning;
 using System.CodeDom;
 
 namespace E_Commers_Adelia.Repository
@@ -40,11 +41,11 @@ namespace E_Commers_Adelia.Repository
                 var listOModel = await _db.OrderHistory.Where(x => x.OrderNo == orderNo).ToListAsync();
                 foreach (var item in listOModel) 
                 {
+                    var orderSatus = OrderStatus.All.FirstOrDefault(x => x.Id == item.StatusId);
                     var result = process(item.StatusId);
                     if (result.Value != null)
                     {
                         dynamic data = result.Value;
-
                         var i = new DisplayOrderHistory
                         {
                             Date = item.Created.ToLocalTime().ToString("d/M/yyyy h:mm:ss tt"),
@@ -52,7 +53,8 @@ namespace E_Commers_Adelia.Repository
                             Icon = data.icon,
                             Mode = data.mode,
                             Text = item.Text,
-                            State = data.state
+                            State = data.state,
+                            Detail = orderSatus.Detail
                         };
                         model.Add(i);
                     }

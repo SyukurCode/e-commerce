@@ -25,7 +25,7 @@
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
     <div class="container-fluid">
         <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-              <form asp-action="Index" asp-controller="OrderTracking"> 
+            <form asp-action="Index" asp-controller="OrderTracking">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <button type="submit" class="btn btn-search pe-1">
@@ -38,7 +38,7 @@
                            value="@ViewData["search"]"
                            class="form-control" />
                 </div>
-             </form>  
+            </form>
         </nav>
 
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
@@ -90,40 +90,42 @@
                         <span class="notification">@notiCount</span>
                     }
                 </a>
-                <ul class="dropdown-menu messages-notif-box animated fadeIn"
-                    aria-labelledby="notifDropdown">
-                    <li>
-                        <div class="dropdown-title d-flex justify-content-between align-items-center">
-                            @($"{notiCount} New notification")
-                            @* <a id="btnMarkAll" class="small">Dismiss all</a> *@
-                        </div>
-                    </li>
-                    <li>
-                        <div class="message-notif-scroll scrollbar-outer">
-                            <div class="notif-center">
-                                @foreach (var n in noti)
-                                {
-                                    var duration = DurationCalulator.GetTimeAgo(n.DateCreated);
-                                    <a asp-action="Index" asp-controller="Notification" asp-route-id="@n.Id" class="">
-                                        <div class="notif-icon notif-primary">
-                                            <i class="fa @n.FaIcon"></i>
-                                        </div>
-                                        <div class="notif-content">
-                                            <span class="block @(n.IsRead ? "" : "fw-bold text-black")"> @n.Text </span>
-                                            <span class="time">@duration</span>
-                                        </div>
-                                    </a>
-                                }
+                @if ((int?)notiCount > 0)
+                {
+                    <ul class="dropdown-menu messages-notif-box animated fadeIn"
+                        aria-labelledby="notifDropdown">
+                        <li>
+                            <div class="dropdown-title d-flex justify-content-between align-items-center">
+                                @($"{notiCount} New notification")
+                                @* <a id="btnMarkAll" class="small">Dismiss all</a> *@
                             </div>
-                        </div>
-                    </li>
-                    <li>
-
-                        <a class="see-all" id="btnRemoveAll">
-                            Clear all notifications<i class="fa fa-angle-right"></i>
-                        </a>
-                    </li>
-                </ul>
+                        </li>
+                        <li>
+                            <div class="message-notif-scroll scrollbar-outer">
+                                <div class="notif-center">
+                                    @foreach (var n in noti)
+                                    {
+                                        var duration = DurationCalulator.GetTimeAgo(n.DateCreated);
+                                        <a asp-action="Index" asp-controller="Notification" asp-route-id="@n.Id" class="">
+                                            <div class="notif-icon notif-primary">
+                                                <i class="fa @n.FaIcon"></i>
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="block @(n.IsRead ? "" : "fw-bold text-black")"> @n.Text </span>
+                                                <span class="time">@duration</span>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <a class="see-all" id="btnRemoveAll">
+                                Clear all notifications<i class="fa fa-angle-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                }
             </li>
             <li class="nav-item topbar-user dropdown hidden-caret">
                 <a id="manage" class="dropdown-toggle profile-pic"

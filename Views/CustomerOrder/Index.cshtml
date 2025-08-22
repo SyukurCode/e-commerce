@@ -1,0 +1,196 @@
+﻿@using E_Commers_Adelia.Common
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<E_Commers_Adelia.Models.Order>
+@inject UserManager<EUser> userManager
+@inject ApplicationDbContext db
+@{
+    ViewData["Title"] = "Your Order";
+    ViewData["OrderCount"] = Model.Count();
+}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">You have currently @ViewData["OrderCount"] orders</h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-neworder" role="tabpanel" aria-labelledby="pills-neworder-tab">
+                <div class="card shadow rounded-3 mb-4">
+                    <div class="card-header">
+                        <div class="card-head-row card-tools-still-right">
+                            <div class="card-title">
+                                Order Transaction History
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-pills nav-fill nav-secondary" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="pills-toreceive-tab" data-bs-toggle="pill" href="#pills-toreceive" role="tab" aria-controls="pills-toreceive" aria-selected="true">To Receive</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-completed-tab" data-bs-toggle="pill" href="#pills-completed" role="tab" aria-controls="pills-completed" aria-selected="false">Completed</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-canceled-tab" data-bs-toggle="pill" href="#pills-canceled" role="tab" aria-controls="pills-canceled" aria-selected="false">Canceled</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="pills-topaid-tab" data-bs-toggle="pill" href="#pills-topaid" role="tab" aria-controls="pills-topaid" aria-selected="false">To Pay</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+                            <div class="tab-pane fade show active" id="pills-toreceive" role="tabpanel" aria-labelledby="pills-home-tab">
+                                <div class="card-list py-4">
+
+                                    @foreach (var order in Model.Where(x => x.StatusId > OrderStatus.ToPay.Id && x.StatusId < OrderStatus.Completed.Id))
+                                    {
+                                        var options = order.SelectedOption.Split("\r\n");
+                                        var totalOrder = Model.Where(x => x.OrderNo == order.OrderNo).Count();
+                                        var totalComplete = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Completed.Id).Count();
+                                        var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Cancelled.Id).Count();
+                                        float percentCancel = ((float)totalCancel / totalOrder) * 100f;
+                                        float percentComplete = ((float)totalComplete / totalOrder) * 100f;
+                                        var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
+
+                                        if ((percentComplete + percentCancel) < 100)
+                                        {
+                                            <div class="item-list">
+                                                <div class="avatar">
+                                                    <img src="~/@order.ProductImageUrl"
+                                                        alt="..."
+                                                        class="avatar-img rounded-circle" />
+                                                </div>
+                                                <div class="info-user ms-3">
+                                                    <div class="text-danger"><strong>@($"RM{order.SubTotalPrice}")</strong></div>
+                                                    <div class="username">@($"{order.ProductName} x {order.Quantity}")</div>
+                                                    @foreach (var option in options)
+                                                    {
+                                                        <div class="status">@option</div>
+                                                    }
+                                                </div>
+                                                <a class="btn btn-label-primary btn-round"
+                                                    asp-action="Index"
+                                                    asp-controller="OrderTracking"
+                                                    asp-route-orderNo="@order.OrderNo"
+                                                >
+                                                    <span class="btn-label">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                    </span>
+                                                    Track
+                                                </a>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pills-completed" role="tabpanel" aria-labelledby="pills-completed-tab">
+                                <div class="card-list py-4">
+
+                                    @foreach (var order in Model.Where(x => x.StatusId == OrderStatus.Completed.Id))
+                                    {
+                                        var options = order.SelectedOption.Split("\r\n");
+                                        var totalOrder = Model.Where(x => x.OrderNo == order.OrderNo).Count();
+                                        var totalComplete = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Completed.Id).Count();
+                                        var totalCancel = Model.Where(x => x.OrderNo == order.OrderNo && x.StatusId == OrderStatus.Cancelled.Id).Count();
+                                        float percentCancel = ((float)totalCancel / totalOrder) * 100f;
+                                        float percentComplete = ((float)totalComplete / totalOrder) * 100f;
+                                        var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
+                                        @* if ((percentComplete + percentCancel) < 100)
+                                        { *@
+                                        <div class="item-list">
+                                            <div class="avatar">
+                                                <img src="~/@order.ProductImageUrl"
+                                                     alt="..."
+                                                     class="avatar-img rounded-circle" />
+                                            </div>
+                                            <div class="info-user ms-3">
+                                                <div class="text-danger"><strong>@($"RM{order.SubTotalPrice}")</strong></div>
+                                                <div class="username">@($"{order.ProductName} x {order.Quantity}")</div>
+                                                @foreach (var option in options)
+                                                {
+                                                    <div class="status">@option</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    @* } *@
+                                    }
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pills-canceled" role="tabpanel" aria-labelledby="pills-canceled-tab">
+                                <div class="card-list py-4">
+                                    @foreach (var order in Model.Where(x => x.StatusId == OrderStatus.Cancelled.Id || x.StatusId == OrderStatus.UserCanceled.Id))
+                                    {
+                                        var options = order.SelectedOption.Split("\r\n");
+
+                                        <div class="item-list">
+                                            <div class="avatar">
+                                                <img src="~/@order.ProductImageUrl"
+                                                     alt="..."
+                                                     class="avatar-img rounded-circle" />
+                                            </div>
+                                            <div class="info-user ms-3">
+                                                <div class="text-danger"><strong>@($"RM{order.SubTotalPrice}")</strong></div>
+                                                <div class="username">@($"{order.ProductName} x {order.Quantity}")</div>
+                                                @foreach (var option in options)
+                                                {
+                                                    <div class="status">@option</div>
+                                                }
+                                            </div>
+                                           
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pills-topaid" role="tabpanel" aria-labelledby="pills-topaid-tab">
+                                <div class="card-list py-4">
+                                    @foreach (var order in Model.Where(x => x.StatusId == OrderStatus.ToPay.Id))
+                                    {
+                                        var options = order.SelectedOption.Split("\r\n");
+
+                                        <div class="item-list">
+                                            <div class="avatar">
+                                                <img src="~/@order.ProductImageUrl"
+                                                     alt="..."
+                                                     class="avatar-img rounded-circle" />
+                                            </div>
+                                            <div class="info-user ms-3">
+                                                <div class="text-danger"><strong>@($"RM{order.SubTotalPrice}")</strong></div>
+                                                <div class="username">@($"{order.ProductName} x {order.Quantity}")</div>
+                                                @foreach (var option in options)
+                                                {
+                                                    <div class="status">@option</div>
+                                                }
+                                            </div>
+                                            <a class="btn btn-label-primary btn-round"
+                                               asp-action="Checkout"
+                                               asp-controller="Order"
+                                               asp-route-orderNo="@order.OrderNo">
+                                                <span class="btn-label">
+                                                    <i class="fas fa-credit-card"></i>
+                                                </span>
+                                                Pay now
+                                            </a>
+                                            <a class="btn btn-label-danger btn-round"
+                                               asp-action="CancelSingle"
+                                               asp-controller="Order"
+                                               asp-route-id="@order.Id"
+                                               asp-route-returnUrl="@Url.Action("Index", "CustomerOrder")"
+                                            >
+                                                <span class="btn-label">
+                                                    <i class="far fa-window-close"></i>
+                                                </span>
+                                                Cancel
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
