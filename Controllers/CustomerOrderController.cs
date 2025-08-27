@@ -19,9 +19,14 @@ namespace E_Commers_Adelia.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var currentUser = _userManager.GetUserId(User);
-            var order = await _db.Orders.Where(x => x.CustomerId == currentUser).ToListAsync();
-            return View(order);
+            if (User.Identity.IsAuthenticated)
+            {
+                var currentUser = _userManager.GetUserId(User);
+                var order = await _db.Orders.Where(x => x.CustomerId == currentUser).ToListAsync();
+                return View(order);
+            }
+            var orderGuest = await _db.Orders.Where(x => x.SessionId == HttpContext.Session.Id).ToListAsync();
+            return View(orderGuest);
         }
     }
 }

@@ -142,7 +142,8 @@ namespace E_Commers_Adelia.Controllers
                     SelectedOption = selectedOption,
                     StatusId = OrderStatus.ToPay.Id,
                     DeliveryId = 0,
-                    ExtraCharges = 0
+                    ExtraCharges = 0,
+                    SessionId = HttpContext.Session.Id
                 };
 
                 // validate product 
@@ -543,7 +544,8 @@ namespace E_Commers_Adelia.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelSingle(int id)
         {
             var order = await _db.Orders.FindAsync(id);

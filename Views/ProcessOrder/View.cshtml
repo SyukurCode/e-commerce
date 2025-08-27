@@ -125,8 +125,8 @@
                                     <form asp-action="FinishOrder" asp-route-id="@order.Id" method="post">
                                         <button type="submit" class="dropdown-item">Finish</button>
                                     </form>
-                                    <form asp-action="CancelOrder" asp-route-id="@order.Id" method="post">
-                                        <button type="submit" class="dropdown-item">Cancel</button>
+                                    <form id="@order.Id" asp-action="CancelOrder" asp-route-id="@order.Id" method="post">
+                                            <button type="button" class="dropdown-item" onclick="submitCancelled(@order.Id)">Cancel</button>
                                     </form>
                                 </div>
                             }

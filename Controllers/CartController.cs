@@ -113,7 +113,7 @@ namespace E_Commers_Adelia.Controllers
                     {
                         OrderNo = orderNo,
                         SellerId = item.Product.userId,
-                        CustomerId = _userManager.GetUserId(User) ?? "Guest",
+                        CustomerId = _userManager.GetUserId(User) ?? null,
                         UnitPrice = item.UnitPrice,
                         SubTotalPrice = item.TotalPrice,
                         PlaceDateTime = DateTime.UtcNow,
@@ -126,6 +126,7 @@ namespace E_Commers_Adelia.Controllers
                         StatusId = OrderStatus.ToPay.Id,
                         DeliveryId = 0,
                         ExtraCharges = 0,
+                        SessionId = HttpContext.Session.Id
                     };
 
                     // validate product 

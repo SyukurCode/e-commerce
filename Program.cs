@@ -69,7 +69,8 @@ builder.Services.AddScoped<INotification, RNotification>()
     .AddScoped<IUploadQRImage, UploadQRImage>()
     .AddScoped<ICustomerPayment, RCustomerPayment>()
     .AddScoped<IReceiptVerificationService, ReceiptVerificationService>()
-    .AddScoped<IOrderHistory, ROrderHistory>();
+    .AddScoped<IOrderHistory, ROrderHistory>()
+    .AddScoped<ICleanupJob, CleanupJob>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();
@@ -86,29 +87,24 @@ builder.Services.AddSignalR();
 // add MailService
 builder.Services.AddTransient<IEmailService, SMTPEmailSender>();
 
-//string? redis = EnvHelper.GetEnv("REDIS_HOST");
-//string? redisport = EnvHelper.GetEnv("REDIS_PORT");
-//string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
+string? redis = EnvHelper.GetEnv("REDIS_HOST");
+string? redisport = EnvHelper.GetEnv("REDIS_PORT");
+string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
 
-//// add Redis
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = string.Format("{0}:{1}," +
-//        "{2},ConnectTimeout = 5000," +
-//        "SyncTimeout = 5000," +
-//        "AbortOnConnectFail = false", redis, redisport, redispassword); // Sesuai bila dalam Docker Swarm
-//});
+// add Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = string.Format("{0}:{1},password={2}", redis, redisport, redispassword); // Sesuai bila dalam Docker Swarm
+});
 
-//builder.Services.AddSession(options =>
-//{
-//    options.IdleTimeout = TimeSpan.FromMinutes(30);
-//    options.Cookie.HttpOnly = false;
-//    options.Cookie.IsEssential = true;
-//});
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
-
-app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -118,6 +114,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 
    
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobs = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobs.AddOrUpdate<ICleanupJob>(
+    "daily-job",
+    job => job.RunCleaningAsync(),
+    Cron.Daily(0,0)
+    );
 }
 
     using (var scope = app.Services.CreateScope())
@@ -182,6 +188,9 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseStaticFiles();
+
+app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
