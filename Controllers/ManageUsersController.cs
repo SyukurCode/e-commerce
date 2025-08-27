@@ -4,8 +4,10 @@ using E_Commers_Adelia.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NuGet.Packaging.Signing;
 using Serilog;
 
 namespace E_Commers_Adelia.Controllers
@@ -15,10 +17,12 @@ namespace E_Commers_Adelia.Controllers
     {
         private readonly UserManager<EUser> _userManager;
         private readonly ApplicationDbContext _db;
-        public ManageUsersController(UserManager<EUser> userManager, ApplicationDbContext db)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public ManageUsersController(UserManager<EUser> userManager, ApplicationDbContext db, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _db = db;
+            _roleManager = roleManager;
         }
         public async Task<IActionResult> Index()
         {
@@ -27,27 +31,12 @@ namespace E_Commers_Adelia.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(string Id)
         {
             var user = await _userManager.FindByIdAsync(Id);
             if (user != null)
             {
-                // Delete user Avatar
-                // Delete Seller SellerPaymentMethode
-                // Delete Seller delivery option
-                // delete Order 
-                // DeleteNotification
-                // Delete Message
-                // Delete QRcode
-                // Delete Online transfernote
-
-                // delete user product
-                //var userProduct = await _db.Products.Where(x => x.userId == user.Id).ToListAsync();
-                //foreach(var product in userProduct)
-                //{
-                //    _db.Products.Remove(product);
-                //    await _db.SaveChangesAsync();
-                //}
 
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
@@ -66,6 +55,7 @@ namespace E_Commers_Adelia.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatusUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -93,12 +83,71 @@ namespace E_Commers_Adelia.Controllers
                 else
                 {
                     TempData["SuccessMessage"] = string.Format("Account {0} was disabled", user.Email);
-                }   
+                }
                 return RedirectToAction("Index");
 
             }
-            TempData["SuccessMessage"] = string.Format("Error disable user, {0}",result.Errors);
+            TempData["SuccessMessage"] = string.Format("Error disable user, {0}", result.Errors);
             return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> ChangeRole(string id)
+        {
+            var allRoles = _roleManager.Roles.Select(x => x.Name).ToList();
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userRoles = new UserRole
+                {
+                    EUser = user,
+                    Roles = roles.ToList()
+                };
+
+                // hantar senarai roles ke View
+                ViewBag.AllRoles = allRoles.Select(r => new SelectListItem
+                {
+                    Value = r,
+                    Text = r,
+                    Selected = roles.Contains(r)
+                }).ToList();
+
+                return View(userRoles);
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeRole(UserRole model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(model.EUser.Id);
+                if (user != null)
+                {
+                    var userRoles = await _userManager.GetRolesAsync(user);
+
+                    // roles baru dipilih
+                    var selectedRoles = model.Roles ?? new List<string>();
+
+                    // buang roles yang dah tak dipilih
+                    var removeResult = await _userManager.RemoveFromRolesAsync(user, userRoles.Except(selectedRoles));
+                    if (!removeResult.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Failed to remove roles");
+                        return View(model);
+                    }
+
+                    // tambah roles baru yang belum ada
+                    var addResult = await _userManager.AddToRolesAsync(user, selectedRoles.Except(userRoles));
+                    if (!addResult.Succeeded)
+                    {
+                        ModelState.AddModelError("", "Failed to add roles");
+                        return View(model);
+                    }
+                }
+            }
+
+            return RedirectToAction("Index"); // balik ke senarai user
         }
     }
 }

@@ -68,6 +68,13 @@
                             @* <span class="badge badge-success">4</span>  *@
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a asp-controller="Tools" asp-action="Index">
+                            <i class="fas fa-screwdriver"></i>
+                            <p>Tools</p>
+                            @* <span class="badge badge-success">4</span>  *@
+                        </a>
+                    </li>
                 }
                 @if (User.IsInRole("Seller") || User.IsInRole("Admin"))
                 {
@@ -135,6 +142,23 @@
                             @* <span class="badge badge-success">4</span> *@
                         </a>
                     </li>
+                }
+                else
+                {
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon">
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                        <h4 class="text-section">Guest</h4>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-action="Index" asp-controller="CustomerOrder">
+                            <i class="fa fa-shopping-cart"></i>
+                            <p>Orders</p>
+                            @* <span class="badge badge-success">4</span> *@
+                        </a>
+                    </li>
+
                 }
             </ul>
         </div>

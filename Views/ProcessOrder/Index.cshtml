@@ -38,7 +38,74 @@
                         <div class="tab-content mt-2 mb-3" id="pills-tabContent">
                             <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
                                 <div class="card-list py-4">
-
+                                    <!-- Modal -->
+                                    @* <div class="modal fade"
+                                         id="DeliveryInfo"
+                                         tabindex="-1"
+                                         role="dialog"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content text-center">
+                                                <div class="modal-header border-0">
+                                                    <h5 class="modal-title">
+                                                        <span class="fw-mediumbold">Delivery info</span>
+                                                        <span class="fw-light">#@($"#{order.OrderNo}")</span>
+                                                    </h5>
+                                                    <button type="button"
+                                                            class="close"
+                                                            data-bs-dismiss="modal"
+                                                            aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    @if (payment.PaymentTypeId == PaymentMethod.OnlineTransfer.Id || payment.PaymentTypeId == PaymentMethod.QR.Id)
+                                                    {
+                                                        <div class="d-flex justify-content-center">
+                                                            <img src="@(string.IsNullOrEmpty(payment.ResitUrl)
+                                                                                                                                                                          ? Url.Content("~/img/blank.jpg")
+                                                                                                                                                                          : Url.Content("~/" + payment.ResitUrl))"
+                                                             alt="..."
+                                                             class="img-fluid fa-caret-square-up "
+                                                             style="max-width: 300px;height:auto" />
+                                                    </div>
+                                                                                                        }
+                                                    <div class="table-responsive d-flex justify-content-center">
+                                                        <table width="80%" class="mx-auto">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th class="text-start">Date and Time</th>
+                                                                    <td class="text-start">@payment.PaymentDate.ToLocalTime()</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-start">Amount</th>
+                                                                    <td class="text-start">@($"RM{payment.Amount}")</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th class="text-start">Type</th>
+                                                                    <td class="text-start">@PaymentMethod.All.FirstOrDefault(x => x.Id == payment.PaymentTypeId).Name</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0 justify-content-center">
+                                                    <form asp-action="ComfirmPayment" asp-route-id="@order.OrderNo" method="post">
+                                                        <button type="submit"
+                                                                id="btnComfirm"
+                                                                class="btn btn-primary"
+                                                                style="width:125px;">
+                                                            Confirm
+                                                        </button>
+                                                    </form>
+                                                    <a class="btn btn-outline-danger"
+                                                       data-bs-dismiss="modal" style="width:125px;">
+                                                        Cancel
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> *@
                                     @foreach (var order in Model.DistinctBy(x => x.OrderNo).OrderBy(x => x.UpdateDateTime).ToList())
                                     {
 
@@ -49,14 +116,14 @@
                                         float percentCancel = ((float)totalCancel / totalOrder) * 100f;
                                         float percentComplete = ((float)totalComplete / totalOrder) * 100f;
                                         var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
+                                        var deliveryinfo = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo) : db.CustomerDeliveryInfo.FirstOrDefault(x => x.CustomerId == order.CustomerId);
+                                        var deliveryType = DeliveryOption.All.FirstOrDefault(x => x.Id == order.DeliveryId)?.Name ?? "Unknown";
 
                                     if ((percentComplete + percentCancel) < 100)
                                         {
                                             <div class="item-list">
                                                 <div class="avatar">
-                                                    <img src="@(User.Identity.IsAuthenticated
-                                                    ? Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })
-                                                    : Url.Content("~/img/Avatar.png"))"
+                                                    <img src="@Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })"
                                                         alt="..."
                                                         class="avatar-img rounded-circle" />
                                         </div>
@@ -67,9 +134,23 @@
                                                class="@(Model.FirstOrDefault(x=> x.OrderNo == order.OrderNo)?.StatusId < 3 ? "active":"") ">
 
 
-                                                        <div class="username">@customerName</div>
+                                                        <div class="username">@customerName </div>
                                                         <div class="status">@($"#{order.OrderNo}")</div>
                                                     </a>
+                                                    <div class="delivery-info space-y-2 text-gray-700">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="fas fa-phone text-blue-500"></i>
+                                                            <span>@deliveryinfo.CustomerPhone</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="fas fa-truck text-green-500"></i>
+                                                            <span>@deliveryType</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="fas fa-home text-purple-500"></i>
+                                                            <span>@deliveryinfo.Address</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <p class="">@($"{percentComplete}%")</p>
                                             </div>
@@ -91,13 +172,14 @@
                                     float percentComplete = ((float)totalComplete / totalOrder) * 100f;
                                     float percentCancel = ((float)totalCancel / totalOrder) * 100f;
                                     var customerName = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo)?.CustomerName ?? "Unknown" : userManager.FindByIdAsync(order.CustomerId).Result?.DisplayName;
+                                    var deliveryinfo = string.IsNullOrWhiteSpace(order.CustomerId) ? db.CustomerDeliveryInfo.FirstOrDefault(x => x.OrderNo == order.OrderNo) : db.CustomerDeliveryInfo.FirstOrDefault(x => x.CustomerId == order.CustomerId);
+                                    var deliveryType = DeliveryOption.All.FirstOrDefault(x => x.Id == order.DeliveryId)?.Name ?? "Unknown";
                                     if ((percentComplete + percentCancel) == 100)
                                     {
                                         <div class="item-list">
                                             <div class="avatar">
-                                                <img src="@(User.Identity.IsAuthenticated
-                                                    ? Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })
-                                                    : Url.Content("~/img/Avatar.png"))"
+                                                <img src="@Url.Action("GetAvatar", "Profile", new { userId = order.CustomerId })"
+        
                                                     alt="..."
                                                     class="avatar-img rounded-circle" />
                                             </div>
@@ -112,6 +194,20 @@
                                                     <div class="status">@($"#{order.OrderNo}")</div>
 
                                                 </a>
+                                                <div class="delivery-info space-y-2 text-gray-700">
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="fas fa-phone text-blue-500"></i>
+                                                        <span>@deliveryinfo?.CustomerPhone</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="fas fa-truck text-green-500"></i>
+                                                        <span>@deliveryType</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="fas fa-home text-purple-500"></i>
+                                                        <span>@deliveryinfo?.Address</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="text-end">
 

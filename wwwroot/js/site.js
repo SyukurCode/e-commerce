@@ -79,6 +79,48 @@ function confirmDisabled() {
         }
     });
 }
+
+
+function confirmCancelled() {
+    return swal({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        buttons: {
+            cancel: {
+                text: "No",
+                visible: true,
+                className: "btn btn-danger"
+            },
+            confirm: {
+                text: "Yes",
+                className: "btn btn-success"
+            }
+        }
+    }).then((willDelete) => {
+        if (willDelete) {
+            swal("Cancelled!", "Item has been canceled.", {
+                icon: "success",
+                buttons: {
+                    confirm: {
+                        className: "btn btn-success"
+                    }
+                }
+            });
+            return true;
+        } else {
+            swal("Ok!", "Your item is safe.", {
+                icon: "info",
+                buttons: {
+                    confirm: {
+                        className: "btn btn-primary"
+                    }
+                }
+            });
+            return false;
+        }
+    });
+}
 function submitDelete(btn) {
     confirmDeleted().then(function (confirmed) {
         if (confirmed) {
@@ -88,6 +130,13 @@ function submitDelete(btn) {
 }
 function submitDisable(btn) {
     confirmDisabled().then(function (confirmed) {
+        if (confirmed) {
+            document.getElementById(btn).submit();
+        }
+    });
+}
+function submitCancelled(btn) {
+    confirmCancelled().then(function (confirmed) {
         if (confirmed) {
             document.getElementById(btn).submit();
         }

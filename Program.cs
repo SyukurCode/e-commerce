@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
+using StackExchange.Redis;
+using System.Net;
 
 DotNetEnv.Env.Load(); // ← baca .env file
 
@@ -69,7 +71,9 @@ builder.Services.AddScoped<INotification, RNotification>()
     .AddScoped<IUploadQRImage, UploadQRImage>()
     .AddScoped<ICustomerPayment, RCustomerPayment>()
     .AddScoped<IReceiptVerificationService, ReceiptVerificationService>()
-    .AddScoped<IOrderHistory, ROrderHistory>();
+    .AddScoped<IOrderHistory, ROrderHistory>()
+    .AddScoped<ICleanupJob, CleanupJob>()
+    .AddHttpClient<IGeminiService, GeminiService>();
 
 // Add Id provider for SignalR
 builder.Services.AddSingleton<IUserIdProvider, ProviderId>();
@@ -80,35 +84,55 @@ builder.Services.AddSession();
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
+// add Redis
+string? redis = EnvHelper.GetEnv("REDIS_HOST");
+string? redisport = EnvHelper.GetEnv("REDIS_PORT");
+string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = $"{redis}:{redisport},password={redispassword}";
+});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 // Add SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddStackExchangeRedis($"{redis}:{redisport},password={redispassword}",options =>
+    {
+        options.ConnectionFactory = async writer =>
+        {
+            var config = new ConfigurationOptions
+            {
+                AbortOnConnectFail = false
+            };
+            config.EndPoints.Add(redis, int.Parse(redisport));
+            config.Password = redispassword;
+            config.SetDefaultPorts();
+            var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
+            connection.ConnectionFailed += (_, e) =>
+            {
+                Console.WriteLine("Connection to Redis failed.");
+            };
+
+            if (!connection.IsConnected)
+            {
+                Console.WriteLine("Did not connect to Redis.");
+            }
+
+            return connection;
+        };
+
+    });
 
 // add MailService
 builder.Services.AddTransient<IEmailService, SMTPEmailSender>();
 
-//string? redis = EnvHelper.GetEnv("REDIS_HOST");
-//string? redisport = EnvHelper.GetEnv("REDIS_PORT");
-//string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
-
-//// add Redis
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = string.Format("{0}:{1}," +
-//        "{2},ConnectTimeout = 5000," +
-//        "SyncTimeout = 5000," +
-//        "AbortOnConnectFail = false", redis, redisport, redispassword); // Sesuai bila dalam Docker Swarm
-//});
-
-//builder.Services.AddSession(options =>
-//{
-//    options.IdleTimeout = TimeSpan.FromMinutes(30);
-//    options.Cookie.HttpOnly = false;
-//    options.Cookie.IsEssential = true;
-//});
-
 var app = builder.Build();
-
-app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -117,7 +141,16 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 
-   
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobs = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobs.AddOrUpdate<ICleanupJob>(
+    "daily-job",
+    job => job.RunCleaningAsync(),
+    Cron.Daily(0,0)
+    );
 }
 
     using (var scope = app.Services.CreateScope())
@@ -182,6 +215,9 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseStaticFiles();
+
+app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
@@ -198,4 +234,3 @@ app.MapRazorPages(); // ✅ WAJIB untuk Identity Razor Pages
 app.MapHub<NotificationHub>("/notificationHub"); // Map SignalR hub
 
 app.Run();
-public partial class Program { }

@@ -11,7 +11,7 @@
                 <div class="d-flex align-items-center">
                     <h4 class="card-title">List of User</h4>
                     <a class="btn btn-primary btn-round ms-auto"
-                    id="register" asp-area="Identity" asp-page="/Account/Register">
+                       id="register" asp-area="Identity" asp-page="/Account/Register">
                         <i class="fa fa-plus"></i>
                         Add User
                     </a>
@@ -20,7 +20,7 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="lsUser"
-                    class="display table table-striped table-hover">
+                           class="display table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>No.</th>
@@ -80,7 +80,7 @@
                                                         <button type="button"
                                                                 data-bs-toggle="tooltip"
                                                                 title="Disable"
-                                                                class="btn btn-link btn-danger"
+                                                                class="btn btn-link btn-primary"
                                                                 data-original-title="" onclick="submitDisable('@item.Id')">
                                                             <i class="fa fa-power-off"></i>
                                                         </button>
@@ -107,16 +107,15 @@
                                                    data-original-title="">
                                                     <i class="fa fa-envelope"></i>
                                                 </a>
-                                                <form id="@item.Id" asp-action="DeleteUser"
-                                                      asp-route-Id="@item.Id" method="post">
-                                                    <button type="button"
-                                                            data-bs-toggle="tooltip"
-                                                            title="Delete"
-                                                            class="btn btn-link btn-primary"
-                                                            data-original-title="" onclick="submitDelete('@item.Id')">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </form>
+
+                                                <a asp-action="ChangeRole" 
+                                                   asp-route-id="@item.Id"
+                                                   data-bs-toggle="tooltip"
+                                                   title="Role configration"
+                                                   class="btn btn-link btn-primary"
+                                                   data-original-title="">
+                                                    <i class="fas fa-user-cog"></i>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

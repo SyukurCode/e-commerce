@@ -6,6 +6,9 @@
         {
             var duration = DateTime.UtcNow - createDate;
 
+            if (duration.TotalSeconds == 0)
+                return $"{Math.Floor(duration.TotalSeconds)} just now";
+
             if (duration.TotalSeconds < 60)
                 return $"{Math.Floor(duration.TotalSeconds)} seconds ago";
 

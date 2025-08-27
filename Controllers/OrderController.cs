@@ -28,14 +28,15 @@ namespace E_Commers_Adelia.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly INotification _noti;
         private readonly IHubContext<NotificationHub> _hub;
-        private readonly IReceiptVerificationService _receiptVerificationService;
+        private readonly IGeminiService _receiptVerificationService;
+        //private readonly IReceiptVerificationService _receiptVerificationService;
         private readonly IOrderHistory _orderHistory;
         public OrderController(ApplicationDbContext db,
             UserManager<EUser> userManager, 
             IWebHostEnvironment webHostEnvironment, 
             INotification noti, 
             IHubContext<NotificationHub> hub,
-            IReceiptVerificationService receiptVerificationService,
+            IGeminiService receiptVerificationService,
             IOrderHistory orderHistory)
         {
             _db = db;
@@ -142,7 +143,8 @@ namespace E_Commers_Adelia.Controllers
                     SelectedOption = selectedOption,
                     StatusId = OrderStatus.ToPay.Id,
                     DeliveryId = 0,
-                    ExtraCharges = 0
+                    ExtraCharges = 0,
+                    SessionId = HttpContext.Session.Id
                 };
 
                 // validate product 
@@ -489,10 +491,10 @@ namespace E_Commers_Adelia.Controllers
             try
             {
                 model.ResitUrl = await UploadFileHelper.Upload(image, "PaymentReceipt",_webHostEnvironment, "800KB");
-                var result = await _receiptVerificationService.VerifyReceiptAsync(model.ResitUrl,model.Amount, DateTime.UtcNow);
-                if(!result.Status)
+                var result = await _receiptVerificationService.ExtractReceiptAsync(model.ResitUrl, model.Amount, DateTime.UtcNow);
+                if (!result.isValid)
                 {
-                    TempData["DialogWarning"] = $"{result.Message}";
+                    TempData["DialogWarning"] = $"Receipt not valid";
                     return View(model);
                 }
 
@@ -543,7 +545,8 @@ namespace E_Commers_Adelia.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelSingle(int id)
         {
             var order = await _db.Orders.FindAsync(id);

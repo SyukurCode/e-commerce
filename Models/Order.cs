@@ -33,6 +33,7 @@ namespace E_Commers_Adelia.Models
         public int StatusId { get; set; }
         public int DeliveryId { get; set; }
         public decimal ExtraCharges { get; set; } // read onlyone time
+        public string SessionId { get; set; }
     }
 
 }

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using DotNetEnv;
+using Microsoft.AspNetCore.Hosting;
 using PdfiumViewer;
+using Serilog;
 using Sprache;
 using System.Drawing.Imaging;
 using System.IO.Pipelines;
@@ -70,5 +72,16 @@ namespace E_Commers_Adelia.Common
             
             return Path.Combine("Upload", folder, uniqueFileName);
         }
+        public static void removeFile(IWebHostEnvironment env, string imgUrl)
+        {
+            var removeFolder = Path.Combine(env.WebRootPath, imgUrl);
+            if (File.Exists(removeFolder))
+            {
+                File.Delete(removeFolder);
+            }
+
+            Log.Information($"Delete {imgUrl}");
+        }
+
     }
 }

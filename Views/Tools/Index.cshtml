@@ -1,0 +1,54 @@
+﻿@using E_Commers_Adelia.Common
+@model IEnumerable<CleaningItem>
+@inject ApplicationDbContext db
+@{
+    ViewData["Title"] = "List to remove";
+    ViewData["items"] = Model.Count();
+}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">@ViewData["Title"]</h3>
+        <h6 class="op-7 mb-2">You have @ViewData["items"] pending to clean</h6>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">List for clean</h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="lsUser"
+                           class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.Table)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(Model => Model.ID)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(itemModel => item.Table)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(itemModel => item.ID)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

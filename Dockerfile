@@ -6,6 +6,8 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 EXPOSE 80
 
+RUN 
+
 # Salin dan restore projek
 COPY ["E-CommersAdelia.csproj", "."]
 RUN dotnet restore "./E-CommersAdelia.csproj"
