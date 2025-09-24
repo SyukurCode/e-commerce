@@ -26,39 +26,40 @@
 </div>
 <hr />
 <div class="row">
-<div class="col-md-6">
+    <div class="col-md-6">
+
         <form asp-action="ChangeRole" method="post">
-            <input type="hidden" asp-for="EUser.Id"/>
-        <div class="card  card-post card-round">
-            <div class="card-header">
-                <div class="card-head-row card-tools-still-right">
-                    <div class="card-title">Product</div>
+            <input type="hidden" asp-for="EUser.Id" />
+            <input type="hidden" asp-for="EUser" />
+            <div class="card  card-post card-round">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Product</div>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
+                <div class="card-body">
 
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="form-floating mb-3">
-                    <input asp-for="EUser.DisplayName" class="form-control" readonly/>
-                    <label asp-for="EUser.DisplayName" class="form-label"></label>
-                    <span asp-validation-for="EUser.DisplayName" class="text-danger"></span>
+                    <div class="form-floating mb-3">
+                        <input asp-for="EUser.DisplayName" class="form-control" readonly />
+                        <label asp-for="EUser.DisplayName" class="form-label"></label>
+                        <span asp-validation-for="EUser.DisplayName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Roles">Roles</label>
+                        <select asp-for="Roles" asp-items="ViewBag.AllRoles" multiple class="form-control border-0 shadow">
+                        </select>
+                        <span asp-validation-for="Roles" class="text-danger"></span>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <input type="hidden" asp-for="EUser" />
-                    <div class="mb-3">
-                        <label asp-for="Roles" class="form-label">Roles</label>
-                        <select asp-for="Roles" asp-items="ViewBag.AllRoles" multiple class="form-select"></select>
+                <div class="card-footer">
+                    <div class="text-center align-content-between">
+                        <input type="submit" value="Save" class="btn btn-primary m-1" />
+                        <a class="btn btn-outline-secondary m-1" onclick="history.back()">Back</a>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <div class="text-center align-content-between">
-                    <input type="submit" value="Save" class="btn btn-primary m-1" />
-                    <a class="btn btn-outline-secondary m-1" onclick="history.back()">Back</a>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 </div>
