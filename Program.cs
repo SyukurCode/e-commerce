@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
-using StackExchange.Redis;
-using System.Net;
 
 DotNetEnv.Env.Load(); // ← baca .env file
 
@@ -83,22 +81,6 @@ builder.Services.AddSession();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-
-// add Redis
-string? redis = EnvHelper.GetEnv("REDIS_HOST");
-string? redisport = EnvHelper.GetEnv("REDIS_PORT");
-string? redispassword = EnvHelper.GetEnv("REDIS_PASSWORD");
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = $"{redis}:{redisport},password={redispassword}";
-});
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
 
 // Add SignalR
 builder.Services.AddSignalR()
